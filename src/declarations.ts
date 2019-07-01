@@ -6,3 +6,14 @@ export interface DemetraOptions {
   lang : string,
   debug: boolean,
 }
+
+export interface Pagination {
+  start : number,
+  count : number,
+}
+
+export interface Filter {
+  compare : string,
+  key : string,
+  value : string,
+}
