@@ -5,8 +5,11 @@ import {
   Pagination,
   Request
 } from "./declarations";
+import Defaults from './defaults';
 
 class Demetra {
+  private static Defaults = Defaults;
+
   private options : DemetraOptions;
   private endpoint : string = '';
   private request : Request = {
@@ -18,11 +21,18 @@ class Demetra {
     archive: null,
   };
 
-  constructor(options : DemetraOptions) {
-    this.options = options;
-    if (typeof this.options.debug === 'undefined') {
-      this.options.debug = false;
-    }
+  constructor(options : Partial<DemetraOptions>) {
+    const defaults : DemetraOptions = {
+      endpoint: '',
+      url: '',
+      version: Demetra.Defaults.VERSION,
+      project: Demetra.Defaults.SITE,
+      site: Demetra.Defaults.SITE,
+      lang: Demetra.Defaults.LANG,
+      debug: false,
+    };
+    this.options = { ...options, ...defaults};
+
     this.endpoint = this.options.endpoint;
   }
 
@@ -88,14 +98,7 @@ class Demetra {
     loop : boolean = true
   ) {
     if (typeof type === 'undefined') type = 'pages';
-    const request : Request = {
-      header: {
-        url: this.options.url,
-        version: this.options.version || 2,
-        project: this.options.site || 'default',
-      },
-      lang: this.options.lang || 'en',
-      site: this.options.site || 'default',
+    const request : Partial<Request> = {
       page: {
         id: slug,
         type,
@@ -109,6 +112,7 @@ class Demetra {
       menu: null,
       archive: null,
     };
+    this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
     this.debugLog(response);
     this.handleError(response);
@@ -116,20 +120,14 @@ class Demetra {
   }
   
   public async fetchMenu(slug : string | number) {
-    const request : Request = {
-      header: {
-        url: this.options.url,
-        version: this.options.version || 2,
-        project: this.options.site || 'default',
-      },
-      lang: this.options.lang || 'en',
-      site: this.options.site || 'default',
+    const request : Partial<Request> = {
       page: null,
       menu: {
         id: slug,
       },
       archive: null,
     };
+    this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
     this.debugLog(response);
     this.handleError(response);
@@ -142,14 +140,7 @@ class Demetra {
     pagination : Pagination,
     filters : Array<Filter>
   ) {
-    const request : Request = {
-      header: {
-        url: this.options.url,
-        version: this.options.version || 2,
-        project: this.options.site || 'default',
-      },
-      lang: this.options.lang || 'en',
-      site: this.options.site || 'default',
+    const request : Partial<Request> = {
       page: null,
       menu: null,
       archive: {
@@ -159,6 +150,7 @@ class Demetra {
         pagination,
       }
     }
+    this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
     this.debugLog(response);
     this.handleError(response);
@@ -173,14 +165,14 @@ class Demetra {
     return response.data;
   }
 
-  private setHeaders(request : Request) {
+  private setHeaders(request : Partial<Request>) {
     request.header = {
-      url: this.options.url,
-      version: this.options.version || 2,
-      project: this.options.site || 'default',
+      url: this.options.url || '',
+      version: this.options.version || Demetra.Defaults.VERSION,
+      project: this.options.site || Demetra.Defaults.SITE,
     };
-    request.lang = this.options.lang || 'en';
-    request.site = this.options.site || 'default';
+    request.lang = this.options.lang;
+    request.site = this.options.site;
   }
   
   private handleError(response : AxiosResponse) {
