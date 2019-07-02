@@ -20,15 +20,6 @@ class Demetra {
 
   constructor(options : DemetraOptions) {
     this.options = options;
-    if (typeof this.options.version === 'undefined') {
-      this.options.version = 2;
-    }
-    if (typeof this.options.site === 'undefined') {
-      this.options.site = 'default';
-    }
-    if (typeof this.options.lang === 'undefined') {
-      this.options.lang = 'en';
-    }
     if (typeof this.options.debug === 'undefined') {
       this.options.debug = false;
     }
@@ -100,11 +91,11 @@ class Demetra {
     const request : Request = {
       header: {
         url: this.options.url,
-        version: this.options.version,
-        project: this.options.site,
+        version: this.options.version || 2,
+        project: this.options.site || 'default',
       },
-      lang: this.options.lang,
-      site: this.options.site,
+      lang: this.options.lang || 'en',
+      site: this.options.site || 'default',
       page: {
         id: slug,
         type,
@@ -128,11 +119,11 @@ class Demetra {
     const request : Request = {
       header: {
         url: this.options.url,
-        version: this.options.version,
-        project: this.options.site,
+        version: this.options.version || 2,
+        project: this.options.site || 'default',
       },
-      lang: this.options.lang,
-      site: this.options.site,
+      lang: this.options.lang || 'en',
+      site: this.options.site || 'default',
       page: null,
       menu: {
         id: slug,
@@ -154,11 +145,11 @@ class Demetra {
     const request : Request = {
       header: {
         url: this.options.url,
-        version: this.options.version,
-        project: this.options.site,
+        version: this.options.version || 2,
+        project: this.options.site || 'default',
       },
-      lang: this.options.lang,
-      site: this.options.site,
+      lang: this.options.lang || 'en',
+      site: this.options.site || 'default',
       page: null,
       menu: null,
       archive: {
@@ -185,11 +176,11 @@ class Demetra {
   private setHeaders(request : Request) {
     request.header = {
       url: this.options.url,
-      version: this.options.version,
-      project: this.options.site,
+      version: this.options.version || 2,
+      project: this.options.site || 'default',
     };
-    request.lang = this.options.lang;
-    request.site = this.options.site;
+    request.lang = this.options.lang || 'en';
+    request.site = this.options.site || 'default';
   }
   
   private handleError(response : AxiosResponse) {
