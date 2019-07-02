@@ -1,13 +1,22 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import {
   DemetraOptions,
   Filter,
-  Pagination
+  Pagination,
+  Request
 } from "./declarations";
 
 class Demetra {
   private options : DemetraOptions;
-  private endpoint : string = 'https://';
+  private endpoint : string = '';
+  private request : Request = {
+    header: null,
+    lang: 'en',
+    site: 'default',
+    page: null,
+    menu: null,
+    archive: null,
+  };
 
   constructor(options : DemetraOptions) {
     this.options = options;
@@ -23,6 +32,59 @@ class Demetra {
     if (typeof this.options.debug === 'undefined') {
       this.options.debug = false;
     }
+    this.endpoint = this.options.endpoint;
+  }
+
+  public queuePage(
+    slug : string | number,
+    type : string | undefined,
+    siblings : boolean = false,
+    fields : Array<string>,
+    prev : boolean = true,
+    next : boolean = true,
+    loop : boolean = true
+  ) {
+    if (typeof type === 'undefined') type = 'pages';
+    this.request.page = {
+      id: slug,
+      type,
+      siblings: {
+        prev: siblings ? prev : false,
+        next: siblings ? next : false,
+        loop,
+        fields,
+      }
+    }
+    return this.request;
+  }
+
+  public queueMenu(slug : string | number) {
+    this.request.menu = {
+      id: slug,
+    }
+    return this.request;
+  }
+
+  public queueArchive(
+    type : string,
+    fields : Array<string>,
+    pagination : Pagination,
+    filters : Array<Filter>,
+  ) {
+    this.request.archive = {
+      type,
+      fields,
+      filters,
+      pagination,
+    };
+    return this.request;
+  }
+
+  public async fetch() {
+    const response : AxiosResponse = await axios.post(this.endpoint, this.request);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
   }
 
   public async fetchPage(
@@ -34,7 +96,8 @@ class Demetra {
     next : boolean = true,
     loop : boolean = true
   ) {
-    const request : any = {
+    if (typeof type === 'undefined') type = 'pages';
+    const request : Request = {
       header: {
         url: this.options.url,
         version: this.options.version,
@@ -44,22 +107,25 @@ class Demetra {
       site: this.options.site,
       page: {
         id: slug,
-        type: type,
+        type,
         siblings: {
           prev: siblings ? prev : false,
           next: siblings ? next : false,
           loop,
           fields,
         }
-      }
+      },
+      menu: null,
+      archive: null,
     };
-    const response = await axios.post(this.endpoint, request);
+    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    this.debugLog(response);
     this.handleError(response);
-    return response;
+    return response.data;
   }
   
   public async fetchMenu(slug : string | number) {
-    const request : any = {
+    const request : Request = {
       header: {
         url: this.options.url,
         version: this.options.version,
@@ -67,13 +133,16 @@ class Demetra {
       },
       lang: this.options.lang,
       site: this.options.site,
+      page: null,
       menu: {
         id: slug,
-      }
+      },
+      archive: null,
     };
-    const response = await axios.post(this.endpoint, request);
+    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    this.debugLog(response);
     this.handleError(response);
-    return response;
+    return response.data;
   }
 
   public async fetchArchive(
@@ -82,7 +151,7 @@ class Demetra {
     pagination : Pagination,
     filters : Array<Filter>
   ) {
-    const request : any = {
+    const request : Request = {
       header: {
         url: this.options.url,
         version: this.options.version,
@@ -90,6 +159,8 @@ class Demetra {
       },
       lang: this.options.lang,
       site: this.options.site,
+      page: null,
+      menu: null,
       archive: {
         type,
         fields,
@@ -97,31 +168,41 @@ class Demetra {
         pagination,
       }
     }
-    const response = await axios.post(this.endpoint, request);
+    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    this.debugLog(response);
     this.handleError(response);
-    return response;
+    return response.data;
   }
 
-  public async rawRequest(request : any) {
+  public async rawRequest(request : Request) {
+    this.setHeaders(request);
+    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
+  }
+
+  private setHeaders(request : Request) {
     request.header = {
       url: this.options.url,
       version: this.options.version,
       project: this.options.site,
-    }
+    };
     request.lang = this.options.lang;
     request.site = this.options.site;
-    const response = await axios.post(this.endpoint, request);
-    this.handleError(response);
-    return response;
   }
   
-  public handleError(response : any) {
+  private handleError(response : AxiosResponse) {
     if (response.status !== 200) {
       if (this.options.debug) {
         console.error(`${response.data.status.code}: ${response.data.status.message}`);
       }
       throw new Error(response.data.status.message);
     }
+  }
+
+  private debugLog(response : AxiosResponse) {
+    if (this.options.debug) console.log(response);
   }
 }
 
