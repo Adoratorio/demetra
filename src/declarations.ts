@@ -1,11 +1,11 @@
 export interface DemetraOptions {
   endpoint : string,
   url : string,
-  version : number,
+  version : number | undefined,
   project : string,
-  site : string,
-  lang : string,
-  debug: boolean,
+  site : string | undefined,
+  lang : string | undefined,
+  debug: boolean | undefined,
 }
 
 export interface Pagination {
