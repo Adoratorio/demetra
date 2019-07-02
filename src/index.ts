@@ -157,7 +157,7 @@ class Demetra {
     return response.data;
   }
 
-  public async rawRequest(request : Request) {
+  public async rawRequest(request : Partial<Request>) {
     this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
     this.debugLog(response);
