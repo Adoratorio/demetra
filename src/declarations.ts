@@ -20,10 +20,10 @@ export interface Filter {
 }
 
 export interface Siblings {
-  fields : Array<String>,
-  next : boolean,
-  prev : boolean,
-  loop : boolean,
+  fields : Array<String> | undefined,
+  next : boolean | undefined,
+  prev : boolean | undefined,
+  loop : boolean | undefined,
 }
 
 export interface Header {
@@ -44,9 +44,9 @@ export interface Menu {
 
 export interface Archive {
   type : string,
-  fields : Array<string>,
-  filters : Array<Filter>,
-  pagination : Pagination,
+  fields : Array<string> | undefined,
+  filters : Array<Filter> | undefined,
+  pagination : Pagination | undefined,
 }
 
 export interface Request {

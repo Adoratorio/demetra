@@ -31,19 +31,19 @@ class Demetra {
       lang: Demetra.Defaults.LANG,
       debug: false,
     };
-    this.options = { ...options, ...defaults};
+    this.options = { ...defaults, ...options};
 
     this.endpoint = this.options.endpoint;
   }
 
   public queuePage(
     slug : string | number,
-    type : string | undefined,
-    siblings : boolean = false,
-    fields : Array<string>,
-    prev : boolean = true,
-    next : boolean = true,
-    loop : boolean = true
+    type : string | undefined = 'pages',
+    siblings : boolean | undefined = false,
+    fields : Array<string> | undefined = undefined,
+    prev : boolean | undefined = false,
+    next : boolean | undefined = false,
+    loop : boolean | undefined = false
   ) {
     if (typeof type === 'undefined') type = 'pages';
     this.request.page = {
@@ -68,9 +68,9 @@ class Demetra {
 
   public queueArchive(
     type : string,
-    fields : Array<string>,
-    pagination : Pagination,
-    filters : Array<Filter>,
+    fields : Array<string> | undefined = undefined,
+    pagination : Pagination | undefined = undefined,
+    filters : Array<Filter> | undefined = undefined,
   ) {
     this.request.archive = {
       type,
@@ -82,6 +82,7 @@ class Demetra {
   }
 
   public async fetch() {
+    this.setHeaders(this.request);
     const response : AxiosResponse = await axios.post(this.endpoint, this.request);
     this.debugLog(response);
     this.handleError(response);
@@ -90,14 +91,13 @@ class Demetra {
 
   public async fetchPage(
     slug : string | number,
-    type : string | undefined,
-    siblings : boolean = false,
-    fields : Array<string>,
-    prev : boolean = true,
-    next : boolean = true,
-    loop : boolean = true
+    type : string | undefined = 'pages',
+    siblings : boolean | undefined = false,
+    fields : Array<string> | undefined = undefined,
+    prev : boolean | undefined = false,
+    next : boolean | undefined = false,
+    loop : boolean | undefined = false
   ) {
-    if (typeof type === 'undefined') type = 'pages';
     const request : Partial<Request> = {
       page: {
         id: slug,
@@ -136,9 +136,9 @@ class Demetra {
 
   public async fetchArchive(
     type : string,
-    fields : Array<string>,
-    pagination : Pagination,
-    filters : Array<Filter>
+    fields : Array<string> | undefined = undefined,
+    pagination : Pagination | undefined = undefined,
+    filters : Array<Filter> | undefined = undefined,
   ) {
     const request : Partial<Request> = {
       page: null,
