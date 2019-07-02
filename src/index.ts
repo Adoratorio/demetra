@@ -13,7 +13,11 @@ class Demetra {
   private options : DemetraOptions;
   private endpoint : string = '';
   private request : Request = {
-    header: null,
+    header: {
+      url: '',
+      version: 2,
+      project: 'default',
+    },
     lang: 'en',
     site: 'default',
     page: null,

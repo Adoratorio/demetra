@@ -35,7 +35,7 @@ export interface Header {
 export interface Page {
   type : string,
   id : string | number,
-  siblings : Partial<Siblings>,
+  siblings : Siblings | undefined,
 }
 
 export interface Menu {
@@ -50,10 +50,10 @@ export interface Archive {
 }
 
 export interface Request {
-  header : Partial<Header> | null,
+  header : Header | undefined,
   lang : string,
   site : string,
-  page : Partial<Page> | null,
-  menu : Partial<Menu> | null,
-  archive : Partial<Archive> | null,
+  page : Page | null | undefined,
+  menu : Menu | null | undefined,
+  archive : Archive | null | undefined,
 }
