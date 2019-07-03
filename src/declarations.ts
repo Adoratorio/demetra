@@ -1,11 +1,11 @@
 export interface DemetraOptions {
   endpoint : string,
   url : string,
-  version : number | undefined,
-  project : string,
-  site : string | undefined,
-  lang : string | undefined,
-  debug: boolean | undefined,
+  version? : number,
+  project? : string,
+  site? : string,
+  lang? : string,
+  debug? : boolean,
 }
 
 export interface Pagination {
@@ -20,10 +20,10 @@ export interface Filter {
 }
 
 export interface Siblings {
-  fields : Array<String> | undefined,
-  next : boolean | undefined,
-  prev : boolean | undefined,
-  loop : boolean | undefined,
+  fields : Array<String>,
+  next? : boolean,
+  prev? : boolean,
+  loop? : boolean,
 }
 
 export interface Header {
@@ -35,7 +35,7 @@ export interface Header {
 export interface Page {
   type : string,
   id : string | number,
-  siblings : Siblings | undefined,
+  siblings? : Siblings,
 }
 
 export interface Menu {
@@ -44,16 +44,16 @@ export interface Menu {
 
 export interface Archive {
   type : string,
-  fields : Array<string> | undefined,
-  filters : Array<Filter> | undefined,
-  pagination : Pagination | undefined,
+  fields? : Array<string>,
+  filters? : Array<Filter>,
+  pagination? : Pagination,
 }
 
 export interface Request {
-  header : Header | undefined,
+  header? : Header,
   lang : string,
   site : string,
-  page : Page | null | undefined,
-  menu : Menu | null | undefined,
-  archive : Archive | null | undefined,
+  page? : Page,
+  menu? : Menu,
+  archive? : Archive,
 }

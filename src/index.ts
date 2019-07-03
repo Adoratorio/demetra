@@ -20,9 +20,6 @@ class Demetra {
     },
     lang: 'en',
     site: 'default',
-    page: null,
-    menu: null,
-    archive: null,
   };
 
   constructor(options : Partial<DemetraOptions>) {
@@ -42,12 +39,12 @@ class Demetra {
 
   public queuePage(
     slug : string | number,
-    type : string | undefined = 'pages',
-    siblings : boolean | undefined = false,
-    fields : Array<string> | undefined = undefined,
-    prev : boolean | undefined = false,
-    next : boolean | undefined = false,
-    loop : boolean | undefined = false
+    type : string = 'pages',
+    siblings : boolean = false,
+    fields : Array<string> = [],
+    prev : boolean = false,
+    next : boolean = false,
+    loop : boolean = false
   ) {
     if (typeof type === 'undefined') type = 'pages';
     this.request.page = {
@@ -72,9 +69,9 @@ class Demetra {
 
   public queueArchive(
     type : string,
-    fields : Array<string> | undefined = undefined,
-    pagination : Pagination | undefined = undefined,
-    filters : Array<Filter> | undefined = undefined,
+    fields : Array<string> = [],
+    pagination? : Pagination,
+    filters : Array<Filter> = [],
   ) {
     this.request.archive = {
       type,
@@ -95,12 +92,12 @@ class Demetra {
 
   public async fetchPage(
     slug : string | number,
-    type : string | undefined = 'pages',
-    siblings : boolean | undefined = false,
-    fields : Array<string> | undefined = undefined,
-    prev : boolean | undefined = false,
-    next : boolean | undefined = false,
-    loop : boolean | undefined = false
+    type : string = 'pages',
+    siblings : boolean = false,
+    fields : Array<string> = [],
+    prev : boolean = false,
+    next : boolean = false,
+    loop : boolean = false
   ) {
     const request : Partial<Request> = {
       page: {
@@ -113,8 +110,6 @@ class Demetra {
           fields,
         }
       },
-      menu: null,
-      archive: null,
     };
     this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
@@ -125,11 +120,9 @@ class Demetra {
   
   public async fetchMenu(slug : string | number) {
     const request : Partial<Request> = {
-      page: null,
       menu: {
         id: slug,
       },
-      archive: null,
     };
     this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
@@ -140,13 +133,11 @@ class Demetra {
 
   public async fetchArchive(
     type : string,
-    fields : Array<string> | undefined = undefined,
-    pagination : Pagination | undefined = undefined,
-    filters : Array<Filter> | undefined = undefined,
+    fields : Array<string> = [],
+    pagination? : Pagination,
+    filters : Array<Filter> = [],
   ) {
     const request : Partial<Request> = {
-      page: null,
-      menu: null,
       archive: {
         type,
         fields,
@@ -161,7 +152,7 @@ class Demetra {
     return response.data;
   }
 
-  public async rawRequest(request : Partial<Request>) {
+  public async rawRequest(request : Request) {
     this.setHeaders(request);
     const response : AxiosResponse = await axios.post(this.endpoint, request);
     this.debugLog(response);
