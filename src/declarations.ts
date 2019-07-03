@@ -1,11 +1,10 @@
 export interface DemetraOptions {
+  lang : string,
   endpoint : string,
-  url : string,
-  version? : number,
-  project? : string,
-  site? : string,
-  lang? : string,
-  debug? : boolean,
+  version : number,
+  project : string,
+  site : string,
+  debug : boolean,
 }
 
 export interface Pagination {
@@ -26,34 +25,16 @@ export interface Siblings {
   loop? : boolean,
 }
 
-export interface Header {
-  url : string,
-  version : number,
+export interface Request {
+  mode : string,
+  lang : string,
+  version : string| number,
   project : string,
-}
-
-export interface Page {
-  type : string,
-  id : string | number,
+  site : string,
+  id? : string | number,
+  type? : string,
   siblings? : Siblings,
-}
-
-export interface Menu {
-  id : string | number,
-}
-
-export interface Archive {
-  type : string,
   fields? : Array<string>,
   filters? : Array<Filter>,
   pagination? : Pagination,
-}
-
-export interface Request {
-  header? : Header,
-  lang : string,
-  site : string,
-  page? : Page,
-  menu? : Menu,
-  archive? : Archive,
 }

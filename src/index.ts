@@ -1,93 +1,44 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import {
   DemetraOptions,
   Filter,
   Pagination,
-  Request
+  Request,
 } from "./declarations";
 import Defaults from './defaults';
+import Modes from './modes';
 
 class Demetra {
   private static Defaults = Defaults;
+  private static Modes = Modes;
 
   private options : DemetraOptions;
   private endpoint : string = '';
   private request : Request = {
-    header: {
-      url: '',
-      version: 2,
-      project: 'default',
-    },
+    mode: 'page',
     lang: 'en',
+    version: 2,
+    project: '',
     site: 'default',
+    id: '',
+    type: 'pages',
   };
 
   constructor(options : Partial<DemetraOptions>) {
+    if (typeof options.project === 'undefined') {
+      throw new Error('Project cannot be undefined');
+    }
     const defaults : DemetraOptions = {
       endpoint: '',
-      url: '',
-      version: Demetra.Defaults.VERSION,
-      project: Demetra.Defaults.SITE,
-      site: Demetra.Defaults.SITE,
       lang: Demetra.Defaults.LANG,
+      version: Demetra.Defaults.VERSION,
+      project: '',
+      site: Demetra.Defaults.SITE,
       debug: false,
     };
     this.options = { ...defaults, ...options};
 
     this.endpoint = this.options.endpoint;
-  }
-
-  public queuePage(
-    slug : string | number,
-    type : string = 'pages',
-    siblings : boolean = false,
-    fields : Array<string> = [],
-    prev : boolean = false,
-    next : boolean = false,
-    loop : boolean = false
-  ) {
-    if (typeof type === 'undefined') type = 'pages';
-    this.request.page = {
-      id: slug,
-      type,
-      siblings: {
-        prev: siblings ? prev : false,
-        next: siblings ? next : false,
-        loop,
-        fields,
-      }
-    }
-    return this.request;
-  }
-
-  public queueMenu(slug : string | number) {
-    this.request.menu = {
-      id: slug,
-    }
-    return this.request;
-  }
-
-  public queueArchive(
-    type : string,
-    fields : Array<string> = [],
-    pagination? : Pagination,
-    filters : Array<Filter> = [],
-  ) {
-    this.request.archive = {
-      type,
-      fields,
-      filters,
-      pagination,
-    };
-    return this.request;
-  }
-
-  public async fetch() {
-    this.setHeaders(this.request);
-    const response : AxiosResponse = await axios.post(this.endpoint, this.request);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
   }
 
   public async fetchPage(
@@ -99,33 +50,47 @@ class Demetra {
     next : boolean = false,
     loop : boolean = false
   ) {
-    const request : Partial<Request> = {
-      page: {
-        id: slug,
-        type,
-        siblings: {
-          prev: siblings ? prev : false,
-          next: siblings ? next : false,
-          loop,
-          fields,
-        }
-      },
+    this.request = {
+      mode: Demetra.Modes.PAGES,
+      lang: this.options.lang,
+      version: this.options.version,
+      project: this.options.project,
+      site: this.options.site,
+      id: slug,
+      type,
+      siblings: {
+        prev: siblings ? prev : false,
+        next: siblings ? next : false,
+        loop,
+        fields,
+      }
     };
-    this.setHeaders(request);
-    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+    const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
     return response.data;
   }
   
   public async fetchMenu(slug : string | number) {
-    const request : Partial<Request> = {
-      menu: {
-        id: slug,
-      },
+    this.request = {
+      mode: Demetra.Modes.MENU,
+      lang: this.options.lang,
+      version: this.options.version,
+      project: this.options.project,
+      site: this.options.site,
+      id: slug,
     };
-    this.setHeaders(request);
-    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+    const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
     return response.data;
@@ -137,37 +102,26 @@ class Demetra {
     pagination? : Pagination,
     filters : Array<Filter> = [],
   ) {
-    const request : Partial<Request> = {
-      archive: {
-        type,
-        fields,
-        filters,
-        pagination,
-      }
+    this.request = {
+      mode: Demetra.Modes.ARCHIVE,
+      lang: this.options.lang,
+      version: this.options.version,
+      project: this.options.project,
+      site: this.options.site,
+      type,
+      fields,
+      pagination,
+      filters,
     }
-    this.setHeaders(request);
-    const response : AxiosResponse = await axios.post(this.endpoint, request);
+    const config : AxiosRequestConfig = {
+      url: this.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+    const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
     return response.data;
-  }
-
-  public async rawRequest(request : Request) {
-    this.setHeaders(request);
-    const response : AxiosResponse = await axios.post(this.endpoint, request);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  private setHeaders(request : Partial<Request>) {
-    request.header = {
-      url: this.options.url || '',
-      version: this.options.version || Demetra.Defaults.VERSION,
-      project: this.options.site || Demetra.Defaults.SITE,
-    };
-    request.lang = this.options.lang;
-    request.site = this.options.site;
   }
   
   private handleError(response : AxiosResponse) {
