@@ -1,5 +1,5 @@
 const Modes = {
-  PAGES: 'page',
+  PAGE: 'page',
   MENU: 'menu',
   ARCHIVE: 'archive',
 }

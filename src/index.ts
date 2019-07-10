@@ -4,9 +4,12 @@ import {
   Filter,
   Pagination,
   Request,
-} from "./declarations";
+} from './declarations';
 import Defaults from './defaults';
 import Modes from './modes';
+import {
+  validateUrl
+} from './validate';
 
 class Demetra {
   private static Defaults = Defaults;
@@ -18,32 +21,31 @@ class Demetra {
     mode: 'page',
     lang: 'en',
     version: 2,
-    project: '',
     site: 'default',
     id: '',
-    type: 'pages',
+    i18n: true,
+    type: 'page',
   };
 
   constructor(options : Partial<DemetraOptions>) {
-    if (typeof options.project === 'undefined') {
-      throw new Error('Project cannot be undefined');
-    }
     const defaults : DemetraOptions = {
       endpoint: '',
       lang: Demetra.Defaults.LANG,
       version: Demetra.Defaults.VERSION,
-      project: '',
       site: Demetra.Defaults.SITE,
       debug: false,
     };
     this.options = { ...defaults, ...options};
 
+
     this.endpoint = this.options.endpoint;
+    this.validation('url', this.endpoint);
   }
 
   public async fetchPage(
     slug : string | number,
-    type : string = 'pages',
+    type : string = 'page',
+    i18n : boolean = true,
     siblings : boolean = false,
     fields : Array<string> = [],
     prev : boolean = false,
@@ -51,13 +53,13 @@ class Demetra {
     loop : boolean = false
   ) {
     this.request = {
-      mode: Demetra.Modes.PAGES,
+      mode: Demetra.Modes.PAGE,
       lang: this.options.lang,
       version: this.options.version,
-      project: this.options.project,
       site: this.options.site,
       id: slug,
       type,
+      i18n: true,
       siblings: {
         prev: siblings ? prev : false,
         next: siblings ? next : false,
@@ -70,6 +72,9 @@ class Demetra {
       method: 'post',
       data: this.request,
     }
+
+    this.validation('page', this.request);
+
     const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
@@ -81,7 +86,6 @@ class Demetra {
       mode: Demetra.Modes.MENU,
       lang: this.options.lang,
       version: this.options.version,
-      project: this.options.project,
       site: this.options.site,
       id: slug,
     };
@@ -90,6 +94,9 @@ class Demetra {
       method: 'post',
       data: this.request,
     }
+
+    this.validation('menu', this.request);
+
     const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
@@ -99,6 +106,7 @@ class Demetra {
   public async fetchArchive(
     type : string,
     fields : Array<string> = [],
+    i18n: false,
     pagination? : Pagination,
     filters : Array<Filter> = [],
   ) {
@@ -106,9 +114,9 @@ class Demetra {
       mode: Demetra.Modes.ARCHIVE,
       lang: this.options.lang,
       version: this.options.version,
-      project: this.options.project,
       site: this.options.site,
       type,
+      i18n: false,
       fields,
       pagination,
       filters,
@@ -118,6 +126,9 @@ class Demetra {
       method: 'post',
       data: this.request,
     }
+
+    this.validation('archive', this.request);
+
     const response : AxiosResponse = await axios(config);
     this.debugLog(response);
     this.handleError(response);
@@ -125,16 +136,47 @@ class Demetra {
   }
   
   private handleError(response : AxiosResponse) {
-    if (response.status !== 200) {
+    if (response.data.status.code !== 200) {
       if (this.options.debug) {
-        console.error(`${response.data.status.code}: ${response.data.status.message}`);
+        console.error(`${response.data.status.code} - ${response.data.status.message}`);
       }
-      throw new Error(response.data.status.message);
+      throw new Error(`${response.data.status.code} - ${response.data.status.message}`);
     }
   }
 
   private debugLog(response : AxiosResponse) {
     if (this.options.debug) console.log(response);
+  }
+
+  private validation(mode : string, request : any) {
+    switch (true) {
+      case (mode === 'url'):
+        if (!validateUrl(request)) {
+          if (this.options.debug) {
+            console.log(request);
+          }
+          throw new Error('Invalid endpoint');
+        }
+        break;
+
+      case (mode === 'page' || mode === 'menu'):
+        if (typeof request.id === 'undefined') {
+          if (this.options.debug) {
+            console.log(request);
+          }
+          throw new Error('Missing slug/id');
+        }
+        break;
+
+      case (mode === 'archive'):
+        if (typeof request.type === 'undefined') {
+          if (this.options.debug) {
+            console.log(request);
+          }
+          throw new Error('Missing type');
+        }
+        break;
+    }
   }
 }
 

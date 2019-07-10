@@ -2,7 +2,6 @@ export interface DemetraOptions {
   lang : string,
   endpoint : string,
   version : number,
-  project : string,
   site : string,
   debug : boolean,
 }
@@ -28,11 +27,11 @@ export interface Siblings {
 export interface Request {
   mode : string,
   lang : string,
-  version : string| number,
-  project : string,
+  version : string | number,
   site : string,
   id? : string | number,
   type? : string,
+  i18n?: boolean,
   siblings? : Siblings,
   fields? : Array<string>,
   filters? : Array<Filter>,
