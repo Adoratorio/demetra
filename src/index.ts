@@ -134,6 +134,28 @@ class Demetra {
     this.handleError(response);
     return response.data;
   }
+
+  public async fetchExtra(slug : string) {
+    this.request = {
+      mode: Demetra.Modes.EXTRA,
+      lang: this.options.lang,
+      version: this.options.version,
+      site: this.options.site,
+      id: slug,
+    };
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+
+    this.validation('extra', this.request);
+
+    const response : AxiosResponse = await axios(config);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
+  }
   
   private handleError(response : AxiosResponse) {
     if (response.data.status.code !== 200) {
@@ -159,7 +181,7 @@ class Demetra {
         }
         break;
 
-      case (mode === 'page' || mode === 'menu'):
+      case (mode === 'page' || mode === 'menu' || mode === 'extra'):
         if (typeof request.id === 'undefined') {
           if (this.options.debug) {
             console.log(request);
