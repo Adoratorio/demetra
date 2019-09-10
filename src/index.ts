@@ -59,7 +59,7 @@ class Demetra {
       site: this.options.site,
       id: slug,
       type,
-      i18n: true,
+      i18n,
       siblings: {
         prev: siblings ? prev : false,
         next: siblings ? next : false,
@@ -106,7 +106,6 @@ class Demetra {
   public async fetchArchive(
     type : string,
     fields : Array<string> = [],
-    i18n: false,
     pagination? : Pagination,
     filters : Array<Filter> = [],
   ) {
@@ -199,6 +198,22 @@ class Demetra {
         }
         break;
     }
+  }
+
+  public get lang() {
+    return this.options.lang;
+  }
+
+  public set lang(lang : string) {
+    this.options.lang = lang;
+  }
+
+  public get site() {
+    return this.options.site;
+  }
+
+  public set site(site : string) {
+    this.options.site = site;
   }
 }
 
