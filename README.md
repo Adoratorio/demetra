@@ -41,10 +41,19 @@ Use this method to get pages details, the method accept the following params
 ```typescript
 Demetra.fetchPage(slug : string | number, type : string, i18n : boolean, siblings : boolean, fields : Array<string>, prev : boolean, next : boolean, loop: boolean);
 ```
-[Untitled](https://www.notion.so/3a800412c7894ae6b6ef24d7aea9b889)
+|parameter|type|default|description|
+|:-------|:--:|:-----:|:----------|
+|parameter|string \| number|none, required|The id or the slug of the page to fetch|
+|parameter|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
+|parameter|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
+|parameter|boolean|`false`|If you also need information about adiacent siblings|
+|parameter|Array\<string\>|`[]`|An array of fields you need for siblings, identified by their frontId|
+|parameter|boolean|`false`|If you need the prev sibling|
+|parameter|boolean|`false`|If you need the next sibling|
+|parameter|boolean|`false`|If the requested page is the last or the first, treat the siblings as a circle, returning the first one or the previous one depending on the position|
 
 The returned object will be in the following form
-```json
+```javascript
 {
   "page": {
     "id": 87,
@@ -106,7 +115,7 @@ Fetch content for a menu
 Demetra.fetchMenu(slug : string | number);
 ```
 The returned object will be in the following form
-```json
+```javascript
 {
   "page": null,
   "menu": {
@@ -168,10 +177,16 @@ Retrive the information and the content for an archive (a collection of items)
 ```typescript
 Demetra.fetchArchive(type : string, fields : Array<string>, i18n : boolean, pagination : Pagination, filters : Array<Filter>);
 ```
-[Untitled](https://www.notion.so/a85d745af6944b92a41806a2f150f65b)
+|parameter|type|default|description|
+|:-------|:--:|:-----:|:----------|
+|type|string|none, required|The URL for the custom theme API endpoint|
+|fields|string|`[]`|Array of frontId used to identify the fileds for the items|
+|i18n|boolean|`false`|If you want i18n information for each item in the archive|
+|pagination|Pagination|`undefined`|A pagination object used to define if you need pagination `{ start : number, count : number }`|
+|filters|Array\<Filter\>|`[]`|Array of filters object used as condition to filter the item in the archive, the object is composed like so `{ compare : string, key : string, value : string }`|
 
 The returning object will be in the following form
-```json
+```javascript
 {
   "page": null,
   "menu": null,
@@ -215,10 +230,10 @@ The returning object will be in the following form
 
 Fetch data considered to be extra in the Wordpress seetup
 ```typescript
-    Demetra.fetchExtra(slug : string);
+Demetra.fetchExtra(slug : string);
 ```
 The returning object will be in the following form
-```json
+```javascript
 {
     "page": null,
     "menu": null,
