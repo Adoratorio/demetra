@@ -43,14 +43,14 @@ Demetra.fetchPage(slug : string | number, type : string, i18n : boolean, sibling
 ```
 |parameter|type|default|description|
 |:-------|:--:|:-----:|:----------|
-|parameter|string \| number|none, required|The id or the slug of the page to fetch|
-|parameter|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
-|parameter|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
-|parameter|boolean|`false`|If you also need information about adiacent siblings|
-|parameter|Array\<string\>|`[]`|An array of fields you need for siblings, identified by their frontId|
-|parameter|boolean|`false`|If you need the prev sibling|
-|parameter|boolean|`false`|If you need the next sibling|
-|parameter|boolean|`false`|If the requested page is the last or the first, treat the siblings as a circle, returning the first one or the previous one depending on the position|
+|slug|string \| number|none, required|The id or the slug of the page to fetch|
+|type|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
+|i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
+|siblings|boolean|`false`|If you also need information about adiacent siblings|
+|fields|Array\<string\>|`[]`|An array of fields you need for siblings, identified by their frontId|
+|prev|boolean|`false`|If you need the prev sibling|
+|next|boolean|`false`|If you need the next sibling|
+|loop|boolean|`false`|If the requested page is the last or the first, treat the siblings as a circle, returning the first one or the previous one depending on the position|
 
 The returned object will be in the following form
 ```javascript
