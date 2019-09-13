@@ -1,5 +1,3 @@
-# Demetra README
-
 # Demetra
 
 A utility library for Wordpress custom api interaction, using the **adora-theme** endpoint.
