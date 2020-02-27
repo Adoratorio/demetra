@@ -30,6 +30,7 @@ Medusa accept in the constructor and `option` object with the following possible
 |version|number|`1`|The API version used, v1 only available for now...|
 |site|string|`''`|In multi-site installation Wordpress the site id to fetch data from|
 |debug|boolean|`false`|If You need extra log in browser console about what Demetra is doing|
+|cache|boolean|`true`|If the ednpoint will use the API cache, disable in development mode|
 
 ## APIs
 

@@ -34,6 +34,7 @@ class Demetra {
       version: Demetra.Defaults.VERSION,
       site: Demetra.Defaults.SITE,
       debug: false,
+      cache: true,
     };
     this.options = { ...defaults, ...options};
 
@@ -60,6 +61,7 @@ class Demetra {
       id: slug,
       type,
       i18n,
+      cache: this.options.cache,
       siblings: {
         prev: siblings ? prev : false,
         next: siblings ? next : false,
@@ -88,6 +90,7 @@ class Demetra {
       version: this.options.version,
       site: this.options.site,
       id: slug,
+      cache: this.options.cache,
     };
     const config : AxiosRequestConfig = {
       url: this.options.endpoint,
@@ -119,6 +122,7 @@ class Demetra {
       fields,
       pagination,
       filters,
+      cache: this.options.cache,
     }
     const config : AxiosRequestConfig = {
       url: this.endpoint,
@@ -141,6 +145,7 @@ class Demetra {
       version: this.options.version,
       site: this.options.site,
       id: slug,
+      cache: this.options.cache,
     };
     const config : AxiosRequestConfig = {
       url: this.options.endpoint,

@@ -4,6 +4,7 @@ export interface DemetraOptions {
   version : number,
   site : string,
   debug : boolean,
+  cache : boolean,
 }
 
 export interface Pagination {
@@ -36,4 +37,5 @@ export interface Request {
   fields? : Array<string>,
   filters? : Array<Filter>,
   pagination? : Pagination,
+  cache? : boolean,
 }
