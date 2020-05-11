@@ -99,6 +99,7 @@ The returned object will be in the following form
   "menu": null,
   "archive": null,
   "extra": null,
+  "taxonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -163,6 +164,7 @@ The returned object will be in the following form
   },
   "archive": null,
   "extra": null,
+  "taxonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -218,6 +220,7 @@ The returning object will be in the following form
     }
   },
   "extra": null,
+  "taxonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -243,6 +246,42 @@ The returning object will be in the following form
         "email": ""
         // ... Extra data with key : value here
     },
+    "taxonomy": null,
+    "status": {
+        "code": 200,
+        "message": "Data loaded!",
+        "cache": false
+    }
+}
+```
+### fetchTaxonomy()
+
+Fetch a single taxonomy with all terms
+```typescript
+Demetra.fetchTaxonomy(slug : string);
+```
+The returning object will be in the following form
+```javascript
+{
+    "page": null,
+    "menu": null,
+    "archive": null,
+    "extra": null,
+    "taxonomy": [
+      {
+        "term_id": 17,
+        "name": "TERM NAME",
+        "slug": "termname",
+        "term_group": 0,
+        "term_taxonomy_id": 17,
+        "taxonomy": "taxonomy id",
+        "description": "",
+        "parent": 0,
+        "count": 0,
+        "filter": "raw"
+      },
+      // ... Other terms following
+    ],
     "status": {
         "code": 200,
         "message": "Data loaded!",

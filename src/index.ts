@@ -160,6 +160,29 @@ class Demetra {
     this.handleError(response);
     return response.data;
   }
+
+  public async fetchTaxonomy(slug : string) {
+    this.request = {
+      mode: Demetra.Modes.TAXONOMY,
+      lang: this.options.lang,
+      version: this.options.version,
+      site: this.options.site,
+      id: slug,
+      cache: this.options.cache,
+    };
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+
+    this.validation('taxonomy', this.request);
+
+    const response : AxiosResponse = await axios(config);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
+  }
   
   private handleError(response : AxiosResponse) {
     if (response.data.status.code !== 200) {
@@ -185,7 +208,7 @@ class Demetra {
         }
         break;
 
-      case (mode === 'page' || mode === 'menu' || mode === 'extra'):
+      case (mode === 'page' || mode === 'menu' || mode === 'extra' || mode === 'taxonomy'):
         if (typeof request.id === 'undefined') {
           if (this.options.debug) {
             console.log(request);

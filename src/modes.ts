@@ -3,6 +3,7 @@ const Modes = {
   MENU: 'menu',
   ARCHIVE: 'archive',
   EXTRA: 'extra',
+  TAXONOMY: 'taxonomy'
 }
 
 export default Modes;
