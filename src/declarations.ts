@@ -38,4 +38,6 @@ export interface Request {
   filters? : Array<Filter>,
   pagination? : Pagination,
   cache? : boolean,
+  data? : string,
+  email? : string,
 }

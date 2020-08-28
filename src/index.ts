@@ -183,6 +183,53 @@ class Demetra {
     this.handleError(response);
     return response.data;
   }
+
+  public async send(id : number, data : string) {
+    this.request = {
+      mode: Demetra.Modes.SEND,
+      lang: this.options.lang,
+      version: this.options.version,
+      site: this.options.site,
+      id: id,
+      cache: this.options.cache,
+      data: data,
+    };
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+
+    this.validation('send', this.request);
+
+    const response : AxiosResponse = await axios(config);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
+  }
+
+  public async subscribe(email : string) {
+    this.request = {
+      mode: Demetra.Modes.SEND,
+      lang: this.options.lang,
+      version: this.options.version,
+      site: this.options.site,
+      cache: this.options.cache,
+      email: email,
+    };
+    const config : AxiosRequestConfig = {
+      url: this.options.endpoint,
+      method: 'post',
+      data: this.request,
+    }
+
+    this.validation('subscribe', this.request);
+
+    const response : AxiosResponse = await axios(config);
+    this.debugLog(response);
+    this.handleError(response);
+    return response.data;
+  }
   
   private handleError(response : AxiosResponse) {
     if (response.data.status.code !== 200) {
@@ -223,6 +270,28 @@ class Demetra {
             console.log(request);
           }
           throw new Error('Missing type');
+        }
+        break;
+
+      case (mode === 'send'):
+        if (
+          typeof request.type === 'undefined'
+          || typeof request.id === 'undefined'
+          || typeof request.data !== 'string'
+        ) {
+          if (this.options.debug) {
+            console.log(request);
+          }
+          throw new Error('Invalid send payload, missing id or data is not a serialized JSON string');
+        }
+        break;
+
+      case (mode === 'subscribe'):
+        if (typeof request.type === 'undefined' || typeof request.email === 'undefined') {
+          if (this.options.debug) {
+            console.log(request);
+          }
+          throw new Error('Invalid send payload, missing id or data is not a serialized JSON string');
         }
         break;
     }

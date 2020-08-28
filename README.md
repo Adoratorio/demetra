@@ -99,7 +99,9 @@ The returned object will be in the following form
   "menu": null,
   "archive": null,
   "extra": null,
-  "taxonomy": null,
+  "t
+  "send": null,
+  "subscribe": null,axonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -164,7 +166,9 @@ The returned object will be in the following form
   },
   "archive": null,
   "extra": null,
-  "taxonomy": null,
+  "t
+  "send": null,
+  "subscribe": null,axonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -220,7 +224,9 @@ The returning object will be in the following form
     }
   },
   "extra": null,
-  "taxonomy": null,
+  "t
+  "send": null,
+  "subscribe": null,axonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -246,7 +252,9 @@ The returning object will be in the following form
         "email": ""
         // ... Extra data with key : value here
     },
-    "taxonomy": null,
+    "t
+    "send": null,
+    "subscribe": null,axonomy": null,
     "status": {
         "code": 200,
         "message": "Data loaded!",
@@ -282,6 +290,64 @@ The returning object will be in the following form
       },
       // ... Other terms following
     ],
+    "send": null,
+    "subscribe": null,
+    "status": {
+        "code": 200,
+        "message": "Data loaded!",
+        "cache": false
+    }
+}
+```
+
+### send()
+
+Use a preconfigured form on WP to send an email
+```typescript
+Demetra.send(id : number, data : string);
+```
+`data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field definded in form options on WP side.\n
+The returning object will be in the following form
+```javascript
+{
+    "page": null,
+    "menu": null,
+    "archive": null,
+    "extra": null,
+    "taxonomy": null,
+    "send": {
+      "saved": 1, // How many requests have been saved in the db
+      "sended": true, // If the email has been sended to the recipients
+    },
+    "subscribe": null,
+    "status": {
+        "code": 200,
+        "message": "Data loaded!",
+        "cache": false
+    }
+}
+```
+
+### subscribe()
+
+Use configured MailChimp settings in order to subscribe an email to a list
+```typescript
+Demetra.subscribe(email : string);
+```
+The returning object will be in the following form
+```javascript
+{
+    "page": null,
+    "menu": null,
+    "archive": null,
+    "extra": null,
+    "taxonomy": null,
+    "send": null,
+    "subscribe": {
+      "response": 1, // The request result 0 in case of error
+      "message": "SUCCESS!", // The message associated with the result
+      "mailchimp": "", // Contains mailchimp messages and debug informations
+    },
     "status": {
         "code": 200,
         "message": "Data loaded!",

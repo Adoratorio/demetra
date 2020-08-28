@@ -4,6 +4,8 @@ const Modes = {
   ARCHIVE: 'archive',
   EXTRA: 'extra',
   TAXONOMY: 'taxonomy'
+  SEND: 'send',
+  SUBSCRIBE: 'subscribe',
 }
 
 export default Modes;
