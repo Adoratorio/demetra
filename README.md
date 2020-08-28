@@ -99,7 +99,7 @@ The returned object will be in the following form
   "menu": null,
   "archive": null,
   "extra": null,
-  "t
+  "taxonomy": null,
   "send": null,
   "subscribe": null,axonomy": null,
   "status": {
@@ -166,7 +166,7 @@ The returned object will be in the following form
   },
   "archive": null,
   "extra": null,
-  "t
+  "taxonomy": null,
   "send": null,
   "subscribe": null,axonomy": null,
   "status": {
@@ -224,7 +224,7 @@ The returning object will be in the following form
     }
   },
   "extra": null,
-  "t
+  "taxonomy": null,
   "send": null,
   "subscribe": null,axonomy": null,
   "status": {
@@ -252,7 +252,7 @@ The returning object will be in the following form
         "email": ""
         // ... Extra data with key : value here
     },
-    "t
+    "taxonomy": null,
     "send": null,
     "subscribe": null,axonomy": null,
     "status": {
