@@ -3,7 +3,7 @@ const Modes = {
   MENU: 'menu',
   ARCHIVE: 'archive',
   EXTRA: 'extra',
-  TAXONOMY: 'taxonomy'
+  TAXONOMY: 'taxonomy',
   SEND: 'send',
   SUBSCRIBE: 'subscribe',
 }
