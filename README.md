@@ -45,7 +45,7 @@ Demetra.fetchPage(slug : string | number, type : string, i18n : boolean, sibling
 |slug|string \| number|none, required|The id or the slug of the page to fetch|
 |type|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
-|siblings|boolean|`false`|If you also need information about adiacent siblings|
+|siblings|boolean|`false`|If you also need information about adjacent siblings|
 |fields|Array\<string\>|`[]`|An array of fields you need for siblings, identified by their frontId|
 |prev|boolean|`false`|If you need the prev sibling|
 |next|boolean|`false`|If you need the next sibling|
@@ -136,7 +136,7 @@ The returned object will be in the following form
         ],
         "behaviour": "internal",
         "parent": false,
-        // ... custom fields associataed with this menu voice
+        // ... custom fields associated with this menu voice
       },
       {
         "id": 122,
@@ -178,14 +178,14 @@ The returned object will be in the following form
 ```
 ### fetchArchive()
 
-Retrive the information and the content for an archive (a collection of items)
+Retrieve the information and the content for an archive (a collection of items)
 ```typescript
 Demetra.fetchArchive(type : string, fields : Array<string>, i18n : boolean, pagination : Pagination, filters : Array<Filter>);
 ```
 |parameter|type|default|description|
 |:-------|:--:|:-----:|:----------|
 |type|string|none, required|The URL for the custom theme API endpoint|
-|fields|string|`[]`|Array of frontId used to identify the fileds for the items|
+|fields|string|`[]`|Array of frontId used to identify the fields for the items|
 |i18n|boolean|`false`|If you want i18n information for each item in the archive|
 |pagination|Pagination|`undefined`|A pagination object used to define if you need pagination `{ start : number, count : number }`|
 |filters|Array\<Filter\>|`[]`|Array of filters object used as condition to filter the item in the archive, the object is composed like so `{ compare : string, key : string, value : string }`|
@@ -226,7 +226,7 @@ The returning object will be in the following form
   "extra": null,
   "taxonomy": null,
   "send": null,
-  "subscribe": null,axonomy": null,
+  "subscribe": null,taxonomy": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -236,7 +236,7 @@ The returning object will be in the following form
 ```
 ### fetchExtra()
 
-Fetch data considered to be extra in the Wordpress seetup
+Fetch data considered to be extra in the Wordpress setup
 ```typescript
 Demetra.fetchExtra(slug : string);
 ```
@@ -254,7 +254,7 @@ The returning object will be in the following form
     },
     "taxonomy": null,
     "send": null,
-    "subscribe": null,axonomy": null,
+    "subscribe": null,taxonomy": null,
     "status": {
         "code": 200,
         "message": "Data loaded!",
