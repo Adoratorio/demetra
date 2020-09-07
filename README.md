@@ -101,7 +101,7 @@ The returned object will be in the following form
   "extra": null,
   "taxonomy": null,
   "send": null,
-  "subscribe": null,axonomy": null,
+  "subscribe": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -168,7 +168,7 @@ The returned object will be in the following form
   "extra": null,
   "taxonomy": null,
   "send": null,
-  "subscribe": null,axonomy": null,
+  "subscribe": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -226,7 +226,7 @@ The returning object will be in the following form
   "extra": null,
   "taxonomy": null,
   "send": null,
-  "subscribe": null,axonomy": null,
+  "subscribe": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
@@ -254,7 +254,7 @@ The returning object will be in the following form
     },
     "taxonomy": null,
     "send": null,
-    "subscribe": null,axonomy": null,
+    "subscribe": null,
     "status": {
         "code": 200,
         "message": "Data loaded!",
