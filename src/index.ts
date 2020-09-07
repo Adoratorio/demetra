@@ -184,7 +184,7 @@ class Demetra {
     return response.data;
   }
 
-  public async send(id : number, data : string) {
+  public async send(id : number, recipients : string, data : string) {
     this.request = {
       mode: Demetra.Modes.SEND,
       lang: this.options.lang,
@@ -192,6 +192,7 @@ class Demetra {
       site: this.options.site,
       id: id,
       cache: this.options.cache,
+      recipients: recipients,
       data: data,
     };
     const config : AxiosRequestConfig = {

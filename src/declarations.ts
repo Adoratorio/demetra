@@ -40,4 +40,5 @@ export interface Request {
   cache? : boolean,
   data? : string,
   email? : string,
+  recipients? : string,
 }

@@ -304,9 +304,9 @@ The returning object will be in the following form
 
 Use a preconfigured form on WP to send an email
 ```typescript
-Demetra.send(id : number, data : string);
+Demetra.send(id : number, recipients : string, data : string);
 ```
-`data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field definded in form options on WP side.\n
+`recipients` should be a single email or a comma separated list of email addresses, `data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field definded in form options on WP side.\n
 The returning object will be in the following form
 ```javascript
 {
