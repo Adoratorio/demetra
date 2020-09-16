@@ -211,7 +211,7 @@ class Demetra {
 
   public async subscribe(email : string) {
     this.request = {
-      mode: Demetra.Modes.SEND,
+      mode: Demetra.Modes.SUBSCRIBE,
       lang: this.options.lang,
       version: this.options.version,
       site: this.options.site,
@@ -276,8 +276,7 @@ class Demetra {
 
       case (mode === 'send'):
         if (
-          typeof request.type === 'undefined'
-          || typeof request.id === 'undefined'
+          typeof request.id === 'undefined'
           || typeof request.data !== 'string'
         ) {
           if (this.options.debug) {
@@ -288,11 +287,11 @@ class Demetra {
         break;
 
       case (mode === 'subscribe'):
-        if (typeof request.type === 'undefined' || typeof request.email === 'undefined') {
+        if (typeof request.email === 'undefined') {
           if (this.options.debug) {
             console.log(request);
           }
-          throw new Error('Invalid send payload, missing id or data is not a serialized JSON string');
+          throw new Error('Invalid email');
         }
         break;
     }
