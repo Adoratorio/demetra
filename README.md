@@ -304,9 +304,9 @@ The returning object will be in the following form
 
 Use a preconfigured form on WP to send an email
 ```typescript
-Demetra.send(id : number, recipients : string, data : string);
+Demetra.send(id : number, recipients : string, data : string, attachments : Array<File>);
 ```
-`recipients` should be a single email or a comma separated list of email addresses, `data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field definded in form options on WP side.\n
+`recipients` should be a single email or a comma separated list of email addresses, `data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field definded in form options on WP side, `attachment` should be a list of files handler to upload as attachments to the request. \n
 The returning object will be in the following form
 ```javascript
 {
@@ -348,6 +348,27 @@ The returning object will be in the following form
       "message": "SUCCESS!", // The message associated with the result
       "mailchimp": "", // Contains mailchimp messages and debug informations
     },
+    "status": {
+        "code": 200,
+        "message": "Data loaded!",
+        "cache": false
+    }
+}
+```
+
+### upload()
+
+Upload one or multiple files to the Wordpress media library
+```typescript
+Demetra.upload(files : File | Array<File>);
+```
+The returning object will be in the following form
+```javascript
+{
+    "files": [{
+      "upload_id": 1, // The post id of the uploaded file
+      "url": "https://...", // The url of the uploaded file
+    }],
     "status": {
         "code": 200,
         "message": "Data loaded!",

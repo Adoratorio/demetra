@@ -1,6 +1,7 @@
 export interface DemetraOptions {
   lang : string,
   endpoint : string,
+  uploadEndpoint? : string,
   version : number,
   site : string,
   debug : boolean,
@@ -41,4 +42,5 @@ export interface Request {
   data? : string,
   email? : string,
   recipients? : string,
+  attachments? : Array<string>
 }

@@ -30,6 +30,7 @@ class Demetra {
   constructor(options : Partial<DemetraOptions>) {
     const defaults : DemetraOptions = {
       endpoint: '',
+      uploadEndpoint: undefined,
       lang: Demetra.Defaults.LANG,
       version: Demetra.Defaults.VERSION,
       site: Demetra.Defaults.SITE,
@@ -38,6 +39,9 @@ class Demetra {
     };
     this.options = { ...defaults, ...options};
 
+    if (typeof options.uploadEndpoint === 'undefined') {
+      this.options.uploadEndpoint = this.options.endpoint.replace('/api.php', '/upload.php');
+    }
 
     this.endpoint = this.options.endpoint;
     this.validation('url', this.endpoint);
@@ -184,7 +188,12 @@ class Demetra {
     return response.data;
   }
 
-  public async send(id : number, recipients : string, data : string) {
+  public async send(id : number, recipients : string, data : string, attachments : Array<File>) {
+    let urls = undefined;
+    if (Array.isArray(attachments)) {
+      const uploadResponse = await this.upload(attachments);
+      urls = uploadResponse.map((r) => r.file.url);
+    }
     this.request = {
       mode: Demetra.Modes.SEND,
       lang: this.options.lang,
@@ -194,6 +203,7 @@ class Demetra {
       cache: this.options.cache,
       recipients: recipients,
       data: data,
+      attachments: urls,
     };
     const config : AxiosRequestConfig = {
       url: this.options.endpoint,
@@ -230,6 +240,28 @@ class Demetra {
     this.debugLog(response);
     this.handleError(response);
     return response.data;
+  }
+
+  public async upload(files : File | Array<File>) {
+    if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload andpoint defined');
+    const fs = Array.isArray(files) ? files : [files];
+    const promises : Array<Promise<AxiosResponse<any>>> = [];
+    fs.forEach((file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const promise = axios.post(this.options.uploadEndpoint || '', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      promises.push(promise);
+    });
+    const responses = await Promise.all(promises);
+    responses.forEach((response) => {
+      this.debugLog(response);
+      this.handleError(response);
+    });
+    return responses.map((r) => r.data);
   }
   
   private handleError(response : AxiosResponse) {
