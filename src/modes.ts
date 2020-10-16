@@ -1,4 +1,4 @@
-const Modes = {
+const MODES = {
   PAGE: 'page',
   MENU: 'menu',
   ARCHIVE: 'archive',
@@ -8,4 +8,4 @@ const Modes = {
   SUBSCRIBE: 'subscribe',
 }
 
-export default Modes;
+export default MODES;

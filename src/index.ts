@@ -1,349 +1,130 @@
-import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
-import {
-  DemetraOptions,
-  Filter,
-  Pagination,
-  Request,
-} from './declarations';
-import Defaults from './defaults';
-import Modes from './modes';
-import {
-  validateUrl
-} from './validate';
+import { DemetraOptions, DemetraRequestOptions } from './declarations';
+import { serialize } from 'object-to-formdata';
+import { validateUrl } from './validators';
+
+import DemetraRequest from './DemetraRequest';
+import MODES from './modes';
+
+// TODO: localCache
 
 class Demetra {
-  private static Defaults = Defaults;
-  private static Modes = Modes;
+  private readonly options : DemetraOptions;
+  private readonly requestQueue : Array<DemetraRequest>;
+  private static readonly MODES = MODES;
 
-  private options : DemetraOptions;
-  private endpoint : string = '';
-  private request : Request = {
-    mode: 'page',
-    lang: 'en',
-    version: 2,
+  public defaults : DemetraOptions = {
+    endpoint: undefined,
+    uploadEndpoint: undefined,
     site: 'default',
-    id: '',
-    i18n: true,
-    type: 'page',
+    lang: 'en',
+    debug: false,
   };
 
-  constructor(options : Partial<DemetraOptions>) {
-    const defaults : DemetraOptions = {
-      endpoint: '',
-      uploadEndpoint: undefined,
-      lang: Demetra.Defaults.LANG,
-      version: Demetra.Defaults.VERSION,
-      site: Demetra.Defaults.SITE,
-      debug: false,
-      cache: true,
-    };
-    this.options = { ...defaults, ...options};
+  constructor(options? : Partial<DemetraOptions>) {
+    this.options = {...this.defaults, ...options};
+    this.requestQueue = [];
 
-    if (typeof options.uploadEndpoint === 'undefined') {
+    this.validate();
+  }
+
+  public async addQueue(requestOptions : DemetraRequest) {
+    this.requestQueue.push(requestOptions)
+  }
+
+  public async fetch(fetchModes : string) {
+    const optionsQueue : Array<DemetraRequestOptions> = this.requestQueue.map(request => request.options);
+    const formData : FormData = serialize(optionsQueue);
+    const requestInit = DemetraRequest.addConfig(formData);
+
+    const response : Response = await fetch(this.endpoint as RequestInfo, requestInit);
+    this.debugLog(response);
+    this.handleError(response)
+
+    return response.json();
+  }
+
+  public async fetchPage(id : string | number, options? : Partial<DemetraRequestOptions>) {
+    if (typeof options !== 'undefined' && typeof options.lang === 'undefined') options.lang = this.defaults.lang;
+    return await this.send(Demetra.MODES.PAGE, id, options)
+  }
+
+  public async fetchMenu(id: string, options: object) {
+    await this.send(Demetra.MODES.MENU, id, options)
+  }
+
+  public async fetchArchive(id : string, options : object) {
+    return await this.send(Demetra.MODES.ARCHIVE, id, options)
+  }
+
+  public async fetchExtra(id : string, options : object) {
+    return await this.send(Demetra.MODES.EXTRA, id, options)
+  }
+
+  public async fetchTaxonomy(id : | number, options : object) {
+    return await this.send(Demetra.MODES.TAXONOMY, id, options)
+  }
+
+  // recipients : string, data : string, attachments : Array<File>
+  // public async send(id: number, options: object) {
+  // }
+
+  // public async subscribe(email: string) {
+  // }
+
+  // public async upload(files: File | Array<File>) {
+  // }
+
+  // private handleError(response: AxiosResponse) {
+  // }
+
+  // private debugLog(response: AxiosResponse) {
+  // }
+
+  // private validation(mode: string, request: any) {
+  // }
+
+  private validate() : void {
+    if (typeof this.options.endpoint === 'undefined') {
+      throw new Error('Endpoint cannot be undefined')
+    }
+
+    if (!validateUrl(this.options.endpoint)) {
+      throw new Error('Invalid endpoint');
+    }
+
+    if (typeof this.options.uploadEndpoint === 'undefined') {
       this.options.uploadEndpoint = this.options.endpoint.replace('/api.php', '/upload.php');
     }
-
-    this.endpoint = this.options.endpoint;
-    this.validation('url', this.endpoint);
   }
 
-  public async fetchPage(
-    slug : string | number,
-    type : string = 'page',
-    i18n : boolean = true,
-    siblings : boolean = false,
-    fields : Array<string> = [],
-    prev : boolean = false,
-    next : boolean = false,
-    loop : boolean = false
-  ) {
-    this.request = {
-      mode: Demetra.Modes.PAGE,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      id: slug,
-      type,
-      i18n,
-      cache: this.options.cache,
-      siblings: {
-        prev: siblings ? prev : false,
-        next: siblings ? next : false,
-        loop,
-        fields,
-      }
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
+  private async send(mode: string, id : number | string, options? : Partial<DemetraRequestOptions>) : Promise<object> {
+    const request = new DemetraRequest(mode, id, options);
 
-    this.validation('page', this.request);
-
-    const response : AxiosResponse = await axios(config);
+    const response : Response = await fetch(this.endpoint as RequestInfo, request.config);
     this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-  
-  public async fetchMenu(slug : string | number) {
-    this.request = {
-      mode: Demetra.Modes.MENU,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      id: slug,
-      cache: this.options.cache,
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
+    this.handleError(response)
 
-    this.validation('menu', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
+    return response.json();
   }
 
-  public async fetchArchive(
-    type : string,
-    fields : Array<string> = [],
-    pagination? : Pagination,
-    filters : Array<Filter> = [],
-  ) {
-    this.request = {
-      mode: Demetra.Modes.ARCHIVE,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      type,
-      i18n: false,
-      fields,
-      pagination,
-      filters,
-      cache: this.options.cache,
-    }
-    const config : AxiosRequestConfig = {
-      url: this.endpoint,
-      method: 'post',
-      data: this.request,
-    }
-
-    this.validation('archive', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  public async fetchExtra(slug : string) {
-    this.request = {
-      mode: Demetra.Modes.EXTRA,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      id: slug,
-      cache: this.options.cache,
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
-
-    this.validation('extra', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  public async fetchTaxonomy(slug : string) {
-    this.request = {
-      mode: Demetra.Modes.TAXONOMY,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      id: slug,
-      cache: this.options.cache,
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
-
-    this.validation('taxonomy', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  public async send(id : number, recipients : string, data : string, attachments : Array<File>) {
-    let urls = undefined;
-    if (Array.isArray(attachments)) {
-      const uploadResponse = await this.upload(attachments);
-      urls = uploadResponse.map((r) => r.file.url);
-    }
-    this.request = {
-      mode: Demetra.Modes.SEND,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      id: id,
-      cache: this.options.cache,
-      recipients: recipients,
-      data: data,
-      attachments: urls,
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
-
-    this.validation('send', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  public async subscribe(email : string) {
-    this.request = {
-      mode: Demetra.Modes.SUBSCRIBE,
-      lang: this.options.lang,
-      version: this.options.version,
-      site: this.options.site,
-      cache: this.options.cache,
-      email: email,
-    };
-    const config : AxiosRequestConfig = {
-      url: this.options.endpoint,
-      method: 'post',
-      data: this.request,
-    }
-
-    this.validation('subscribe', this.request);
-
-    const response : AxiosResponse = await axios(config);
-    this.debugLog(response);
-    this.handleError(response);
-    return response.data;
-  }
-
-  public async upload(files : File | Array<File>) {
-    if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload andpoint defined');
-    const fs = Array.isArray(files) ? files : [files];
-    const promises : Array<Promise<AxiosResponse<any>>> = [];
-    fs.forEach((file) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const promise = axios.post(this.options.uploadEndpoint || '', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      promises.push(promise);
-    });
-    const responses = await Promise.all(promises);
-    responses.forEach((response) => {
-      this.debugLog(response);
-      this.handleError(response);
-    });
-    return responses.map((r) => r.data);
-  }
-  
-  private handleError(response : AxiosResponse) {
-    if (response.data.status.code !== 200) {
-      if (this.options.debug) {
-        console.error(`${response.data.status.code} - ${response.data.status.message}`);
-      }
-      throw new Error(`${response.data.status.code} - ${response.data.status.message}`);
-    }
-  }
-
-  private debugLog(response : AxiosResponse) {
+  private debugLog(response : Response) {
     if (this.options.debug) console.log(response);
   }
 
-  private validation(mode : string, request : any) {
-    switch (true) {
-      case (mode === 'url'):
-        if (!validateUrl(request)) {
-          if (this.options.debug) {
-            console.log(request);
-          }
-          throw new Error('Invalid endpoint');
-        }
-        break;
-
-      case (mode === 'page' || mode === 'menu' || mode === 'extra' || mode === 'taxonomy'):
-        if (typeof request.id === 'undefined') {
-          if (this.options.debug) {
-            console.log(request);
-          }
-          throw new Error('Missing slug/id');
-        }
-        break;
-
-      case (mode === 'archive'):
-        if (typeof request.type === 'undefined') {
-          if (this.options.debug) {
-            console.log(request);
-          }
-          throw new Error('Missing type');
-        }
-        break;
-
-      case (mode === 'send'):
-        if (
-          typeof request.id === 'undefined'
-          || typeof request.data !== 'string'
-        ) {
-          if (this.options.debug) {
-            console.log(request);
-          }
-          throw new Error('Invalid send payload, missing id or data is not a serialized JSON string');
-        }
-        break;
-
-      case (mode === 'subscribe'):
-        if (typeof request.email === 'undefined') {
-          if (this.options.debug) {
-            console.log(request);
-          }
-          throw new Error('Invalid email');
-        }
-        break;
+  private handleError(response : Response) {
+    if (response.ok) {
+      if (this.options.debug) {
+        console.error(`${response.status} - ${response.statusText}`);
+      }
+      throw new Error(`${response.status} - ${response.statusText}`);
     }
   }
 
-  public get lang() {
-    return this.options.lang;
+  public get endpoint() : string | undefined {
+    return this.options.endpoint;
   }
 
-  public set lang(lang : string) {
-    this.options.lang = lang;
-  }
-
-  public get site() {
-    return this.options.site;
-  }
-
-  public set site(site : string) {
-    this.options.site = site;
+  public set endpoint(url : string | undefined) {
+    this.options.endpoint = url;
   }
 }
-
-export default Demetra;

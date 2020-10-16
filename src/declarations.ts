@@ -1,15 +1,29 @@
 export interface DemetraOptions {
-  lang : string,
-  endpoint : string,
+  endpoint? : string,
   uploadEndpoint? : string,
-  version : number,
   site : string,
+  lang : string,
   debug : boolean,
-  cache : boolean,
+}
+
+export interface DemetraRequestOptions {
+  id: string | number,
+  mode: string,
+  type? : string,
+  lang? : string,
+  i18n?: boolean,
+  siblings? : Siblings,
+  fields? : Array<string>,
+  filters? : Array<Filter>,
+  pagination? : Pagination,
+  wpCache? : boolean,
+  localCache? : boolean,
+  recipients? : string,
+  attachments? : Array<string>
 }
 
 export interface Pagination {
-  start : number,
+  start : number ,
   count : number,
 }
 
@@ -24,23 +38,4 @@ export interface Siblings {
   next? : boolean,
   prev? : boolean,
   loop? : boolean,
-}
-
-export interface Request {
-  mode : string,
-  lang : string,
-  version : string | number,
-  site : string,
-  id? : string | number,
-  type? : string,
-  i18n?: boolean,
-  siblings? : Siblings,
-  fields? : Array<string>,
-  filters? : Array<Filter>,
-  pagination? : Pagination,
-  cache? : boolean,
-  data? : string,
-  email? : string,
-  recipients? : string,
-  attachments? : Array<string>
 }
