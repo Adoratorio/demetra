@@ -7,6 +7,8 @@ export const isUndefined = (value : any) : boolean => typeof value === 'undefine
 
 export const isNull = (value : any) : boolean => value === null;
 
+export const isEmpty = (value : any) : boolean => typeof value === 'string' && value === '';
+
 export const isBoolean = (value : any) : boolean => typeof value === 'boolean';
 
 export const isObject = (value : any) : boolean => value === Object(value);

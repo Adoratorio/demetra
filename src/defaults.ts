@@ -1,4 +1,11 @@
+import DemetraRequest from './DemetraRequest';
+
 const DEFAULTS = new Map();
+
+DEFAULTS.set('cache', {
+  wpCache: false,
+  localCache: false
+});
 
 DEFAULTS.set('page', {
   i18n: true,
@@ -11,12 +18,12 @@ DEFAULTS.set('page', {
   fields: [],
 });
 
-DEFAULTS.set('menu', {
-});
-
 DEFAULTS.set('archive', {
   fields: [],
   filters: [],
+});
+
+DEFAULTS.set('menu', {
 });
 
 DEFAULTS.set('extra', {

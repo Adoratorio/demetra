@@ -19,12 +19,11 @@ class DemetraRequest {
   }
 
   constructor(mode : string, id : number | string, options? : Partial<DemetraRequestOptions>) {
-    this.options = { ...DEFAULTS.get(mode), ...options };
+    this.options = { ...DEFAULTS.get('cache'), ...DEFAULTS.get(mode), ...options };
     this.options.id = id;
     this.options.mode = mode
 
     this.validate();
-
   }
 
   private validate() : void {
@@ -39,6 +38,14 @@ class DemetraRequest {
     if (isUndefined(this.options.id)) {
       throw new Error('Missing id');
     }
+  }
+
+  public get localCache() : Boolean {
+    return this.options.localCache;
+  }
+
+  public get key() : string {
+    return `${this.options.id}_${this.options.mode}`;
   }
 
   public get data() : FormData {
