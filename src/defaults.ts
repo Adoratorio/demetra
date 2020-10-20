@@ -1,14 +1,26 @@
-import DemetraRequest from './DemetraRequest';
+import {
+  FetchPageOptions,
+  FetchArchiveOptions,
+  FetchExtraOptions,
+  FetchMenuOptions,
+  FetchTaxonomyOptions,
+  FetchSendOptions,
+  Cache,
+  Lang,
+} from './declarations';
 
-const DEFAULTS = new Map();
-
-DEFAULTS.set('cache', {
+const cache : Cache = {
   wpCache: false,
-  localCache: false
-});
+  localCache: false,
+}
 
-DEFAULTS.set('page', {
+const lang : Lang = {
+  lang: 'en',
   i18n: true,
+}
+
+const page : FetchPageOptions = {
+  type: 'page',
   siblings: {
     fields: [],
     prev: false,
@@ -16,20 +28,39 @@ DEFAULTS.set('page', {
     loop: false
   },
   fields: [],
-});
+  ...cache,
+  ...lang
+}
 
-DEFAULTS.set('archive', {
+const archive : FetchArchiveOptions = {
   fields: [],
   filters: [],
-});
+  ...cache,
+  ...lang
+}
 
-DEFAULTS.set('menu', {
-});
+const extra : FetchExtraOptions = {
+  ...cache,
+  ...lang
+}
 
-DEFAULTS.set('extra', {
-});
+const menu : FetchMenuOptions = {
+  ...cache,
+  ...lang
+}
 
-DEFAULTS.set('taxonomy', {
-});
+const taxonomy : FetchTaxonomyOptions = {
+  ...cache,
+  ...lang
+}
+
+const DEFAULTS = new Map();
+DEFAULTS.set('page', page);
+DEFAULTS.set('archive', archive);
+DEFAULTS.set('extra', extra);
+DEFAULTS.set('menu', menu);
+DEFAULTS.set('taxonomy', taxonomy);
+// DEFAULTS.set('send', send);
+
 
 export default DEFAULTS

@@ -1,9 +1,13 @@
-import { DemetraRequestOptions } from './declarations';
-import DEFAULTS from './defaults';
-import MODES from './modes'
-import { isUndefined } from './validators';
-
+import md5 from 'md5';
 import { serialize } from 'object-to-formdata';
+
+import DEFAULTS from './defaults';
+import { isUndefined } from './validators';
+import {
+  FetchOptions,
+  DemetraRequestOptions,
+  MODES,
+} from './declarations';
 
 class DemetraRequest {
   public readonly options : DemetraRequestOptions;
@@ -18,8 +22,8 @@ class DemetraRequest {
     }
   }
 
-  constructor(mode : string, id : number | string, options? : Partial<DemetraRequestOptions>) {
-    this.options = { ...DEFAULTS.get('cache'), ...DEFAULTS.get(mode), ...options };
+  constructor(mode : MODES, id : number | string, options? : Partial<FetchOptions>) {
+    this.options  = { ...DEFAULTS.get(mode), ...options };
     this.options.id = id;
     this.options.mode = mode
 
@@ -41,16 +45,16 @@ class DemetraRequest {
   }
 
   public get localCache() : Boolean {
-    return this.options.localCache;
+    return this.options.localCache || false;
   }
 
   public get key() : string {
-    return `${this.options.id}_${this.options.mode}`;
+    return md5(JSON.stringify(this.options));
   }
 
   public get data() : FormData {
     return serialize(
-      this.options,
+      [this.options],
     );
   }
 
