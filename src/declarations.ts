@@ -104,8 +104,12 @@ export type DemetraRequestSubscribeOptions = DemetraRequestGlobalOptions & Fetch
 
 export type DemetraRequestOptions =  DemetraRequestPageOptions | DemetraRequestArchiveOptions | DemetraRequestExtraOptions | DemetraRequestMenuOptions | DemetraRequestTaxonomyOptions | DemetraRequestSendOptions;
 
-// TODO: CANCEL
-export interface Anything {
-  ['page']: DemetraRequestPageOptions
-  ['send']: DemetraRequestSendOptions
-}
+/*
+ * object-to-form-data (Serialize)
+ */
+export interface SerializeOptions {
+  indices?: boolean,
+  nullsAsUndefineds?: boolean,
+  booleansAsIntegers?: boolean,
+  allowEmptyArrays?: boolean,
+};

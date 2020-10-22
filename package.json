@@ -26,7 +26,8 @@
   "contributors": [
     "Andrea Gottardi <andrea@adoratorio.com>",
     "Daniele Borra <daniele@adoratorio.com>",
-    "Tommaso Algozzino <tommaso@adoratorio.com>"
+    "Tommaso Algozzino <tommaso@adoratorio.com>",
+    "Luca Bortolussi <luca@adoratorio.com>"
   ],
   "license": "MIT",
   "bugs": {
@@ -36,10 +37,10 @@
   "dependencies": {
     "@types/lru-cache": "^5.1.0",
     "@types/md5": "^2.2.0",
-    "axios": "^0.19.0",
+    "form-data": "^3.0.0",
     "lru-cache": "^6.0.0",
     "md5": "^2.3.0",
-    "object-to-formdata": "^4.1.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "typescript": "^3.3.3333"
