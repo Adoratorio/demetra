@@ -1,8 +1,11 @@
+/* eslint-disable */
 import LRUCache from 'lru-cache';
+import fetch from 'cross-fetch';
+import FormData from 'form-data'
 
 import DemetraRequest from './DemetraRequest';
 import serialize from './object-to-formdata';
-import { isEmpty, isFile, validateUrl } from './validators';
+import { isEmpty, isFile, validateUrl, isUndefined } from './validators';
 import {
   DemetraOptions,
   FetchArchiveOptions,
@@ -15,21 +18,16 @@ import {
   MODES,
 } from './declarations';
 
-if (!globalThis.fetch) {
-  globalThis.fetch = require('node-fetch');
-}
-
-if (!globalThis.FormData) {
-  globalThis.FormData = require('form-data');
-}
-
 class Demetra {
-  private cache : any;
-  private readonly options : DemetraOptions;
-  private readonly requestQueue : Array<DemetraRequest>;
+  private cache: LRUCache<string, Response>;
+
+  private readonly options: DemetraOptions;
+
+  private readonly requestQueue: Array<DemetraRequest>;
+
   public static readonly MODES = MODES;
 
-  public defaults : DemetraOptions = {
+  public defaults: DemetraOptions = {
     endpoint: '',
     uploadEndpoint: '',
     site: 'default',
@@ -38,9 +36,9 @@ class Demetra {
     cacheMaxAge: 1000 * 60 * 60,
   };
 
-  constructor(options? : Partial<DemetraOptions>) {
-    this.options = {...this.defaults, ...options};
-    this.cache = null;
+  constructor(options?: Partial<DemetraOptions>) {
+    this.options = { ...this.defaults, ...options };
+    this.cache = new LRUCache(this.options.cacheMaxAge);
     this.requestQueue = [];
 
     this.validate();
@@ -49,136 +47,149 @@ class Demetra {
   /*
    * public function
    */
-  public addQueue(requestOptions : DemetraRequest) : void {
-    this.requestQueue.push(requestOptions)
+  public addQueue(requestOptions: DemetraRequest): void {
+    this.requestQueue.push(requestOptions);
   }
 
-  public clearQueue() : void {
-    this.requestQueue.length = 0
+  public clearQueue(): void {
+    this.requestQueue.length = 0;
   }
 
-  public async fetchQueue(sendModes : 'once' | 'simultaneously' | 'await' = 'once') : Promise<object> {
+  public async fetchQueue(
+    sendModes: 'once' | 'simultaneously' | 'await' = 'once'
+  ): Promise<object> {
     switch (sendModes) {
       case 'once':
-        return await this.sendOnce(this.requestQueue)
+        return this.sendOnce(this.requestQueue);
       case 'simultaneously':
-        return await this.sendSimultaneously(this.requestQueue);
+        return this.sendSimultaneously(this.requestQueue);
       case 'await':
-        return await this.sendAwait(this.requestQueue);
+        return this.sendAwait(this.requestQueue);
+      default:
+        return this.sendOnce(this.requestQueue);
     }
   }
 
-  public async fetchPage(id : string | number, options? : Partial<FetchPageOptions>) {
-    if (typeof options !== 'undefined' && typeof options.lang === 'undefined') options.lang = this.defaults.lang;
+  public async fetchPage(id: string | number, options?: Partial<FetchPageOptions>) : Promise<any[]> {
+    // @ts-ignore
+    if (isUndefined(options) && isUndefined(options.lang)) {
+      // @ts-ignore
+      options.lang = this.defaults.lang;
+    }
     const request = new DemetraRequest(Demetra.MODES.PAGE, id, options);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async fetchArchive(id : string, options? : Partial<FetchArchiveOptions>) {
+  public async fetchArchive(id: string, options?: Partial<FetchArchiveOptions>) {
     const request = new DemetraRequest(Demetra.MODES.ARCHIVE, id, options);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async fetchExtra(id : string, options? : Partial<FetchExtraOptions>) {
+  public async fetchExtra(id: string, options?: Partial<FetchExtraOptions>) {
     const request = new DemetraRequest(Demetra.MODES.EXTRA, id, options);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async fetchMenu(id: string, options? : Partial<FetchMenuOptions>) {
+  public async fetchMenu(id: string, options?: Partial<FetchMenuOptions>) {
     const request = new DemetraRequest(Demetra.MODES.MENU, id, options);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async fetchTaxonomy(id : string, options? : Partial<FetchTaxonomyOptions>) {
+  public async fetchTaxonomy(id: string, options?: Partial<FetchTaxonomyOptions>) {
     const request = new DemetraRequest(Demetra.MODES.TAXONOMY, id, options);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async send(id: number, recipients : string, data : FormData, options? : Partial<FetchSendOptions>) {
-    const urls : Array<string> = [];
+  public async send(
+    id: number,
+    recipients: string,
+    data: FormData,
+    options?: Partial<FetchSendOptions>
+  ) {
+    const urls: Array<string> = [];
 
     for (const [key, value] of Object.entries(data)) {
       if (isFile(value)) {
-        const uploadResponse = await this.upload(value);
+        const uploadResponse : Array<any> = await this.upload(value);
 
-        if (typeof uploadResponse !== 'object') { throw new Error('Invalid response. It mus be an object')}
-        if (!uploadResponse.hasOwnProperty('file')) { throw new Error('Invalid File Response') }
+        if (typeof uploadResponse !== 'object') {
+          throw new Error('Invalid response. It mus be an object');
+        }
+        if (!uploadResponse.hasOwnProperty('file')) {
+          throw new Error('Invalid File Response');
+        }
 
-        const url = (uploadResponse as any).file.url;
+        // @ts-ignore
+        const { url } = (uploadResponse).file;
+        // @ts-ignore
         data.delete(key);
         urls.push(url);
       }
     }
 
-    const request = new DemetraRequest(Demetra.MODES.EXTRA, id, {...options, ...data, recipients, urls});
+    const request = new DemetraRequest(Demetra.MODES.EXTRA, id, {
+      ...options,
+      ...data,
+      recipients,
+      urls,
+    });
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async subscribe(email: string) {
+  public async subscribe(email: string): Promise<Array<any>> {
     const request = new DemetraRequest(Demetra.MODES.SUBSCRIBE, email);
     const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.validateResponse(response);
   }
 
-  public async upload(files : File | Array<File>) {
-    if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
+  public async upload(file: File): Promise<Array<any>> {
+    if (isUndefined(this.options.uploadEndpoint))
+      throw new Error('No upload endpoint defined');
 
-    const fs = Array.isArray(files) ? files : [files];
+    const formData: FormData = new FormData();
+    formData.append('file', file);
 
-    const promises : Array<Promise<Response>> = fs.map((file : File) => {
-      const formData : FormData = new FormData();
-      formData.append('file', file);
-
-      const requestConfig : RequestInit = DemetraRequest.addConfig(formData);
-      return fetch(this.endpoint as RequestInfo, requestConfig);
-    });
-
-    const responses = await Promise.all(promises);
-    responses.forEach((response : Response) => {
-      this.debugLog(response);
-      this.handleError(response);
-    });
-
-    return responses.map((response : Response) => {
-      return this.validateResponse(response);
-    });
+    // @ts-ignore
+    const requestConfig: RequestInit = DemetraRequest.addConfig(formData);
+    const response = await fetch(this.endpoint, requestConfig);
+    return this.validateResponse(response);
   }
 
   /*
    * private function
    */
-  private async getResponse(request : DemetraRequest) : Promise<Response> {
-    let response : Response;
+  private async getResponse(request: DemetraRequest): Promise<Response> {
+    let response: Response | undefined;
 
     // check if cache is required
     if (request.localCache) {
-      // check if cache was instantiate
-      if (!this.cache) {
-        this.cache = new LRUCache(this.options.cacheMaxAge)
-      }
       // check if key exist
       if (this.cache.has(request.key)) {
-        response = this.cache.get(request.key)
+        console.log('se ha la key prende dalla cache');
+        response = this.cache.get(request.key);
+        console.log('la risposta dalla cache è: ', response);
       } else {
+        console.log('se non ha la fa la fetch');
         response = await fetch(this.endpoint, request.config);
-        this.cache.set(request.key, response)
+        this.cache.set(request.key, response);
       }
     } else {
       response = await fetch(this.endpoint, request.config);
     }
 
+    // @ts-ignore
     return response;
   }
 
-  private validate() : void {
+  private validate(): void {
     if (isEmpty(this.options.endpoint)) {
-      throw new Error('Endpoint cannot be undefined')
+      throw new Error('Endpoint cannot be undefined');
     }
 
     if (!validateUrl(this.options.endpoint)) {
@@ -190,84 +201,92 @@ class Demetra {
     }
   }
 
-  private async sendOnce(requestQueue : Array<DemetraRequest>) : Promise<object> {
-    const cachedData : Array<object> = [];
+  private async sendOnce(requestQueue: Array<DemetraRequest>): Promise<object> {
+    const cachedData: Array<object> = [];
 
-    const uncachedRequest : Array<DemetraRequest> = requestQueue.filter(request => {
+    const uncachedRequest: Array<DemetraRequest> = requestQueue.filter((request) => {
       if (!request.localCache) {
         return true;
-      } else {
-        if (!this.cache) {
-          this.cache = new LRUCache(this.options.cacheMaxAge)
-        }
-        if (this.cache.has(request.key)) {
-          cachedData.push(this.cache.get(request.key));
-          return false;
-        } else {
-          return true;
-        }
       }
-      })
+      if (this.cache.has(request.key)) {
+        // @ts-ignore
+        cachedData.push(this.cache.get(request.key));
+        return false;
+      } else {
+        return true;
+      }
+    });
 
-    const optionsQueue : Array<FetchOptions> = uncachedRequest.map(request => request.options);
-    const formData : FormData = serialize(optionsQueue, { indices: true, }, undefined, 'requests');
-    const requestConfig : RequestInit = DemetraRequest.addConfig(formData);
-    const response : Response = await fetch(this.endpoint as RequestInfo, requestConfig);
+    const optionsQueue: Array<FetchOptions> = uncachedRequest.map((request) => request.options);
+    // TODO: il form data va inserito all interno del demetra request in modo da eliminare la dipendenza da Demetra
+    // @ts-ignore
+    const formData: FormData = serialize(optionsQueue, { indices: true }, undefined, 'requests');
+    // @ts-ignore
+    const requestConfig: RequestInit = DemetraRequest.addConfig(formData);
+    const response: Response = await fetch(this.endpoint as RequestInfo, requestConfig);
 
-    const dataArray = await this.validateResponse(response)
-    if (!Array.isArray(dataArray)) { throw new Error('Invalid response. It mus be an array') }
+    const dataArray = await this.validateResponse(response);
+    if (!Array.isArray(dataArray)) {
+      throw new Error('Invalid response. It mus be an array');
+    }
 
-    uncachedRequest.forEach((request : DemetraRequest, index: number) => {
-      if (request.localCache) { this.cache.set(request.key, dataArray[index]) }
-    })
+    uncachedRequest.forEach((request: DemetraRequest, index: number) => {
+      if (request.localCache) {
+        // @ts-ignore
+        this.cache.set(request.key, dataArray[index]);
+      }
+    });
 
-    return dataArray.concat(cachedData)
+    // @ts-ignore
+    return dataArray.concat(cachedData);
   }
 
-  private async sendSimultaneously(requestQueue : Array<DemetraRequest>) : Promise<object> {
-    const promises : Array<Promise<Response>> = requestQueue.map((request) => {
+  private async sendSimultaneously(requestQueue: Array<DemetraRequest>): Promise<object> {
+    const promises: Array<Promise<Response>> = requestQueue.map((request) => {
       return this.getResponse(request);
-    })
+    });
 
-    const responseQueue : Response[] | void = await Promise.all(promises)
+    const responseQueue: Response[] | void = await Promise.all(promises);
 
-    const validResponseQueue : Array<Array<any>> = []
+    const validResponseQueue: Array<Array<any>> = [];
 
     for (const response of responseQueue) {
-      const validResponse = await this.validateResponse(response)
+      const validResponse = await this.validateResponse(response);
       if (Array.isArray(validResponse)) {
-        validResponseQueue.push(...validResponse)
+        // @ts-ignore
+        validResponseQueue.push(...validResponse);
       } else {
-        validResponseQueue.push(validResponse)
+        validResponseQueue.push(validResponse);
       }
     }
 
     return validResponseQueue;
   }
 
-  private async sendAwait(requestQueue : Array<DemetraRequest>) : Promise<any[]> {
-    const validResponseQueue : Array<Array<any>> = []
+  private async sendAwait(requestQueue: Array<DemetraRequest>): Promise<any[]> {
+    const validResponseQueue: Array<Array<any>> = [];
 
     for (const request of requestQueue) {
-      const response : Response = await this.getResponse(request)
-      const validResponse = await this.validateResponse(response)
+      const response: Response = await this.getResponse(request);
+      const validResponse = await this.validateResponse(response);
       if (Array.isArray(validResponse)) {
-        validResponseQueue.push(...validResponse)
+        // @ts-ignore
+        validResponseQueue.push(...validResponse);
       } else {
-        validResponseQueue.push(validResponse)
+        validResponseQueue.push(validResponse);
       }
     }
 
     return validResponseQueue;
   }
 
-  private debugLog(response : Response) {
+  private debugLog(response: Response) {
     if (this.options.debug) {
-      console.log(response)
-    };
+      console.log(response);
+    }
   }
 
-  private handleError(response : Response) {
+  private handleError(response: Response) {
     if (!response.ok) {
       if (this.options.debug) {
         console.error(`${response.status} - ${response.statusText}`);
@@ -276,28 +295,29 @@ class Demetra {
     }
   }
 
-  private async validateResponse(response : Response) : Promise<Array<any>> {
+  private async validateResponse(response: Response): Promise<Array<{ data: object, status: object }>> {
     this.debugLog(response);
-    this.handleError(response)
-    return await response.json();
+    this.handleError(response);
+    // TODO: return only data and not status
+    return response.json();
   }
 
   /*
    * getter & setter
    */
-  public get endpoint() : string {
+  public get endpoint(): string {
     return this.options.endpoint;
   }
 
-  public set endpoint(url : string) {
+  public set endpoint(url: string) {
     this.options.endpoint = url;
   }
 
-  public get lang() : string {
+  public get lang(): string {
     return this.options.lang;
   }
 
-  public set lang(lang : string) {
+  public set lang(lang: string) {
     this.options.lang = lang;
   }
 }

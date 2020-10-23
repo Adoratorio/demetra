@@ -10,15 +10,27 @@ interface Filter {
 }
 
 interface Siblings {
-  fields : Array<String>,
+  fields : Array<string>,
   next? : boolean,
   prev? : boolean,
   loop? : boolean,
 }
 
+export interface Cache {
+  wpCache : boolean,
+  localCache : boolean,
+}
+
+export interface Lang {
+  lang : string,
+  i18n?: boolean,
+}
+
 /*
  * global modes
  */
+// TODO: capire il disable
+// eslint-disable-next-line no-shadow
 export enum MODES {
   PAGE = 'page',
   ARCHIVE = 'archive',
@@ -65,7 +77,7 @@ export interface FetchTaxonomyOptions extends Cache, Lang {}
 
 export interface FetchSendOptions {
   recipients : string,
-  data : object,
+  data : Record<string, unknown>,
   urls? : Array<string>,
   localCache? : false,
 }
@@ -77,16 +89,6 @@ export interface FetchSubscribeOptions {
 export interface DemetraRequestGlobalOptions {
   id: string | number,
   mode: string,
-}
-
-export interface Cache {
-  wpCache : boolean,
-  localCache : boolean,
-}
-
-export interface Lang {
-  lang : string,
-  i18n?: boolean,
 }
 
 export type FetchOptions =  FetchPageOptions | FetchArchiveOptions | FetchExtraOptions | FetchMenuOptions | FetchTaxonomyOptions | FetchSendOptions | FetchSubscribeOptions;
@@ -112,4 +114,5 @@ export interface SerializeOptions {
   nullsAsUndefineds?: boolean,
   booleansAsIntegers?: boolean,
   allowEmptyArrays?: boolean,
-};
+}
+

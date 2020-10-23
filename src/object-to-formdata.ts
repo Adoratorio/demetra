@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { SerializeOptions } from './declarations';
 import {
   isUndefined,
@@ -10,7 +11,7 @@ import {
   isFile
 } from './validators'
 
-const serialize = (obj : object, cfg : SerializeOptions = {}, fd : FormData | undefined = new FormData(), pre : string = '') : FormData => {
+const serialize = (obj : Record<string, any> = {}, cfg : SerializeOptions = {}, fd : FormData | undefined = new FormData(), pre  = '') : FormData => {
   cfg.indices = isUndefined(cfg.indices) ? false : cfg.indices;
 
   cfg.nullsAsUndefineds = isUndefined(cfg.nullsAsUndefineds)
@@ -28,7 +29,8 @@ const serialize = (obj : object, cfg : SerializeOptions = {}, fd : FormData | un
 
   if (isUndefined(obj)) {
     return fd;
-  } else if (isNull(obj)) {
+  }
+  if (isNull(obj)) {
     if (!cfg.nullsAsUndefineds) {
       fd.append(pre, '');
     }
@@ -41,18 +43,17 @@ const serialize = (obj : object, cfg : SerializeOptions = {}, fd : FormData | un
   } else if (Array.isArray(obj)) {
     if (obj.length) {
       obj.forEach((value : any, index : number) => {
-        const key = pre + '[' + (cfg.indices ? index : '') + ']';
+        const key = `${pre  }[${  cfg.indices ? index : ''  }]`;
 
         serialize(value, cfg, fd, key);
       });
     } else if (cfg.allowEmptyArrays) {
-      fd.append(pre + '[]', '');
+      fd.append(`${pre  }[]`, '');
     }
   } else if (obj instanceof Date) {
     fd.append(pre, obj.toISOString());
   } else if (isObject(obj) && !isFile(obj) && !isBlob(obj)) {
     Object.keys(obj).forEach((prop) => {
-      // @ts-ignore
       const value = obj[prop];
 
       if (isArray(value)) {
@@ -61,7 +62,7 @@ const serialize = (obj : object, cfg : SerializeOptions = {}, fd : FormData | un
         }
       }
 
-      const key = pre ? pre + '[' + prop + ']' : prop;
+      const key = pre ? `${pre  }[${  prop  }]` : prop;
 
       serialize(value, cfg, fd, key);
     });

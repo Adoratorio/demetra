@@ -1,9 +1,14 @@
+/* eslint-disable */
 import md5 from 'md5';
 
 import DEFAULTS from './defaults';
 import serialize from './object-to-formdata';
 import { isUndefined } from './validators';
 import { DemetraRequestOptions, FetchOptions, MODES } from './declarations';
+
+if (!globalThis.FormData) {
+  globalThis.FormData = require('form-data');
+}
 
 class DemetraRequest {
   public readonly options: DemetraRequestOptions;
@@ -38,7 +43,7 @@ class DemetraRequest {
     }
   }
 
-  public get localCache(): Boolean {
+  public get localCache(): boolean {
     return this.options.localCache || false;
   }
 
