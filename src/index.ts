@@ -29,7 +29,7 @@ class Demetra {
   private readonly requestQueue : Array<DemetraRequest>;
   public static readonly MODES = MODES;
 
-  public defaults : DemetraOptions = {
+  private defaults : DemetraOptions = {
     endpoint: '',
     uploadEndpoint: '',
     site: 'default',
@@ -43,7 +43,7 @@ class Demetra {
     this.cache = null;
     this.requestQueue = [];
 
-    this.validate();
+    this.validateDemetra();
   }
 
   /*
@@ -71,32 +71,27 @@ class Demetra {
   public async fetchPage(id : string | number, options? : Partial<FetchPageOptions>) {
     if (typeof options !== 'undefined' && typeof options.lang === 'undefined') options.lang = this.defaults.lang;
     const request = new DemetraRequest(Demetra.MODES.PAGE, id, options);
-    const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.getResponse(request);
   }
 
   public async fetchArchive(id : string, options? : Partial<FetchArchiveOptions>) {
     const request = new DemetraRequest(Demetra.MODES.ARCHIVE, id, options);
-    const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return await this.getResponse(request);
   }
 
   public async fetchExtra(id : string, options? : Partial<FetchExtraOptions>) {
     const request = new DemetraRequest(Demetra.MODES.EXTRA, id, options);
-    const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.getResponse(request);
   }
 
   public async fetchMenu(id: string, options? : Partial<FetchMenuOptions>) {
     const request = new DemetraRequest(Demetra.MODES.MENU, id, options);
-    const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.getResponse(request);
   }
 
   public async fetchTaxonomy(id : string, options? : Partial<FetchTaxonomyOptions>) {
     const request = new DemetraRequest(Demetra.MODES.TAXONOMY, id, options);
-    const response = await this.getResponse(request);
-    return await this.validateResponse(response)
+    return this.getResponse(request);
   }
 
   public async send(id: number, recipients : string, data : FormData, options? : Partial<FetchSendOptions>) {
@@ -154,7 +149,7 @@ class Demetra {
    * private function
    */
   private async getResponse(request : DemetraRequest) : Promise<Response> {
-    let response : Response;
+    let jsonResponse : any;
 
     // check if cache is required
     if (request.localCache) {
@@ -164,19 +159,25 @@ class Demetra {
       }
       // check if key exist
       if (this.cache.has(request.key)) {
-        response = this.cache.get(request.key)
+        jsonResponse = this.cache.get(request.key)
+        console.log('response dalla cache', jsonResponse);
       } else {
-        response = await fetch(this.endpoint, request.config);
-        this.cache.set(request.key, response)
+        const response = await fetch(this.endpoint, request.config);
+        jsonResponse = await this.validateResponse(response);
+        this.cache.set(request.key, jsonResponse)
+        // TODO: in teroia devo mettere la value della cache come Response
       }
     } else {
-      response = await fetch(this.endpoint, request.config);
+      const response = await fetch(this.endpoint, request.config);
+      console.log('response', response);
+      jsonResponse = await this.validateResponse(response);
     }
 
-    return response;
+    console.log('jsonResponse', jsonResponse);
+    return jsonResponse;
   }
 
-  private validate() : void {
+  private validateDemetra() : void {
     if (isEmpty(this.options.endpoint)) {
       throw new Error('Endpoint cannot be undefined')
     }
@@ -191,7 +192,8 @@ class Demetra {
   }
 
   private async sendOnce(requestQueue : Array<DemetraRequest>) : Promise<object> {
-    const cachedData : Array<object> = [];
+    console.log('inizio di sendOnce');
+    const cachedData : Array<Response> = [];
 
     const uncachedRequest : Array<DemetraRequest> = requestQueue.filter(request => {
       if (!request.localCache) {
@@ -212,7 +214,7 @@ class Demetra {
     const optionsQueue : Array<FetchOptions> = uncachedRequest.map(request => request.options);
     const formData : FormData = serialize(optionsQueue, { indices: true, }, undefined, 'requests');
     const requestConfig : RequestInit = DemetraRequest.addConfig(formData);
-    const response : Response = await fetch(this.endpoint as RequestInfo, requestConfig);
+    const response : Response = await fetch(this.endpoint, requestConfig);
 
     const dataArray = await this.validateResponse(response)
     if (!Array.isArray(dataArray)) { throw new Error('Invalid response. It mus be an array') }
@@ -221,40 +223,31 @@ class Demetra {
       if (request.localCache) { this.cache.set(request.key, dataArray[index]) }
     })
 
+    console.log('fine di sendOnce');
     return dataArray.concat(cachedData)
   }
 
   private async sendSimultaneously(requestQueue : Array<DemetraRequest>) : Promise<object> {
+    console.log('inizio di sendSimultaneously');
     const promises : Array<Promise<Response>> = requestQueue.map((request) => {
       return this.getResponse(request);
     })
 
     const responseQueue : Response[] | void = await Promise.all(promises)
 
-    const validResponseQueue : Array<Array<any>> = []
-
-    for (const response of responseQueue) {
-      const validResponse = await this.validateResponse(response)
-      if (Array.isArray(validResponse)) {
-        validResponseQueue.push(...validResponse)
-      } else {
-        validResponseQueue.push(validResponse)
-      }
-    }
-
-    return validResponseQueue;
+    console.log('fine di sendSimultaneously');
+    return responseQueue;
   }
 
   private async sendAwait(requestQueue : Array<DemetraRequest>) : Promise<any[]> {
-    const validResponseQueue : Array<Array<any>> = []
+    const validResponseQueue : any = []
 
     for (const request of requestQueue) {
       const response : Response = await this.getResponse(request)
-      const validResponse = await this.validateResponse(response)
-      if (Array.isArray(validResponse)) {
-        validResponseQueue.push(...validResponse)
+      if (Array.isArray(response)) {
+        validResponseQueue.push(...response)
       } else {
-        validResponseQueue.push(validResponse)
+        validResponseQueue.push(response)
       }
     }
 
@@ -264,7 +257,7 @@ class Demetra {
   private debugLog(response : Response) {
     if (this.options.debug) {
       console.log(response)
-    };
+    }
   }
 
   private handleError(response : Response) {
