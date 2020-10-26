@@ -1,4 +1,5 @@
 /* eslint-disable */
+import FormData from 'form-data'
 import { SerializeOptions } from './declarations';
 import {
   isUndefined,

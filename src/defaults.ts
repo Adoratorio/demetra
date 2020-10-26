@@ -7,6 +7,7 @@ import {
   FetchSendOptions,
   Cache,
   Lang,
+  DemetraOptions,
 } from './declarations';
 
 const cache : Cache = {
@@ -54,13 +55,40 @@ const taxonomy : FetchTaxonomyOptions = {
   ...lang
 }
 
-const DEFAULTS = new Map();
-DEFAULTS.set('page', page);
-DEFAULTS.set('archive', archive);
-DEFAULTS.set('extra', extra);
-DEFAULTS.set('menu', menu);
-DEFAULTS.set('taxonomy', taxonomy);
-// DEFAULTS.set('send', send);
+/*
+ * global modes
+ */
+// eslint-disable-next-line no-shadow
+export enum WP_MODES {
+  PAGE = 'page',
+  ARCHIVE = 'archive',
+  EXTRA = 'extra',
+  MENU = 'menu',
+  TAXONOMY = 'taxonomy',
+  SEND = 'send',
+  SUBSCRIBE = 'subscribe',
+}
+
+export enum SEND_MODES {
+  'ONCE',
+  'SIMULTANEOUSLY',
+  'AWAIT'
+}
 
 
-export default DEFAULTS
+export const FETCH_OPTIONS = new Map();
+FETCH_OPTIONS.set(WP_MODES.PAGE, page);
+FETCH_OPTIONS.set(WP_MODES.ARCHIVE, archive);
+FETCH_OPTIONS.set(WP_MODES.EXTRA, extra);
+FETCH_OPTIONS.set(WP_MODES.MENU, menu);
+FETCH_OPTIONS.set(WP_MODES.TAXONOMY, taxonomy);
+// OPTIONS.set('send', send);
+
+export const DEMETRA_OPTIONS : DemetraOptions = {
+  endpoint: '',
+  uploadEndpoint: '',
+  site: 'default',
+  lang: 'en',
+  debug: false,
+  cacheMaxAge: 1000 * 60 * 60,
+}

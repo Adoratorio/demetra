@@ -1,14 +1,9 @@
-/* eslint-disable */
 import md5 from 'md5';
 
-import DEFAULTS from './defaults';
+import { FETCH_OPTIONS, WP_MODES } from './defaults';
 import serialize from './object-to-formdata';
 import { isUndefined } from './validators';
-import { DemetraRequestOptions, FetchOptions, MODES } from './declarations';
-
-if (!globalThis.FormData) {
-  globalThis.FormData = require('form-data');
-}
+import { DemetraRequestOptions, FetchOptions } from './declarations';
 
 class DemetraRequest {
   public readonly options: DemetraRequestOptions;
@@ -21,8 +16,12 @@ class DemetraRequest {
     };
   }
 
-  constructor(mode : MODES, id: number | string, options?: Partial<FetchOptions>) {
-    this.options = { ...DEFAULTS.get(mode), ...options };
+  public static serialize(options : DemetraRequestOptions[] | File | FileList): FormData {
+    return serialize(options, { indices: true }, undefined, 'requests') as unknown as FormData;
+  }
+
+  constructor(mode : WP_MODES, id: number | string, options?: Partial<FetchOptions>) {
+    this.options = { ...FETCH_OPTIONS.get(mode), ...options };
     this.options.id = id;
     this.options.mode = mode;
 
@@ -32,10 +31,6 @@ class DemetraRequest {
   private validate(): void {
     if (isUndefined(this.options.mode)) {
       throw new Error('Missing mode');
-    }
-
-    if (MODES.hasOwnProperty(this.options.mode)) {
-      throw new Error('Invalid mode');
     }
 
     if (isUndefined(this.options.id)) {
@@ -52,7 +47,7 @@ class DemetraRequest {
   }
 
   public get data(): FormData {
-    return serialize([this.options], { indices: true, }, undefined, 'requests');
+    return DemetraRequest.serialize([this.options])
   }
 
   public get config(): RequestInit {

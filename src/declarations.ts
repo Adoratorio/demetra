@@ -22,23 +22,8 @@ export interface Cache {
 }
 
 export interface Lang {
-  lang : string,
+  lang? : string,
   i18n?: boolean,
-}
-
-/*
- * global modes
- */
-// TODO: capire il disable
-// eslint-disable-next-line no-shadow
-export enum MODES {
-  PAGE = 'page',
-  ARCHIVE = 'archive',
-  EXTRA = 'extra',
-  MENU = 'menu',
-  TAXONOMY = 'taxonomy',
-  SEND = 'send',
-  SUBSCRIBE = 'subscribe',
 }
 
 /*
@@ -116,3 +101,9 @@ export interface SerializeOptions {
   allowEmptyArrays?: boolean,
 }
 
+/*
+ * JSON response
+ */
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type wpData = Array<{ status: { code: number, message: string, cache: boolean }, data: object}>

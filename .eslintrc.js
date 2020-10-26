@@ -12,6 +12,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
   ],
   rules: {
+    'no-param-reassign': 'off',
     'no-prototype-builtins': 'off',
     'no-await-in-loop': 'off',
     'import/extensions' : 'off',
