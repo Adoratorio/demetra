@@ -10,50 +10,50 @@ import {
   DemetraOptions,
 } from './declarations';
 
-const cache : Cache = {
+const cache: Cache = {
   wpCache: false,
   localCache: false,
-}
+};
 
-const lang : Lang = {
+const lang: Lang = {
   lang: 'en',
   i18n: true,
-}
+};
 
-const page : FetchPageOptions = {
+const page: FetchPageOptions = {
   type: 'page',
   siblings: {
     fields: [],
     prev: false,
     next: false,
-    loop: false
+    loop: false,
   },
   fields: [],
   ...cache,
-  ...lang
-}
+  ...lang,
+};
 
-const archive : FetchArchiveOptions = {
+const archive: FetchArchiveOptions = {
   fields: [],
   filters: [],
   ...cache,
-  ...lang
-}
+  ...lang,
+};
 
-const extra : FetchExtraOptions = {
+const extra: FetchExtraOptions = {
   ...cache,
-  ...lang
-}
+  ...lang,
+};
 
-const menu : FetchMenuOptions = {
+const menu: FetchMenuOptions = {
   ...cache,
-  ...lang
-}
+  ...lang,
+};
 
-const taxonomy : FetchTaxonomyOptions = {
+const taxonomy: FetchTaxonomyOptions = {
   ...cache,
-  ...lang
-}
+  ...lang,
+};
 
 /*
  * global modes
@@ -69,12 +69,12 @@ export enum WP_MODES {
   SUBSCRIBE = 'subscribe',
 }
 
+// eslint-disable-next-line no-shadow
 export enum SEND_MODES {
   'ONCE',
   'SIMULTANEOUSLY',
-  'AWAIT'
+  'AWAIT',
 }
-
 
 export const FETCH_OPTIONS = new Map();
 FETCH_OPTIONS.set(WP_MODES.PAGE, page);
@@ -84,11 +84,11 @@ FETCH_OPTIONS.set(WP_MODES.MENU, menu);
 FETCH_OPTIONS.set(WP_MODES.TAXONOMY, taxonomy);
 // OPTIONS.set('send', send);
 
-export const DEMETRA_OPTIONS : DemetraOptions = {
+export const DEMETRA_OPTIONS: DemetraOptions = {
   endpoint: '',
   uploadEndpoint: '',
   site: 'default',
   lang: 'en',
   debug: false,
   cacheMaxAge: 1000 * 60 * 60,
-}
+};

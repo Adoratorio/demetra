@@ -1,9 +1,9 @@
 import md5 from 'md5';
 
-import { FETCH_OPTIONS, WP_MODES } from './defaults';
 import serialize from './object-to-formdata';
 import { isUndefined } from './validators';
 import { DemetraRequestOptions, FetchOptions } from './declarations';
+import { FETCH_OPTIONS, WP_MODES } from './defaults';
 
 class DemetraRequest {
   public readonly options: DemetraRequestOptions;
@@ -47,6 +47,10 @@ class DemetraRequest {
   }
 
   public get data(): FormData {
+    if (Array.isArray(this.options)) {
+      return DemetraRequest.serialize(this.options)
+    }
+
     return DemetraRequest.serialize([this.options])
   }
 
