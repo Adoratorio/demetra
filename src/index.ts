@@ -2,7 +2,7 @@ import LRUCache from 'lru-cache';
 import fetch from 'cross-fetch';
 
 import DemetraRequest from './DemetraRequest';
-import { isEmpty, validateUrl } from './validators';
+import { validateUrl } from './validators';
 import { DEMETRA_OPTIONS, SEND_MODES, WP_MODES } from './defaults';
 import {
   DemetraOptions,
@@ -11,7 +11,7 @@ import {
   FetchMenuOptions,
   FetchPageOptions,
   FetchTaxonomyOptions,
-  wpData, DemetraRequestOptions,
+  WpData, DemetraRequestOptions,
 } from './declarations';
 
 class Demetra {
@@ -21,7 +21,7 @@ class Demetra {
 
   public static readonly SEND_MODES = SEND_MODES;
 
-  private static LRUCache: LRUCache<string, wpData> | undefined;
+  private static LRUCache: LRUCache<string, WpData> | undefined;
 
   private readonly requestQueue: Array<DemetraRequest>;
 
@@ -31,12 +31,15 @@ class Demetra {
     this.options = { ...Demetra.DEFAULT_OPTIONS, ...options };
     this.requestQueue = [];
 
-    this.validate();
+    if (this.options.endpoint.length <= 0 || !validateUrl(this.options.endpoint)) {
+      throw new Error('Invalid endpoint');
+    }
+
+    if (this.options.uploadEndpoint.length <= 0) {
+      this.options.uploadEndpoint = this.options.endpoint.replace('/api.php', '/upload.php');
+    }
   }
 
-  /*
-   * public function
-   */
   public addQueue(requestOptions: DemetraRequest): void {
     this.requestQueue.push(requestOptions);
   }
@@ -45,7 +48,6 @@ class Demetra {
     this.requestQueue.length = 0;
   }
 
-  // eslint-disable-next-line consistent-return
   public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<Array<object>> {
     if (sendModes === SEND_MODES.ONCE) {
       return this.sendOnce(this.requestQueue);
@@ -136,78 +138,55 @@ class Demetra {
   //   // return this.validateResponse(response); // TODO: REINSERIRE
   // }
 
-  /*
-   * private function
-   */
   private async getResponse(request: DemetraRequest): Promise<object> {
     let data;
 
-    // check if cache is required
     if (request.localCache) {
-      // check if key exist
-      if (this.cache.has(request.key)) {
-        data = this.cache.get(request.key);
+      // Required to check local cache
+      if (this.cache.has(request.hash)) {
+        // Return the cached response
+        data = this.cache.get(request.hash);
       } else {
         const response = await fetch(this.endpoint, request.config);
-        data = await this.getData(response)
-        this.cache.set(request.key, data[0]);
+        data = await this.getData(response);
+        this.cache.set(request.hash, data[0]); // Use data[0] 'cause we send only one request
       }
     } else {
+      // Local cache check is not required, send the request and return
+      // the parsed response body
       const response = await fetch(this.endpoint, request.config);
-      data = await this.getData(response)
+      data = await this.getData(response);
     }
 
-    if (typeof data === 'undefined') {
-      throw new Error('Empty or undefined data')
-    }
+    if (typeof data === 'undefined') throw new Error('Response body is unexpectedly empty');
 
-    if (Array.isArray(data)) {
-      return data[0].data
-    }
     return data;
   }
 
-  private validate(): void {
-    if (isEmpty(this.options.endpoint)) {
-      throw new Error('Endpoint cannot be undefined');
-    }
-
-    if (!validateUrl(this.options.endpoint)) {
-      throw new Error('Invalid endpoint');
-    }
-
-    if (isEmpty(this.options.uploadEndpoint)) {
-      this.options.uploadEndpoint = this.options.endpoint.replace('/api.php', '/upload.php');
-    }
-  }
-
   private async sendOnce(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
-    const cachedData: Array<object> = [];
+    // This will contains the already fetched data extrapolated from the local cache
+    const cachedData : Array<object> = [];
+    // This will contain all uncachable and all the uncached requests
+    const uncachedRequests : Array<DemetraRequest> = [];
 
-    const uncachedRequest = requestQueue.filter(async (request) => {
-      if (!request.localCache) {
-        return true;
+    for (const request of requestQueue) {
+      if (request.localCache && this.cache.has(request.hash)) {
+        cachedData.push(this.cache.get(request.hash) || {});
+      } else {
+        uncachedRequests.push(request);
       }
+    }
 
-      if (this.cache.has(request.key)) {
-        cachedData.push( await this.getResponse(request));
-        return false;
-      }
-
-      return true;
-
-    });
-
-    const optionsQueue: Array<DemetraRequestOptions> = uncachedRequest.map(request => request.options);
-    const formData = DemetraRequest.serialize(optionsQueue)
-    const requestConfig = DemetraRequest.addConfig(formData);
+    const optionsQueue: Array<DemetraRequestOptions> = uncachedRequests.map(request => request.options);
+    // Inject endpoint and all configuration taken from demetra instance options
+    const requestConfig = DemetraRequest.addConfig(JSON.stringify(optionsQueue));
     const response = await fetch(this.endpoint as RequestInfo, requestConfig);
-    const wpData = await this.getData(response)
+    const wpData = await this.getData(response);
 
-    const data = wpData.map(wp => wp.data)
+    const data = wpData.map(wp => wp.data);
 
-    uncachedRequest.forEach((request: DemetraRequest, index: number) => {
-      if (request.localCache) { this.cache.set(request.key, wpData[index]); }
+    uncachedRequests.forEach((request: DemetraRequest, index: number) => {
+      if (request.localCache) { this.cache.set(request.hash, wpData[index]); }
     });
 
     return data.concat(cachedData);
@@ -224,7 +203,6 @@ class Demetra {
   private async sendAwait(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
     const wpDataQueue = []
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const request of requestQueue) {
       wpDataQueue.push(await this.getResponse(request))
     }
@@ -246,16 +224,13 @@ class Demetra {
     }
   }
 
-  private async getData(response: Response) : Promise<Array<wpData>> {
+  private async getData(response: Response) : Promise<Array<WpData>> {
     this.debugLog(response);
     this.handleError(response);
     return response.json();
   }
 
-  /*
-   * getter & setter
-   */
-  private get cache(): LRUCache<string, wpData> {
+  private get cache(): LRUCache<string, WpData> {
     if (typeof Demetra.LRUCache === 'undefined') {
       return Demetra.LRUCache = new LRUCache(this.options.cacheMaxAge);
     } else {
@@ -271,13 +246,13 @@ class Demetra {
     this.options.endpoint = url;
   }
 
-  // public get lang(): string {
-  //   return this.options.lang;
-  // }
-  //
-  // public set lang(lang: string) {
-  //   this.options.lang = lang;
-  // }
+  public get lang(): string {
+    return this.options.lang;
+  }
+  
+  public set lang(lang: string) {
+    this.options.lang = lang;
+  }
 }
 
 export default Demetra;

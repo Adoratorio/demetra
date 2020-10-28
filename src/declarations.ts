@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
-
 interface Pagination {
   start: number;
   count: number;
@@ -28,9 +26,6 @@ export interface Lang {
   i18n?: boolean;
 }
 
-/*
- * Demetra instance options
- */
 export interface DemetraOptions {
   endpoint: string;
   uploadEndpoint: string;
@@ -40,9 +35,6 @@ export interface DemetraOptions {
   cacheMaxAge: number;
 }
 
-/*
- * Demetra fetch options
- */
 export interface FetchPageOptions extends Cache, Lang {
   type: string;
   siblings: Siblings;
@@ -87,9 +79,6 @@ export type FetchOptions =
   | FetchSendOptions
   | FetchSubscribeOptions;
 
-/*
- * DemetraRequest options
- */
 export type DemetraRequestPageOptions = DemetraRequestGlobalOptions & FetchPageOptions;
 export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchArchiveOptions;
 export type DemetraRequestExtraOptions = DemetraRequestGlobalOptions & FetchExtraOptions;
@@ -106,21 +95,7 @@ export type DemetraRequestOptions =
   | DemetraRequestTaxonomyOptions
   | DemetraRequestSendOptions;
 
-/*
- * object-to-form-data (Serialize)
- */
-export interface SerializeOptions {
-  indices?: boolean;
-  nullsAsUndefineds?: boolean;
-  booleansAsIntegers?: boolean;
-  allowEmptyArrays?: boolean;
-}
-
-/*
- * JSON response
- */
-
-export type wpData = {
+export type WpData = {
   status: {
     code: number;
     message: string;

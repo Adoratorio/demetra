@@ -1,14 +1,12 @@
 import md5 from 'md5';
 
-import serialize from './object-to-formdata';
-import { isUndefined } from './validators';
 import { DemetraRequestOptions, FetchOptions } from './declarations';
 import { FETCH_OPTIONS, WP_MODES } from './defaults';
 
 class DemetraRequest {
   public readonly options: DemetraRequestOptions;
 
-  public static addConfig(data: FormData): RequestInit {
+  public static addConfig(data: string): RequestInit {
     return {
       method: 'POST',
       mode: 'cors',
@@ -16,24 +14,14 @@ class DemetraRequest {
     };
   }
 
-  public static serialize(options : DemetraRequestOptions[] | File | FileList): FormData {
-    return serialize(options, { indices: true }, undefined, 'requests') as unknown as FormData;
-  }
-
   constructor(mode : WP_MODES, id: number | string, options?: Partial<FetchOptions>) {
-    this.options = { ...FETCH_OPTIONS.get(mode), ...options };
-    this.options.id = id;
-    this.options.mode = mode;
+    this.options = { ...FETCH_OPTIONS.get(mode), ...options, id, mode };
 
-    this.validate();
-  }
-
-  private validate(): void {
-    if (isUndefined(this.options.mode)) {
+    if (typeof this.options.mode === 'undefined') {
       throw new Error('Missing mode');
     }
 
-    if (isUndefined(this.options.id)) {
+    if (typeof this.options.id === 'undefined') {
       throw new Error('Missing id');
     }
   }
@@ -42,24 +30,20 @@ class DemetraRequest {
     return this.options.localCache || false;
   }
 
-  public get key(): string {
+  public get hash() : string {
     return md5(JSON.stringify(this.options));
   }
 
-  public get data(): FormData {
+  public get data() : string {
     if (Array.isArray(this.options)) {
-      return DemetraRequest.serialize(this.options)
+      return JSON.stringify([this.options]);
     }
 
-    return DemetraRequest.serialize([this.options])
+    return JSON.stringify(this.options);
   }
 
   public get config(): RequestInit {
-    return {
-      method: 'POST',
-      mode: 'cors',
-      body: this.data,
-    };
+    return DemetraRequest.addConfig(this.data);
   }
 }
 
