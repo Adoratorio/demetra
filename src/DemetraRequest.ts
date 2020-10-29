@@ -6,7 +6,9 @@ import { FETCH_OPTIONS, WP_MODES } from './defaults';
 class DemetraRequest {
   public readonly options: DemetraRequestOptions;
 
-  public static addConfig(data: string): RequestInit {
+  private md5: string | undefined;
+
+  public static addConfig(data: string | FormData): RequestInit {
     return {
       method: 'POST',
       mode: 'cors',
@@ -16,6 +18,7 @@ class DemetraRequest {
 
   constructor(mode : WP_MODES, id: number | string, options?: Partial<FetchOptions>) {
     this.options = { ...FETCH_OPTIONS.get(mode), ...options, id, mode };
+    this.md5 = undefined;
 
     if (typeof this.options.mode === 'undefined') {
       throw new Error('Missing mode');
@@ -31,7 +34,11 @@ class DemetraRequest {
   }
 
   public get hash() : string {
-    return md5(JSON.stringify(this.options));
+    if (typeof this.md5 === 'undefined') {
+      return this.md5 = md5(JSON.stringify(this.options));
+    } else {
+      return this.md5
+    }
   }
 
   public get data() : string {

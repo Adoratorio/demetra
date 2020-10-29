@@ -89,54 +89,58 @@ class Demetra {
     return this.getResponse(request);
   }
 
-  // public async send(id: number, recipients: string, data: FormData, options?: Partial<FetchSendOptions>) {
-  //   const urls: Array<string> = [];
-  //
-  //   for (const [key, value] of Object.entries(data)) {
-  //     if (isFile(value)) {
-  //       const uploadResponse : Array<any> = await this.upload(value);
-  //
-  //       if (typeof uploadResponse !== 'object') {
-  //         throw new Error('Invalid response. It mus be an object');
-  //       }
-  //       if (!uploadResponse.hasOwnProperty('file')) {
-  //         throw new Error('Invalid File Response');
-  //       }
-  //
-  //       const { url } = (uploadResponse).file;
-  //       data.delete(key);
-  //       urls.push(url);
-  //     }
-  //   }
-  //
-  //   const request = new DemetraRequest(Demetra.WP_MODES.EXTRA, id, {
-  //     ...options,
-  //     ...data,
-  //     recipients,
-  //     urls,
-  //   });
-  //   return this.getResponse(request);
-  // }
-
   public async subscribe(email: string): Promise<object> {
     const request = new DemetraRequest(Demetra.WP_MODES.SUBSCRIBE, email);
     return this.getResponse(request);
   }
 
-  // TODO: SICURAMENTE L UPLOAD ERA SBAGLIATO PERCHè CARICA SOLO UN FILE ALLA VOLTA E NON IL FILE LIST
-  // public async upload(file: File): Promise<Array<any>> {
-  //   if (isUndefined(this.options.uploadEndpoint))
-  //     throw new Error('No upload endpoint defined');
-  //
-  //   const formData: FormData = new FormData();
-  //   formData.append('file', file);
-  //
-  //   DemetraRequest.serialize(file)
-  //
-  //   const requestConfig: RequestInit = DemetraRequest.addConfig(formData);
-  //   const response = await fetch(this.endpoint, requestConfig);
-  //   // return this.validateResponse(response); // TODO: REINSERIRE
-  // }
+  public async send(id: number, recipients: string, data: Record<string, unknown>): Promise<object> {
+    let urls: Array<string> = []
+    const attachments: Array<File> = [];
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value instanceof File) {
+        attachments.push(value)
+        delete data[key]
+      }
+    })
+
+    if (attachments.length > 0) {
+      const uploadResponse: Array<object> = await this.upload(attachments);
+
+      uploadResponse.forEach((url) => {
+        if (typeof url !== 'object') {
+          throw new Error('Invalid response. It mus be an object');
+        }
+        if (!url.hasOwnProperty('file')) {
+          throw new Error('Invalid File Response');
+        }
+        // TODO: REMOVE
+        // @ts-ignore
+        urls.push(url.file.url)
+      });
+    }
+
+    const request = new DemetraRequest(Demetra.WP_MODES.SEND, id, { data, recipients, urls, });
+    return this.getResponse(request);
+  }
+
+  public async upload(files : Array<File> | File) : Promise<Array<object>> {
+    if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
+    files = Array.isArray(files) ? files : [files];
+
+    const promises = files.map((file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return fetch(this.options.uploadEndpoint, DemetraRequest.addConfig(formData));
+    });
+
+    const responses = await Promise.all(promises);
+
+    return responses.map((response) => {
+      return this.getData(response)
+    });
+  }
 
   private async getResponse(request: DemetraRequest): Promise<object> {
     let data;
@@ -164,18 +168,18 @@ class Demetra {
   }
 
   private async sendOnce(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
-    // This will contains the already fetched data extrapolated from the local cache
-    const cachedData : Array<object> = [];
-    // This will contain all uncachable and all the uncached requests
+    // This will contains the already fetched data extrapolated from the local cache and the original array index
+    const cachedDates : Array<{ index: number, data: object }> = [];
+    // This will contain all un-cacheable and all the uncached requests
     const uncachedRequests : Array<DemetraRequest> = [];
 
-    for (const request of requestQueue) {
+    requestQueue.forEach((request, index) => {
       if (request.localCache && this.cache.has(request.hash)) {
-        cachedData.push(this.cache.get(request.hash) || {});
+        cachedDates.push({ index, data: this.cache.get(request.hash) || {} });
       } else {
         uncachedRequests.push(request);
       }
-    }
+    })
 
     const optionsQueue: Array<DemetraRequestOptions> = uncachedRequests.map(request => request.options);
     // Inject endpoint and all configuration taken from demetra instance options
@@ -189,7 +193,13 @@ class Demetra {
       if (request.localCache) { this.cache.set(request.hash, wpData[index]); }
     });
 
-    return data.concat(cachedData);
+
+    // merge cached data with fetch data in the original index
+    cachedDates.forEach(cachedData => {
+      data.splice(cachedData.index, 0, cachedData.data)
+    })
+
+    return data;
   }
 
   private async sendSimultaneously(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
@@ -246,10 +256,18 @@ class Demetra {
     this.options.endpoint = url;
   }
 
+  public get uploadEndpoint(): string {
+    return this.options.uploadEndpoint;
+  }
+
+  public set uploadEndpoint(url: string) {
+    this.options.uploadEndpoint = url;
+  }
+
   public get lang(): string {
     return this.options.lang;
   }
-  
+
   public set lang(lang: string) {
     this.options.lang = lang;
   }
