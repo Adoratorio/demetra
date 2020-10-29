@@ -1,35 +1,32 @@
 import LRUCache from 'lru-cache';
-import fetch from 'cross-fetch';
-
-import DemetraRequest from './DemetraRequest';
+import fetch, { Headers, Request } from 'cross-fetch';
 import { validateUrl } from './validators';
-import { DEMETRA_OPTIONS, SEND_MODES, WP_MODES } from './defaults';
-import {
-  DemetraOptions,
-  FetchArchiveOptions,
-  FetchExtraOptions,
-  FetchMenuOptions,
-  FetchPageOptions,
-  FetchTaxonomyOptions,
-  WpData, DemetraRequestOptions,
-} from './declarations';
+import { DemetraOptions, SEND_MODES, WpData } from './declarations';
+import DemetraRequest from './Requests/DemetraRequest';
+import DemetraQueue from './Requests/DemetraQueue';
+import DemetraRequestPage from './Requests/DemetraRequestPage';
+import DemetraRequestArchive from './Requests/DemetraRequestArchive';
+import DemetraRequestExtra from './Requests/DemetraRequestExtra';
 
 class Demetra {
-  private static readonly DEFAULT_OPTIONS = DEMETRA_OPTIONS;
-
-  public static readonly WP_MODES = WP_MODES;
-
   public static readonly SEND_MODES = SEND_MODES;
-
-  private static LRUCache: LRUCache<string, WpData> | undefined;
-
-  private readonly requestQueue: Array<DemetraRequest>;
-
-  private options: DemetraOptions;
+  private readonly cache : LRUCache<string, WpData>;
+  private readonly queue : DemetraQueue;
+  private options : DemetraOptions;
 
   constructor(options: Partial<DemetraOptions> = {}) {
-    this.options = { ...Demetra.DEFAULT_OPTIONS, ...options };
-    this.requestQueue = [];
+    const defaults : DemetraOptions = {
+      endpoint: '',
+      uploadEndpoint: '',
+      site: 'default',
+      lang: 'en',
+      debug: false,
+      version : 2,
+      cacheMaxAge: 1000 * 60 * 60,
+    }
+    this.options = { ...defaults, ...options };
+    this.queue = new DemetraQueue;
+    this.cache = new LRUCache(this.options.cacheMaxAge);
 
     if (this.options.endpoint.length <= 0 || !validateUrl(this.options.endpoint)) {
       throw new Error('Invalid endpoint');
@@ -40,43 +37,55 @@ class Demetra {
     }
   }
 
-  public addQueue(requestOptions: DemetraRequest): void {
-    this.requestQueue.push(requestOptions);
-  }
-
-  public clearQueue(): void {
-    this.requestQueue.length = 0;
-  }
-
   public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<Array<object>> {
     if (sendModes === SEND_MODES.ONCE) {
-      return this.sendOnce(this.requestQueue);
+      return this.sendOnce(this.queue);
     }
 
     if (sendModes === SEND_MODES.SIMULTANEOUSLY) {
-      return this.sendSimultaneously(this.requestQueue);
+      return this.sendSimultaneously(this.queue);
     }
 
     if (sendModes === SEND_MODES.AWAIT) {
-      return this.sendAwait(this.requestQueue);
+      return this.sendAwait(this.queue);
     }
 
     throw new Error('Invalid SEND_MODES')
   }
 
-  public async fetchPage(id: string | number, options?: Partial<FetchPageOptions>): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.PAGE, id, options);
-    return this.getResponse(request);
+  public async fetchPage(id: string | number, request?: Partial<DemetraRequestPage>) : Promise<WpData> {
+    const params = new DemetraRequestPage(id, request);
+    return await this.fetch(params);
   }
 
-  public async fetchArchive(id: string, options?: Partial<FetchArchiveOptions>): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.ARCHIVE, id, options);
-    return this.getResponse(request);
+  public async fetchArchive(id: string, request?: Partial<DemetraRequestArchive>): Promise<object> {
+    const params = new DemetraRequestArchive(id, request);
+    return await this.fetch(params);
   }
 
-  public async fetchExtra(id: string, options?: Partial<FetchExtraOptions>): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.EXTRA, id, options);
-    return this.getResponse(request);
+  public async fetchExtra(id: string, request?: Partial<DemetraRequestExtra>): Promise<object> {
+    const params = new DemetraRequestExtra(id, request);
+    return await this.fetch(params);
+  }
+
+  private async fetch(params : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra) : Promise<WpData> {
+    // Controllo local cache
+    const requests = new Array();
+    requests.push(params);
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    const request = new Request(this.options.endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ requests }),
+    });
+    const response = await fetch(request);
+    const json : Array<WpData> = await response.json() as Array<WpData>;
+    json.forEach((reponse) => {
+      this.debugLog(response);
+      this.handleError(response);
+    });
+    return json[0];
   }
 
   public async fetchMenu(id: string, options?: Partial<FetchMenuOptions>): Promise<object> {
@@ -238,14 +247,6 @@ class Demetra {
     this.debugLog(response);
     this.handleError(response);
     return response.json();
-  }
-
-  private get cache(): LRUCache<string, WpData> {
-    if (typeof Demetra.LRUCache === 'undefined') {
-      return Demetra.LRUCache = new LRUCache(this.options.cacheMaxAge);
-    } else {
-      return Demetra.LRUCache
-    }
   }
 
   public get endpoint(): string {
