@@ -121,11 +121,17 @@ class Demetra {
              DemetraRequestArchive |
              DemetraRequestExtra |
              DemetraRequestMenu |
-             DemetraRequestTaxonomy | 
-             DemetraRequestSubscribe |
-             DemetraRequestSend
+             DemetraRequestTaxonomy |
+             DemetraRequestSend |
+             DemetraRequestSubscribe
   ) : Promise<WpData> {
     // Controllo local cache
+    if ((params as any).localCache && this.cache.has(params.hash)) {
+      const cached = this.cache.get(params.hash);
+      if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
+      return cached;
+    }
+
     const requests = new Array();
     requests.push(params);
     const headers = new Headers();
@@ -141,6 +147,10 @@ class Demetra {
       this.debugLog(response);
       this.handleError(response);
     });
+
+    if ((params as any).localCache) {
+      this.cache.set(params.hash, json[0]);
+    }
     return json[0];
   }
 
@@ -148,20 +158,14 @@ class Demetra {
     if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
     files = Array.isArray(files) ? files : [files];
 
-    const responses : Array<Promise<Response>> = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    const responses : Array<Promise<Response>> = files.map((file) => {
       const formData = new FormData();
       formData.append('file', file);
       const request = new Request(this.options.uploadEndpoint, { method: 'POST', body: formData });
-      responses.push(fetch(request));
-    }
+      return fetch(request);
+    });
     const promisesResponses = await Promise.all(responses);
-    const jsons : Array<Promise<WpFile>> = [];
-    for (let i = 0; i < promisesResponses.length; i++) {
-      const response = promisesResponses[i];
-      jsons.push(response.json());
-    }
+    const jsons : Array<Promise<WpFile>> = promisesResponses.map(response => response.json());
     return Promise.all(jsons);
   }
 
@@ -169,9 +173,14 @@ class Demetra {
     // This will contains the already fetched data extrapolated from the local cache and the original array index
     const cachedDates : Array<{ index: number, data: object }> = [];
     // This will contain all un-cacheable and all the uncached requests
-    const uncachedRequests : Array<DemetraRequest> = [];
+    const uncachedRequests : Array<
+      DemetraRequestPage |
+      DemetraRequestArchive |
+      DemetraRequestExtra |
+      DemetraRequestTaxonomy
+    > = [];
 
-    requestQueue.forEach((request, index) => {
+    this.queue.requests.forEach((request, index) => {
       if (request.localCache && this.cache.has(request.hash)) {
         cachedDates.push({ index, data: this.cache.get(request.hash) || {} });
       } else {
@@ -179,25 +188,24 @@ class Demetra {
       }
     })
 
-    const optionsQueue: Array<DemetraRequestOptions> = uncachedRequests.map(request => request.options);
     // Inject endpoint and all configuration taken from demetra instance options
-    const requestConfig = DemetraRequest.addConfig(JSON.stringify(optionsQueue));
-    const response = await fetch(this.endpoint as RequestInfo, requestConfig);
-    const wpData = await this.getData(response);
+    const requests = new Array();
+    requests.push(uncachedRequests);
+    const request = new Request(this.endpoint, { method: 'POST', body: JSON.stringify({ requests }) });
+    const response = await fetch(request);
+    const responses = await response.json();
 
-    const data = wpData.map(wp => wp.data);
-
-    uncachedRequests.forEach((request: DemetraRequest, index: number) => {
-      if (request.localCache) { this.cache.set(request.hash, wpData[index]); }
+    uncachedRequests.forEach((request, index) => {
+      if (request.localCache) { this.cache.set(request.hash, responses[index]); }
     });
 
 
-    // merge cached data with fetch data in the original index
-    cachedDates.forEach(cachedData => {
-      data.splice(cachedData.index, 0, cachedData.data)
-    })
+    // Merge cached data with fetch data in the original index
+    cachedDates.forEach((cachedData) => {
+      responses.splice(cachedData.index, 0, cachedData.data)
+    });
 
-    return data;
+    return responses;
   }
 
   private async sendSimultaneously(): Promise<Array<WpData>> {

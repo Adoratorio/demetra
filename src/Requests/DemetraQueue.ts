@@ -1,6 +1,6 @@
-import DemetraRequest from "./DemetraRequest";
 import DemetraRequestArchive from "./DemetraRequestArchive";
 import DemetraRequestExtra from "./DemetraRequestExtra";
+import DemetraRequestMenu from "./DemetraRequestMenu";
 import DemetraRequestPage from "./DemetraRequestPage";
 import DemetraRequestTaxonomy from "./DemetraRequestTaxonomy";
 
@@ -14,7 +14,7 @@ class DemetraQueue {
 
   constructor() {}
 
-  add(request : DemetraRequest) {
+  add(request : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra | DemetraRequestMenu | DemetraRequestTaxonomy) {
     this.requests.push(request);
   }
 

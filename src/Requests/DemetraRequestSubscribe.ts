@@ -1,5 +1,5 @@
 import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestSubscribeOptions, WP_MODES } from "../declarations";
+import { WP_MODES } from "../declarations";
 
 class DemetraRequestSubscribe extends DemetraRequest {
   public email : string = '';
