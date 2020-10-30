@@ -236,8 +236,9 @@ class Demetra {
     if (response.status.code !== 200) {
       if (!this.options.debug) {
         console.warn(`${response.status} - ${response.status.message}`);
+      } else {
+        throw new Error(`${response.status} - ${response.status.message}`);
       }
-      throw new Error(`${response.status} - ${response.status.message}`);
     }
   }
 
