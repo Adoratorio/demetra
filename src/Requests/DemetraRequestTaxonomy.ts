@@ -2,13 +2,22 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestTaxonomyOptions, WP_MODES } from "../declarations";
 
 class DemetraRequestTaxonomy extends DemetraRequest {
-  public wpCache : boolean = true;
-  public localCache : boolean = true;
+  public wpCache : boolean;
+  public localCache : boolean;
 
-  constructor(options : DemetraRequestTaxonomyOptions) {
-    super(WP_MODES.TAXONOMY, options.id, options.lang, options.site, options.version);
-    this.wpCache = options.wpCache;
-    this.localCache = options.localCache;
+  constructor(
+    id : string | number,
+    options? : Partial<DemetraRequestTaxonomyOptions>,
+    lang? : string,
+    site? : string,
+    version? : number,
+  ) {
+    super(WP_MODES.TAXONOMY, id, lang, site, version);
+
+    if (typeof options === 'undefined') options = {};
+
+    this.wpCache = options.wpCache        || true;
+    this.localCache = options.localCache  || false;
   }
 }
 

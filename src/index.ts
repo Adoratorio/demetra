@@ -1,12 +1,16 @@
 import LRUCache from 'lru-cache';
 import fetch, { Headers, Request } from 'cross-fetch';
 import { validateUrl } from './validators';
-import { DemetraOptions, SEND_MODES, WpData } from './declarations';
+import { DemetraOptions, SEND_MODES, WpData, WpFile } from './declarations';
 import DemetraRequest from './Requests/DemetraRequest';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestArchive from './Requests/DemetraRequestArchive';
 import DemetraRequestExtra from './Requests/DemetraRequestExtra';
+import DemetraRequestMenu from './Requests/DemetraRequestMenu';
+import DemetraRequestTaxonomy from './Requests/DemetraRequestTaxonomy';
+import DemetraRequestSend from './Requests/DemetraRequestSend';
+import DemetraRequestSubscribe from './Requests/DemetraRequestSubscribe';
 
 class Demetra {
   public static readonly SEND_MODES = SEND_MODES;
@@ -39,36 +43,88 @@ class Demetra {
 
   public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<Array<object>> {
     if (sendModes === SEND_MODES.ONCE) {
-      return this.sendOnce(this.queue);
+      return this.sendOnce();
     }
 
     if (sendModes === SEND_MODES.SIMULTANEOUSLY) {
-      return this.sendSimultaneously(this.queue);
+      return this.sendSimultaneously();
     }
 
     if (sendModes === SEND_MODES.AWAIT) {
-      return this.sendAwait(this.queue);
+      return this.sendConsequentially();
     }
 
     throw new Error('Invalid SEND_MODES')
   }
 
   public async fetchPage(id: string | number, request?: Partial<DemetraRequestPage>) : Promise<WpData> {
-    const params = new DemetraRequestPage(id, request);
-    return await this.fetch(params);
+    const params = new DemetraRequestPage(id, request, this.options.lang, this.options.site, this.options.version);
+    return this.fetch(params);
   }
 
-  public async fetchArchive(id: string, request?: Partial<DemetraRequestArchive>): Promise<object> {
-    const params = new DemetraRequestArchive(id, request);
-    return await this.fetch(params);
+  public async fetchArchive(id: string, request?: Partial<DemetraRequestArchive>): Promise<WpData> {
+    const params = new DemetraRequestArchive(id, request, this.options.lang, this.options.site, this.options.version);
+    return this.fetch(params);
   }
 
-  public async fetchExtra(id: string, request?: Partial<DemetraRequestExtra>): Promise<object> {
-    const params = new DemetraRequestExtra(id, request);
-    return await this.fetch(params);
+  public async fetchExtra(id: string, request?: Partial<DemetraRequestExtra>): Promise<WpData> {
+    const params = new DemetraRequestExtra(id, request, this.options.lang, this.options.site, this.options.version);
+    return this.fetch(params);
   }
 
-  private async fetch(params : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra) : Promise<WpData> {
+  public async fetchMenu(id: string, request?: Partial<DemetraRequestMenu>): Promise<WpData> {
+    const params = new DemetraRequestMenu(id, request, this.options.lang, this.options.site, this.options.version);
+    return this.fetch(params);
+  }
+
+  public async fetchTaxonomy(id: string, request?: Partial<DemetraRequestTaxonomy>): Promise<WpData> {
+    const params = new DemetraRequestTaxonomy(id, request, this.options.lang, this.options.site, this.options.version);
+    return this.fetch(params);
+  }
+
+  public async subscribe(email: string): Promise<WpData> {
+    const params = new DemetraRequestSubscribe(email, this.options.version);
+    return this.fetch(params);
+  }
+
+  public async send(id: number, recipients : string, data : object, files? : Array<File>): Promise<WpData> {
+    let urls: Array<string> = [];
+
+    if (files && files.length > 0) {
+      const uploadResponses: Array<WpFile> = await this.upload(files);
+
+      uploadResponses.forEach((file) => {
+        if (typeof file !== 'object') {
+          throw new Error('Invalid response. It mus be an object');
+        }
+        if (!file.hasOwnProperty('file')) {
+          throw new Error('Invalid File Response');
+        }
+        urls.push(file.data.url);
+      });
+    }
+
+    const params = new DemetraRequestSend(
+      id,
+      recipients,
+      data,
+      urls,
+      this.options.lang,
+      this.options.site,
+      this.options.version
+    );
+    return this.fetch(params);
+  }
+
+  private async fetch(
+    params : DemetraRequestPage |
+             DemetraRequestArchive |
+             DemetraRequestExtra |
+             DemetraRequestMenu |
+             DemetraRequestTaxonomy | 
+             DemetraRequestSubscribe |
+             DemetraRequestSend
+  ) : Promise<WpData> {
     // Controllo local cache
     const requests = new Array();
     requests.push(params);
@@ -88,95 +144,28 @@ class Demetra {
     return json[0];
   }
 
-  public async fetchMenu(id: string, options?: Partial<FetchMenuOptions>): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.MENU, id, options);
-    return this.getResponse(request);
-  }
-
-  public async fetchTaxonomy(id: string, options?: Partial<FetchTaxonomyOptions>): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.TAXONOMY, id, options);
-    return this.getResponse(request);
-  }
-
-  public async subscribe(email: string): Promise<object> {
-    const request = new DemetraRequest(Demetra.WP_MODES.SUBSCRIBE, email);
-    return this.getResponse(request);
-  }
-
-  public async send(id: number, recipients: string, data: Record<string, unknown>): Promise<object> {
-    let urls: Array<string> = []
-    const attachments: Array<File> = [];
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value instanceof File) {
-        attachments.push(value)
-        delete data[key]
-      }
-    })
-
-    if (attachments.length > 0) {
-      const uploadResponse: Array<object> = await this.upload(attachments);
-
-      uploadResponse.forEach((url) => {
-        if (typeof url !== 'object') {
-          throw new Error('Invalid response. It mus be an object');
-        }
-        if (!url.hasOwnProperty('file')) {
-          throw new Error('Invalid File Response');
-        }
-        // TODO: REMOVE
-        // @ts-ignore
-        urls.push(url.file.url)
-      });
-    }
-
-    const request = new DemetraRequest(Demetra.WP_MODES.SEND, id, { data, recipients, urls, });
-    return this.getResponse(request);
-  }
-
-  public async upload(files : Array<File> | File) : Promise<Array<object>> {
+  public async upload(files : Array<File> | File) : Promise<Array<WpFile>> {
     if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
     files = Array.isArray(files) ? files : [files];
 
-    const promises = files.map((file) => {
+    const responses : Array<Promise<Response>> = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const formData = new FormData();
       formData.append('file', file);
-      return fetch(this.options.uploadEndpoint, DemetraRequest.addConfig(formData));
-    });
-
-    const responses = await Promise.all(promises);
-
-    return responses.map((response) => {
-      return this.getData(response)
-    });
-  }
-
-  private async getResponse(request: DemetraRequest): Promise<object> {
-    let data;
-
-    if (request.localCache) {
-      // Required to check local cache
-      if (this.cache.has(request.hash)) {
-        // Return the cached response
-        data = this.cache.get(request.hash);
-      } else {
-        const response = await fetch(this.endpoint, request.config);
-        data = await this.getData(response);
-        this.cache.set(request.hash, data[0]); // Use data[0] 'cause we send only one request
-      }
-    } else {
-      // Local cache check is not required, send the request and return
-      // the parsed response body
-      const response = await fetch(this.endpoint, request.config);
-      data = await this.getData(response);
+      const request = new Request(this.options.uploadEndpoint, { method: 'POST', body: formData });
+      responses.push(fetch(request));
     }
-
-    if (typeof data === 'undefined') throw new Error('Response body is unexpectedly empty');
-
-    return data;
+    const promisesResponses = await Promise.all(responses);
+    const jsons : Array<Promise<WpFile>> = [];
+    for (let i = 0; i < promisesResponses.length; i++) {
+      const response = promisesResponses[i];
+      jsons.push(response.json());
+    }
+    return Promise.all(jsons);
   }
 
-  private async sendOnce(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
+  private async sendOnce(): Promise<Array<object>> {
     // This will contains the already fetched data extrapolated from the local cache and the original array index
     const cachedDates : Array<{ index: number, data: object }> = [];
     // This will contain all un-cacheable and all the uncached requests
@@ -211,21 +200,17 @@ class Demetra {
     return data;
   }
 
-  private async sendSimultaneously(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
-    const promises: Array<Promise<object>> = requestQueue.map((request) => {
-      return this.getResponse(request);
-    });
-
+  private async sendSimultaneously(): Promise<Array<WpData>> {
+    const promises: Array<Promise<WpData>> = this.queue.requests.map(request => this.fetch(request));
     return Promise.all(promises);
   }
 
-  private async sendAwait(requestQueue: Array<DemetraRequest>): Promise<Array<object>> {
-    const wpDataQueue = []
-
-    for (const request of requestQueue) {
-      wpDataQueue.push(await this.getResponse(request))
+  private async sendConsequentially(): Promise<Array<WpData>> {
+    const responses : Array<WpData> = [];
+    for (const request of this.queue.requests) {
+      responses.push(await this.fetch(request));
     }
-    return wpDataQueue
+    return responses;
   }
 
   private debugLog(response: Response) {
@@ -243,11 +228,7 @@ class Demetra {
     }
   }
 
-  private async getData(response: Response) : Promise<Array<WpData>> {
-    this.debugLog(response);
-    this.handleError(response);
-    return response.json();
-  }
+  // Getters and setters
 
   public get endpoint(): string {
     return this.options.endpoint;

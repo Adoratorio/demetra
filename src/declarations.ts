@@ -93,8 +93,6 @@ export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchAr
 export type DemetraRequestExtraOptions = DemetraRequestGlobalOptions & FetchExtraOptions;
 export type DemetraRequestMenuOptions = DemetraRequestGlobalOptions & FetchMenuOptions;
 export type DemetraRequestTaxonomyOptions = DemetraRequestGlobalOptions & FetchTaxonomyOptions;
-export type DemetraRequestSendOptions = DemetraRequestGlobalOptions & FetchSendOptions;
-export type DemetraRequestSubscribeOptions = DemetraRequestGlobalOptions & FetchSubscribeOptions;
 
 export type WpData = {
   status: {
@@ -103,4 +101,15 @@ export type WpData = {
     cache: boolean;
   };
   data: object;
+};
+
+export type WpFile = {
+  status: {
+    code: number;
+    message: string;
+  };
+  data: {
+    uploadId : number,
+    url : string,
+  };
 };

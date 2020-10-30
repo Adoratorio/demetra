@@ -1,7 +1,16 @@
 import DemetraRequest from "./DemetraRequest";
+import DemetraRequestArchive from "./DemetraRequestArchive";
+import DemetraRequestExtra from "./DemetraRequestExtra";
+import DemetraRequestPage from "./DemetraRequestPage";
+import DemetraRequestTaxonomy from "./DemetraRequestTaxonomy";
 
 class DemetraQueue {
-  private readonly requests : Array<DemetraRequest> = [];
+  public readonly requests : Array<
+    DemetraRequestPage |
+    DemetraRequestArchive |
+    DemetraRequestExtra |
+    DemetraRequestTaxonomy
+  > = [];
 
   constructor() {}
 
