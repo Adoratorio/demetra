@@ -143,7 +143,7 @@ class Demetra {
     });
     const response = await fetch(request);
     const json : Array<WpData> = await response.json() as Array<WpData>;
-    json.forEach((reponse) => {
+    json.forEach((response) => {
       this.debugLog(response);
       this.handleError(response);
     });
@@ -193,7 +193,7 @@ class Demetra {
     requests.push(uncachedRequests);
     const request = new Request(this.endpoint, { method: 'POST', body: JSON.stringify({ requests }) });
     const response = await fetch(request);
-    const responses = await response.json();
+    const responses : Array<WpData> = await response.json();
 
     uncachedRequests.forEach((request, index) => {
       if (request.localCache) { this.cache.set(request.hash, responses[index]); }
@@ -202,7 +202,12 @@ class Demetra {
 
     // Merge cached data with fetch data in the original index
     cachedDates.forEach((cachedData) => {
-      responses.splice(cachedData.index, 0, cachedData.data)
+      responses.splice(cachedData.index, 0, cachedData.data as WpData);
+    });
+
+    responses.forEach((response) => {
+      this.debugLog(response);
+      this.handleError(response);
     });
 
     return responses;
@@ -221,18 +226,18 @@ class Demetra {
     return responses;
   }
 
-  private debugLog(response: Response) {
+  private debugLog(response: WpData) {
     if (this.options.debug) {
       console.log(response);
     }
   }
 
-  private handleError(response: Response) {
-    if (!response.ok) {
-      if (this.options.debug) {
-        console.error(`${response.status} - ${response.statusText}`);
+  private handleError(response: WpData) {
+    if (response.status.code !== 200) {
+      if (!this.options.debug) {
+        console.warn(`${response.status} - ${response.status.message}`);
       }
-      throw new Error(`${response.status} - ${response.statusText}`);
+      throw new Error(`${response.status} - ${response.status.message}`);
     }
   }
 
