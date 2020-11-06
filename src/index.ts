@@ -1,7 +1,17 @@
 import LRUCache from 'lru-cache';
 import fetch, { Headers, Request } from 'cross-fetch';
 import { validateUrl } from './validators';
-import { DemetraOptions, SEND_MODES, WpData, WpFile } from './declarations';
+import {
+  DemetraOptions,
+  DemetraRequestArchiveOptions,
+  DemetraRequestExtraOptions,
+  DemetraRequestMenuOptions,
+  DemetraRequestPageOptions,
+  DemetraRequestTaxonomyOptions,
+  SEND_MODES,
+  WpData,
+  WpFile,
+} from './declarations';
 import DemetraRequest from './Requests/DemetraRequest';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
@@ -57,28 +67,28 @@ class Demetra {
     throw new Error('Invalid SEND_MODES')
   }
 
-  public async fetchPage(id: string | number, request?: Partial<DemetraRequestPage>) : Promise<WpData> {
-    const params = new DemetraRequestPage(id, request, this.options.lang, this.options.site, this.options.version);
+  public async fetchPage(id: string | number, options?: Partial<DemetraRequestPageOptions>) : Promise<WpData> {
+    const params = new DemetraRequestPage(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
 
-  public async fetchArchive(id: string, request?: Partial<DemetraRequestArchive>): Promise<WpData> {
-    const params = new DemetraRequestArchive(id, request, this.options.lang, this.options.site, this.options.version);
+  public async fetchArchive(id: string, options?: Partial<DemetraRequestArchiveOptions>): Promise<WpData> {
+    const params = new DemetraRequestArchive(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
 
-  public async fetchExtra(id: string, request?: Partial<DemetraRequestExtra>): Promise<WpData> {
-    const params = new DemetraRequestExtra(id, request, this.options.lang, this.options.site, this.options.version);
+  public async fetchExtra(id: string, options?: Partial<DemetraRequestExtraOptions>): Promise<WpData> {
+    const params = new DemetraRequestExtra(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
 
-  public async fetchMenu(id: string, request?: Partial<DemetraRequestMenu>): Promise<WpData> {
-    const params = new DemetraRequestMenu(id, request, this.options.lang, this.options.site, this.options.version);
+  public async fetchMenu(id: string, options?: Partial<DemetraRequestMenuOptions>): Promise<WpData> {
+    const params = new DemetraRequestMenu(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
 
-  public async fetchTaxonomy(id: string, request?: Partial<DemetraRequestTaxonomy>): Promise<WpData> {
-    const params = new DemetraRequestTaxonomy(id, request, this.options.lang, this.options.site, this.options.version);
+  public async fetchTaxonomy(id: string, options?: Partial<DemetraRequestTaxonomyOptions>): Promise<WpData> {
+    const params = new DemetraRequestTaxonomy(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
 
