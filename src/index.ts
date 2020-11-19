@@ -280,4 +280,10 @@ class Demetra {
 }
 
 export default Demetra;
-export { DemetraRequest };
+export {
+  DemetraRequestPage,
+  DemetraRequestArchive,
+  DemetraRequestMenu,
+  DemetraRequestExtra,
+  DemetraRequestTaxonomy,
+};
