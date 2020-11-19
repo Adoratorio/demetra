@@ -199,9 +199,10 @@ class Demetra {
     })
 
     // Inject endpoint and all configuration taken from demetra instance options
-    const requests = new Array();
-    requests.push(uncachedRequests);
-    const request = new Request(this.endpoint, { method: 'POST', body: JSON.stringify({ requests }) });
+    const request = new Request(this.endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ requests: uncachedRequests }),
+    });
     const response = await fetch(request);
     const responses : Array<WpData> = await response.json();
 
