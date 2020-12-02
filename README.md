@@ -1,6 +1,6 @@
 # Demetra
 
-A utility library for Wordpress custom api interaction, using the **adora-theme** endpoint.
+A utility library for Wordpress custom API interaction, using the **adora-theme** endpoint.
 
 ## Installation
 ```bash
@@ -26,9 +26,9 @@ Demetra accepts in the constructor an `option` object with the following possibl
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |endpoint|string|`''`|The URL for the custom theme API endpoint|
-|uploadEndpoint|string|`{$endpoint}/upload.php`|The URL for the custom theme API endpoint for files upload|
-|site|string|`'default'`|In multi-site installation Wordpress the site id to fetch data from|
-|lang|string|`'en'`|The lang used to fetch the data|
+|uploadEndpoint|string|`{$endpoint}/upload.php`|The URL for the custom theme API endpoint for uploading files|
+|site|string|`'default'`|In the Wordpress multi-site installation the site id to fetch data from|
+|lang|string|`'en'`|The language in which data is retrieved|
 |debug|boolean|`false`|If You need extra log in browser console about what Demetra is doing|
 |version|number|`2`|The API version used (V2 is now available!)|
 |cacheMaxAge|number|`3600000`|Maximum cache age in ms. If the request will use the local cache (LRU Cache)|
@@ -51,16 +51,16 @@ Demetra.fetchPage(id : string | number, options : object);
 |id|`true`|The id or the slug of the page to fetch|
 |options|`false`|The configuration object|
 
-**Options can take a object with the following keys**
+**Options can take an object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |type|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
 |siblings|object|`{ fields: [], prev: false, next: false, loop: false }`|If you also need information about adjacent siblings|
 |cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
-|localCache|boolean|`false`|If the endpoint will use the LruCache|
-|lang|string|`Demetra.lang`|The lang used to fetch the data|
-|i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
+|i18n|boolean|`true`|If you need to get the i18n object in the response containing all information about the other languages available for this page|
 
 **Siblings can take a object with the following keys**
 
@@ -133,7 +133,7 @@ The returned object will be in the following form
 
 ### fetchArchive()
 
-Retrieve the information and the content for an archive (a collection of items)
+Retrieve the information and content for an archive (a collection of items)
 ```typescript
 Demetra.fetchArchive(id: string, options : object);
 ```
@@ -145,15 +145,15 @@ Demetra.fetchArchive(id: string, options : object);
 |id|`true`|The slug of the archive to fetch|
 |options|`false`|The configuration object|
 
-**Options can take a object with the following keys**
+**Options can take an object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |fields|string|`[]`|Array of frontId used to identify the fields for the items|
 |pagination|object|`{ start: 0, count: -1 }`|A pagination object used to define if you need pagination|
 |cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
-|localCache|boolean|`false`|If the endpoint will use the LruCache|
-|lang|string|`Demetra.lang`|The lang used to fetch the data|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 **Pagination can take a object with the following keys**
@@ -223,13 +223,13 @@ Demetra.fetchExtra(id: string, options? : object);
 |id|`true`|The slug of the extra to fetch|
 |options|`false`|The configuration object|
 
-**Options can take a object with the following keys**
+**Options can take an object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
-|localCache|boolean|`false`|If the endpoint will use the LruCache|
-|lang|string|`Demetra.lang`|The lang used to fetch the data|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 The returning object will be in the following form
@@ -269,13 +269,13 @@ Demetra.fetchMenu(id: string, options : object);
 |id|`true`|The slug of the menu to fetch|
 |options|`false`|The configuration object|
 
-**Options can take a object with the following keys**
+**Options can take an object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
-|localCache|boolean|`false`|If the endpoint will use the LruCache|
-|lang|string|`Demetra.lang`|The lang used to fetch the data|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 The returned object will be in the following form
@@ -353,16 +353,17 @@ Demetra.fetchTaxonomy(id: string, options? : object);
 |id|`true`|The slug of the taxonomy to fetch|
 |options|`false`|The configuration object|
 
-**Options can take a object with the following keys**
+**Options can take an object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
-|localCache|boolean|`false`|If the endpoint will use the LruCache|
-|lang|string|`Demetra.lang`|The lang used to fetch the data|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 The returning object will be in the following form
+
 ```javascript
 {
     "page": null,
@@ -487,12 +488,52 @@ The returning object will be in the following form
 }
 ```
 
+### fetchQueue()
+
+Sends all the [DemetraRequest](#DemetraRequests) in the [queue](#Queue) in three different format: **all together**, **simultaneously** or **one at time**.
+
+```typescript
+fetchQueue(sendModes: string)
+```
+
+**Accepted parameters**
+
+| parameter |   type   | required |          default          | description                                                  |
+| :-------- | :------: | :------: | :-----------------------: | :----------------------------------------------------------- |
+| id        | `string` | `false`  | `Demetra.SEND_MODES.ONCE` | A string indicating the send mode you wish to use, it can be 'once', 'simultaneously' or 'await'. Also static enumerators are exposed to help:<br/>• `Demetra.MODE.ONCE`<br/>• `Demetra.MODE.SIMULTANEOUSLY`<br/>• `Demetra.MODE.AWAIT`. |
+
+**Modes:**
+
+- Once: create a request package and send thath package.
+- Simultaneously: sends at the same time all requests independently of each other 
+- Await: Wait a response before send the next request
+
+## Queue
+
+Internally Demetra uses a request queue which is used together with the [fetchQueue()](#fetchQueue()) function
+
+### add()
+
+Adds a request to the queue.
+
+```typescript
+queue.add(request : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra | DemetraRequestMenu | DemetraRequestTaxonomy)
+```
+
+### Clear()
+
+Clear the queue.
+
+```typescript
+queue.clear()
+```
 
 
-## Demetra Requests
+
+## DemetraRequests
 
 In V2 you can directly create a DemetraRequest thath can be directly sent **all together**, **simultaneously** or **one at time**.
-You can instantiate one of the following class:
+You can instantiate one or more of the following class:
 
 - `DemetraRequestArchive(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestExtra(id : string | number, options : object, lang : string, site : string, version : number)`
@@ -508,12 +549,6 @@ You can instantiate one of the following class:
 | :-------- | :--------------: | :------: | :---------: | :----------------------------------------------------------- |
 | id        | string \| number |  `true`  |             | The slug or id of the archive \| extra \| page \| menu \| taxonomy to fetch |
 | options   |      object      | `false`  |             | The configuration object (look the fetch API above to understand how to fill the object for each request) |
-| lang      |      string      | `false`  |   `'en'`    | The lang used to fetch the data                              |
+| lang      |      string      | `false`  |   `'en'`    | The language in which data is retrieved                      |
 | site      |      string      | `false`  | `'default'` | In multi-site installation Wordpress the site id to fetch data from |
 | version   |      number      | `false`  |     `2`     | The API version used                                         |
-
-
-
-### Demetra Queue
-
-Merge requests into a single queue that can be subsequently sent.
