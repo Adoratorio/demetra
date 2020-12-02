@@ -12,26 +12,28 @@ npm install @adoratorio/demetra
 Since this package has a [pkg.module](https://github.com/rollup/rollup/wiki/pkg.module) field, it’s highly recommended importing it as an ES6 module with some bundlers like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/):
 ```javascript
 import Demetra from '@adoratorio/demetra';
-const demetra = new Demetra({ });
+const demetra = new Demetra(options: object);
 ```
 If you are not using any bundlers, you can just load the UMD bundle:
 ```html
-<script src="/medusa/umd/index.js"></script>
-<script>const demetra = window.Demetra({ });</script>
+<script src="/demetra/umd/index.js"></script>
+<script>const demetra = window.Demetra(options: object);</script>
 ```
 ## Available options
 
-Medusa accepts in the constructor and `option` an object with the following possible props.
+Demetra accepts in the constructor an `option` object with the following possible props.
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |endpoint|string|`''`|The URL for the custom theme API endpoint|
-|uploadEndpoint|string|`'{endpoint}/upload.php'`|The URL for the custom theme API endpoint for files upload|
+|uploadEndpoint|string|`{$endpoint}/upload.php`|The URL for the custom theme API endpoint for files upload|
 |site|string|`'default'`|In multi-site installation Wordpress the site id to fetch data from|
 |lang|string|`'en'`|The lang used to fetch the data|
 |debug|boolean|`false`|If You need extra log in browser console about what Demetra is doing|
 |version|number|`2`|The API version used (V2 is now available!)|
 |cacheMaxAge|number|`3600000`|Maximum cache age in ms. If the request will use the local cache (LRU Cache)|
+
+
 
 ## APIs
 
@@ -42,24 +44,35 @@ Use this method to get pages details, the method accept the following params
 Demetra.fetchPage(id : string | number, options : object);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|id|string &#124; number|The id or the slug of the page to fetch|
+|id|`true`|The id or the slug of the page to fetch|
+|options|`false`|The configuration object|
 
-**Options can contain the following parameter**
+**Options can take a object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |type|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
-|siblings|object|`{ fields: [], prev: false, next: false, loop: false }`|If you also need information about adjacent siblings <br> `{ fields: array; next: boolean; prev: boolean; loop: boolean}` <br> *fields*: An array of fields you need for siblings, identified by their frontId <br> *prev*: If you need the prev sibling <br> *next*: If you need the next sibling <br>*loop*: If the requested page is the last or the first, treat the siblings as a circle, returning the first one or the previous one depending on the position|
-|cache|boolean|`true`|If the endpoint will use the API cache, disable in development mode|
+|siblings|object|`{ fields: [], prev: false, next: false, loop: false }`|If you also need information about adjacent siblings|
+|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
 |localCache|boolean|`false`|If the endpoint will use the LruCache|
 |lang|string|`Demetra.lang`|The lang used to fetch the data|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
+**Siblings can take a object with the following keys**
+
+| parameter |  type   | default | description                                                  |
+| :-------- | :-----: | :-----: | :----------------------------------------------------------- |
+| fields    |  Array  |  `[]`   | An array of fields you need for siblings, identified by their frontId |
+| prev      | boolean | `false` | If you need the prev sibling                                 |
+| next      | boolean | `false` | If you need the next sibling                                 |
+| loop      | Boolean | `false` | If the requested page is the last or the first, treat the siblings as a circle, returning the first one or the previous one depending on the position |
+
 The returned object will be in the following form
+
 ```javascript
 {
   "page": {
@@ -125,24 +138,33 @@ Retrieve the information and the content for an archive (a collection of items)
 Demetra.fetchArchive(id: string, options : object);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|id|string|The slug of the archive to fetch|
+|id|`true`|The slug of the archive to fetch|
+|options|`false`|The configuration object|
 
-**Options can contain the following parameter**
+**Options can take a object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
 |fields|string|`[]`|Array of frontId used to identify the fields for the items|
-|pagination|Pagination|`{ start: 0, count: -1 }`|A pagination object used to define if you need pagination <br> `{ start : number, count : number }`|
-|cache|boolean|`true`|If the endpoint will use the API cache, disable in development mode|
+|pagination|object|`{ start: 0, count: -1 }`|A pagination object used to define if you need pagination|
+|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
 |localCache|boolean|`false`|If the endpoint will use the LruCache|
 |lang|string|`Demetra.lang`|The lang used to fetch the data|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
+**Pagination can take a object with the following keys**
+
+| parameter |  type  | default | description |
+| :-------- | :----: | :-----: | :---------- |
+| start     | number |   `0`   |             |
+| count     | number |  `-1`   |             |
+
 The returning object will be in the following form
+
 ```javascript
 {
   "page": null,
@@ -191,20 +213,21 @@ The returning object will be in the following form
 
 Fetch data considered to be extra in the Wordpress setup
 ```typescript
-Demetra.fetchExtra(id: string, options : object);
+Demetra.fetchExtra(id: string, options? : object);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|id|string|The slug of the extra to fetch|
+|id|`true`|The slug of the extra to fetch|
+|options|`false`|The configuration object|
 
-**Options can contain the following parameter**
+**Options can take a object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache, disable in development mode|
+|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
 |localCache|boolean|`false`|If the endpoint will use the LruCache|
 |lang|string|`Demetra.lang`|The lang used to fetch the data|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -241,15 +264,16 @@ Demetra.fetchMenu(id: string, options : object);
 
 **Required params**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|id|string|The slug of the menu to fetch|
+|id|`true`|The slug of the menu to fetch|
+|options|`false`|The configuration object|
 
-**Options can contain the following parameter**
+**Options can take a object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache, disable in development mode|
+|cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
 |localCache|boolean|`false`|If the endpoint will use the LruCache|
 |lang|string|`Demetra.lang`|The lang used to fetch the data|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -319,20 +343,21 @@ The returned object will be in the following form
 
 Fetch a single taxonomy with all terms
 ```typescript
-Demetra.fetchTaxonomy(id: string, options : object);
+Demetra.fetchTaxonomy(id: string, options? : object);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|id|string|The slug of the taxonomy to fetch|
+|id|`true`|The slug of the taxonomy to fetch|
+|options|`false`|The configuration object|
 
-**Options can contain the following parameter**
+**Options can take a object with the following keys**
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache, disable in development mode|
+|cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
 |localCache|boolean|`false`|If the endpoint will use the LruCache|
 |lang|string|`Demetra.lang`|The lang used to fetch the data|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -373,14 +398,14 @@ The returning object will be in the following form
 
 Use configured MailChimp settings in order to subscribe an email to a list
 ```typescript
-Demetra.subscribe(email,  <string>);
+Demetra.subscribe(email : string);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
+|parameter|required|description|
 |:---|:---:|:---|
-|email|string|The e-mail to subscribe to the newsletter|
+|email|`true`|The e-mail to subscribe to the newsletter|
 
 The returning object will be in the following form
 ```javascript
@@ -411,17 +436,14 @@ Use a preconfigured form on WP to send an email
 Demetra.send(id : number, recipients : string, data : object, files : array);
 ```
 
-**Required params**
+**Accepted parameters**
 
-|parameter|type|description|
-|:---|:---:|:---|
-|id|number|The form ID|
-|recipients|string|should be a single email, or a comma separated list of email addresses, `data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field defined in form options on WP side|
-|data|object|An object containing the form data|
-
-**optional params**
-|:---|:---:|:---|
-|files|array|should be a list of files handler to upload as attachments to the request|
+|parameter|required|description|
+|:---|:--:|:---|
+|id|`true`|the form ID|
+|recipients|`true`|should be a single email, or a comma separated list of email addresses|
+|data|`true`|`data` should be a valid JSON parsable string, containing only one level key/value pairs, one for each field defined in form options on WP side|
+|files|`false`|should be a list of files handler to upload as attachments to the reques|
 
 The returning object will be in the following form
 ```javascript
@@ -448,7 +470,7 @@ The returning object will be in the following form
 
 Upload one or multiple files to the Wordpress media library
 ```typescript
-Demetra.upload(files : File | Array);
+Demetra.upload(files : file | array<file>);
 ```
 The returning object will be in the following form
 ```javascript
@@ -464,3 +486,34 @@ The returning object will be in the following form
     }
 }
 ```
+
+
+
+## Demetra Requests
+
+In V2 you can directly create a DemetraRequest thath can be directly sent **all together**, **simultaneously** or **one at time**.
+You can instantiate one of the following class:
+
+- `DemetraRequestArchive(id : string | number, options : object, lang : string, site : string, version : number)`
+- `DemetraRequestExtra(id : string | number, options : object, lang : string, site : string, version : number)`
+- `DemetraRequestMenu(id : string | number, options : object, lang : string, site : string, version : number)`
+- `DemetraRequestPage(id : string | number, options : object, lang : string, site : string, version : number)`
+- `DemetraRequestTaxonomy(id : string | number, options : object, lang : string, site : string, version : number)`
+
+> NB: The request doesn't inherit the global parameters of Demetra.
+
+**Accepted parameters**
+
+| parameter |       type       | required |   default   | description                                                  |
+| :-------- | :--------------: | :------: | :---------: | :----------------------------------------------------------- |
+| id        | string \| number |  `true`  |             | The slug or id of the archive \| extra \| page \| menu \| taxonomy to fetch |
+| options   |      object      | `false`  |             | The configuration object (look the fetch API above to understand how to fill the object for each request) |
+| lang      |      string      | `false`  |   `'en'`    | The lang used to fetch the data                              |
+| site      |      string      | `false`  | `'default'` | In multi-site installation Wordpress the site id to fetch data from |
+| version   |      number      | `false`  |     `2`     | The API version used                                         |
+
+
+
+### Demetra Queue
+
+Merge requests into a single queue that can be subsequently sent.
