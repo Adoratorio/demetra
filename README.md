@@ -415,7 +415,7 @@ The returning object will be in the following form
 
 ### fetchQueue()
 
-Sends all the [DemetraRequest](#DemetraRequests) in the [queue](#Queue) in three different format: **all together**, **simultaneously** or **one at time**.
+Fetch all the [DemetraRequest](#DemetraRequests) in the [queue](#Queue) in three different ways: **all together**, **simultaneously** or **one at time**.
 
 ```typescript
 fetchQueue(sendModes: string)
@@ -429,9 +429,9 @@ fetchQueue(sendModes: string)
 
 **Modes:**
 
-- Once: create a request package and send thath package.
-- Simultaneously: sends at the same time all requests independently of each other 
-- Await: Wait a response before send the next request
+- **Once**: create a request package and send thath package.
+- **Simultaneously**: simultaneously sends all requests independently of each other 
+- **Await**: Wait a response before send the next request
 
 ## Queue
 
@@ -442,7 +442,7 @@ Internally Demetra uses a request queue which is used together with the [fetchQu
 Adds a request to the queue.
 
 ```typescript
-queue.add(request : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra | DemetraRequestMenu | DemetraRequestTaxonomy)
+Demetra.add(request : DemetraRequestPage | DemetraRequestArchive | DemetraRequestExtra | DemetraRequestMenu | DemetraRequestTaxonomy)
 ```
 
 ### Clear()
@@ -450,14 +450,14 @@ queue.add(request : DemetraRequestPage | DemetraRequestArchive | DemetraRequestE
 Clear the queue.
 
 ```typescript
-queue.clear()
+Demetra.clear()
 ```
 
 
 
 ## DemetraRequests
 
-In V2 you can directly create a DemetraRequest thath can be directly sent **all together**, **simultaneously** or **one at time**.
+In V2 you can directly create a DemetraRequest thath can be directly sent via [fetchQueue()](#fetchQueue()) .
 You can instantiate one or more of the following class:
 
 - `DemetraRequestArchive(id : string | number, options : object, lang : string, site : string, version : number)`
