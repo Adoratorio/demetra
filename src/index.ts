@@ -12,7 +12,6 @@ import {
   WpData,
   WpFile,
 } from './declarations';
-import DemetraRequest from './Requests/DemetraRequest';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestArchive from './Requests/DemetraRequestArchive';
@@ -135,7 +134,7 @@ class Demetra {
              DemetraRequestSend |
              DemetraRequestSubscribe
   ) : Promise<WpData> {
-    // Controllo local cache
+    // Check local cache
     if ((params as any).localCache && this.cache.has(params.hash)) {
       const cached = this.cache.get(params.hash);
       if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');

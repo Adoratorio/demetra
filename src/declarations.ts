@@ -1,5 +1,3 @@
-import DemetraRequest from "./Requests/DemetraRequest";
-
 export interface Pagination {
   start: number;
   count: number;
@@ -70,16 +68,6 @@ export interface FetchMenuOptions extends Cache, Lang {}
 export interface FetchExtraOptions extends Cache, Lang {}
 
 export interface FetchTaxonomyOptions extends Cache, Lang {}
-
-export interface FetchSendOptions {
-  recipients: string;
-  data: Record<string, unknown>;
-  urls: Array<string>;
-}
-
-export interface FetchSubscribeOptions {
-  email : string;
-}
 
 export interface DemetraRequestGlobalOptions {
   id : string | number;
