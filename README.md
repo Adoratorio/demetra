@@ -14,11 +14,6 @@ Since this package has a [pkg.module](https://github.com/rollup/rollup/wiki/pkg.
 import Demetra from '@adoratorio/demetra';
 const demetra = new Demetra(options: object);
 ```
-If you are not using any bundlers, you can just load the UMD bundle:
-```html
-<script src="/demetra/umd/index.js"></script>
-<script>const demetra = window.Demetra(options: object);</script>
-```
 ## Available options
 
 Demetra accepts in the constructor an `option` object with the following possible props.
@@ -75,35 +70,40 @@ The returned object will be in the following form
 
 ```javascript
 {
-  "page": {
-    "id": 87,
-    "title": "Cuvée 1821",
-    "path": "/cuvee-1821/",
-    "fullPath": "/en/cuvee-1821/",
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  }
+  "data": {
+    "id": 1,
+    "title": "Homepage",
+    "path": "/homepage/",
+    "fullPath": "/en/homepage/",
+    "slug": "homepage",
     "structure": [
       {
-        "acf_fc_layout": "title",
-        "frontId": "AppTitle"
-        // Extra data with key : value here
+        "frontId": "Component Name"
+        // ... Other item data
       },
-      // ... other components following
+        // ... Other item components
     ],
     "lang": "en",
     "type": "page",
     "i18n": {
       "it": {
-        "id": 53,
-        "slug": "[PAGE_SLUG]",
-        "path": "[PAGE_PATH]",
-        "fullPath": "/it/[PAGE_PATH]"
+        "id": 111,
+        "slug": "homepage",
+        "path": "/homepage",
+        "fullPath": "/it/homepage"
       }
     },
     "siblings": {
       "next": {
-        "id": 90,
-          "title": "Prova",
-          "path": "/prova/",
-          "fullPath": "//prova/",
+        "id": 222,
+          "title": "Siblings Title",
+          "path": "/sibligns-path/",
+          "fullPath": "/en/sibligns-path/",
           "structure": [
             false
           ],
@@ -117,17 +117,6 @@ The returned object will be in the following form
     },
     "date": null // Filled only wen the requested type is a post
   },
-  "menu": null,
-  "archive": null,
-  "extra": null,
-  "taxonomy": null,
-  "send": null,
-  "subscribe": null,
-  "status": {
-    "code": 200,
-    "message": "Data loaded!",
-    "cache": false
-  }
 }
 ```
 
@@ -167,44 +156,38 @@ The returning object will be in the following form
 
 ```javascript
 {
-  "page": null,
-  "menu": null,
-  "archive": {
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  }
+  "data": {
     "items": [
       {
-        "id": 276,
-        "title": "",
-        "path": "/[ITEM_PATH]/",
-        "fullPath": "/en/[ITEM_PATH]/",
+        "id": 111,
+        "title": "First Article",
+        "path": "/first-article/",
+        "fullPath": "/en/first-article/",
         "structure": [
           {
-            "frontId": "TeamPreview",
+            "frontId": "Component Name",
             // ... Other item data
           },
           // ... Other item components
         ],
         "lang": "en",
-        "type": "team",
+        "type": "press",
         "i18n": null,
         "siblings": null,
         "date": null
       }
     ],
     "pagination": {
-      "start": null,
-      "count": null,
-      "more": true,
-      "total": 15
+      start: 0,
+      count: -1,
+      more: true,
+      total: 7
     }
-  },
-  "extra": null,
-  "taxonomy": null,
-  "send": null,
-  "subscribe": null,
-  "status": {
-    "code": 200,
-    "message": "Data loaded!",
-    "cache": false
   }
 }
 ```
@@ -235,23 +218,17 @@ Demetra.fetchExtra(id: string, options? : object);
 The returning object will be in the following form
 ```javascript
 {
-    "page": null,
-    "menu": null,
-    "archive": null,
-    "extra": {
-        "privacy": "",
-        "cookies": "",
-        "email": ""
-        // ... Extra data with key : value here
-    },
-    "taxonomy": null,
-    "send": null,
-    "subscribe": null,
-    "status": {
-        "code": 200,
-        "message": "Data loaded!",
-        "cache": false
-    }
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  }
+  "data": {
+    "privacy": "",
+    "cookies": "",
+    "email": ""
+    // ... Extra data with key : value here
+  },
 }
 ```
 
@@ -281,61 +258,24 @@ Demetra.fetchMenu(id: string, options : object);
 The returned object will be in the following form
 ```javascript
 {
-  "page": null,
-  "menu": {
-    "id": 2,
-    "lang": "en",
-    "count": 7,
-    "items": [
-      {
-        "id": 34,
-        "text": "About",
-        "path": "/about/",
-        "fullPath": "/en/about/",
-        "target": "",
-        "classes": [
-          ""
-        ],
-        "behaviour": "internal",
-        "parent": false,
-        // ... custom fields associataed with this menu voice
-      },
-      {
-        "id": 122,
-        "text": "Team",
-        "path": "/team/",
-        "fullPath": "/en/team/",
-        "target": "",
-        "classes": [
-          ""
-        ],
-        "behaviour": "internal",
-        "parent": false,
-      },
-      {
-        "id": 30,
-        "text": "Contact",
-        "path": "/contact/",
-        "fullPath": "/en/contact/",
-        "target": "",
-        "classes": [
-          ""
-        ],
-        "behaviour": "internal",
-        "parent": false,
-      }
-    ]
-  },
-  "archive": null,
-  "extra": null,
-  "taxonomy": null,
-  "send": null,
-  "subscribe": null,
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
   }
+  "data": {
+    "items": [
+      {
+        caption: 'Home',
+        link: {
+          title: 'Home',
+          url: 'https://xyz/about/',
+          target: ''
+        }
+      },
+      // ... Other menu item
+    ]
+  },
 }
 ```
 
@@ -366,17 +306,19 @@ The returning object will be in the following form
 
 ```javascript
 {
-    "page": null,
-    "menu": null,
-    "archive": null,
-    "extra": null,
-    "taxonomy": [
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  }
+  "data": {
+    "items": [
       {
-        "term_id": 17,
+        "term_id": 1,
         "name": "TERM NAME",
         "slug": "termname",
         "term_group": 0,
-        "term_taxonomy_id": 17,
+        "term_taxonomy_id": 1,
         "taxonomy": "taxonomy id",
         "description": "",
         "parent": 0,
@@ -385,13 +327,7 @@ The returning object will be in the following form
       },
       // ... Other terms following
     ],
-    "send": null,
-    "subscribe": null,
-    "status": {
-        "code": 200,
-        "message": "Data loaded!",
-        "cache": false
-    }
+  }  
 }
 ```
 
@@ -411,22 +347,16 @@ Demetra.subscribe(email : string);
 The returning object will be in the following form
 ```javascript
 {
-    "page": null,
-    "menu": null,
-    "archive": null,
-    "extra": null,
-    "taxonomy": null,
-    "send": null,
-    "subscribe": {
-      "response": 1, // The request result 0 in case of error
-      "message": "SUCCESS!", // The message associated with the result
-      "mailchimp": "", // Contains mailchimp messages and debug informations
-    },
-    "status": {
-        "code": 200,
-        "message": "Data loaded!",
-        "cache": false
-    }
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  }
+  "data": {
+    "response": 1, // The request result 0 in case of error
+    "message": "SUCCESS!", // The message associated with the result
+    "mailchimp": "", // Contains mailchimp messages and debug informations
+  },  
 }
 ```
 
@@ -449,21 +379,15 @@ Demetra.send(id : number, recipients : string, data : object, files : array);
 The returning object will be in the following form
 ```javascript
 {
-    "page": null,
-    "menu": null,
-    "archive": null,
-    "extra": null,
-    "taxonomy": null,
-    "send": {
-      "saved": 1, // How many requests have been saved in the db
-      "sended": true, // If the email has been sended to the recipients
-    },
-    "subscribe": null,
-    "status": {
-        "code": 200,
-        "message": "Data loaded!",
-        "cache": false
-    }
+  "status": {
+    "code": 200,
+    "message": "Data loaded!",
+    "cache": false
+  },
+  "data": {
+    "saved": 1, // How many requests have been saved in the db
+    "sended": true, // If the email has been sended to the recipients
+  },
 }
 ```
 
@@ -476,15 +400,16 @@ Demetra.upload(files : file | array<file>);
 The returning object will be in the following form
 ```javascript
 {
-    "files": [{
+  "status": {
+    "code": 200,
+    "message": "Upload successful",
+  }
+  "data": [
+    {
       "upload_id": 1, // The post id of the uploaded file
       "url": "https://...", // The url of the uploaded file
-    }],
-    "status": {
-        "code": 200,
-        "message": "Data loaded!",
-        "cache": false
     }
+  ],  
 }
 ```
 
