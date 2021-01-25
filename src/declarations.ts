@@ -70,7 +70,7 @@ export interface FetchExtraOptions extends Cache, Lang {}
 export interface FetchTaxonomyOptions extends Cache, Lang {}
 
 export interface DemetraRequestGlobalOptions {
-  id : string | number;
+  id : string | number | [string | number];
   mode : WP_MODES;
   site : string;
   version : number;

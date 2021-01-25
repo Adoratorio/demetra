@@ -86,7 +86,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchTaxonomy(id: string, options?: Partial<DemetraRequestTaxonomyOptions>): Promise<WpData> {
+  public async fetchTaxonomy(id: [string], options?: Partial<DemetraRequestTaxonomyOptions>): Promise<WpData> {
     const params = new DemetraRequestTaxonomy(id, options, this.options.lang, this.options.site, this.options.version);
     return this.fetch(params);
   }
