@@ -283,14 +283,14 @@ The returned object will be in the following form
 
 Fetch a single taxonomy with all terms
 ```typescript
-Demetra.fetchTaxonomy(id: string, options? : object);
+Demetra.fetchTaxonomy(id: string | [string], options? : object);
 ```
 
 **Accepted parameters**
 
 |parameter|required|description|
 |:---|:---:|:---|
-|id|`true`|The slug of the taxonomy to fetch|
+|id|`true`|The slug or an array of slug of the taxonomy to fetch|
 |options|`false`|The configuration object|
 
 **Options can take an object with the following keys**
