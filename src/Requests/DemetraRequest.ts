@@ -2,7 +2,7 @@ import md5 from "md5";
 import { WP_MODES } from "../declarations";
 
 class DemetraRequest {
-  public id : string | number | [string | number] | undefined = undefined;
+  public id : string | number | Array<string> | undefined = undefined;
   public mode : WP_MODES;
   public lang : string;
   public site : string;
@@ -12,7 +12,7 @@ class DemetraRequest {
 
   constructor(
     mode : WP_MODES,
-    id: string | number | [string | number],
+    id: string | number | Array<string>,
     lang : string = 'en',
     site : string = 'default',
     version : number = 2,

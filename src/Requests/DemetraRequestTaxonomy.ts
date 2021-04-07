@@ -6,7 +6,7 @@ class DemetraRequestTaxonomy extends DemetraRequest {
   public localCache : boolean;
 
   constructor(
-    id : string | [string],
+    id : string | Array<string>,
     options? : Partial<DemetraRequestTaxonomyOptions>,
     lang? : string,
     site? : string,
