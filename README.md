@@ -52,7 +52,7 @@ Demetra.fetchPage(id : string | number, options : object);
 |:---|:---:|:---:|:---|
 |type|string|`'page'`|The custom post type id or 'page' if you need an actual page not a post.|
 |siblings|object|`{ fields: [], prev: false, next: false, loop: false }`|If you also need information about adjacent siblings|
-|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
 |localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get the i18n object in the response containing all information about the other languages available for this page|
@@ -140,7 +140,7 @@ Demetra.fetchArchive(id: string, options : object);
 |:---|:---:|:---:|:---|
 |fields|string|`[]`|Array of frontId used to identify the fields for the items|
 |pagination|object|`{ start: 0, count: -1 }`|A pagination object used to define if you need pagination|
-|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
 |localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -210,7 +210,7 @@ Demetra.fetchExtra(id: string, options? : object);
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache (*disable in development mode*)|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
 |localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -250,7 +250,7 @@ Demetra.fetchMenu(id: string, options : object);
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
 |localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -297,7 +297,7 @@ Demetra.fetchTaxonomy(id: string | [string], options? : object);
 
 |parameter|type|default|description|
 |:---|:---:|:---:|:---|
-|cache|boolean|`true`|If the endpoint will use the API cache *(disable in development mode)*|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
 |localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
@@ -466,7 +466,7 @@ You can instantiate one or more of the following class:
 - `DemetraRequestPage(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestTaxonomy(id : string | number, options : object, lang : string, site : string, version : number)`
 
-> NB: The request doesn't inherit the global parameters of Demetra. And you cant pass the  *lang*, *site* and *version* params directly in the options
+> NB: The request doesn't inherit the global parameters of Demetra. Tho you can pass the *lang*, *site* and *version* params directly in the options
 
 **Accepted parameters**
 
