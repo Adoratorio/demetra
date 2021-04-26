@@ -22,8 +22,8 @@ class DemetraRequestPage extends DemetraRequest {
     this.type = options.type              || 'page';
     this.i18n = options.i18n              || true;
     this.siblings = options.siblings      || { fields: [], prev: false, next: false, loop: false };
-    this.wpCache = options.wpCache        || true;
-    this.localCache = options.localCache  || false;
+    this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
+    this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }
 }
 

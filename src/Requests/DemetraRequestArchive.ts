@@ -29,8 +29,8 @@ class DemetraRequestArchive extends DemetraRequest {
     this.fields = options.fields          || [];
     this.pagination = options.pagination  || { start: 0, count: -1 };
     this.filters = options.filters        || [];
-    this.wpCache = options.wpCache        || true;
-    this.localCache = options.localCache  || false;
+    this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
+    this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }
 }
 
