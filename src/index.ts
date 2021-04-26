@@ -279,11 +279,11 @@ class Demetra {
   }
 
   private handleError(response: WpData) {
-    if (response.status.code !== 200) {
+    if (response.status.code === 500) {
       if (!this.options.debug) {
-        console.warn(`${response.status} - ${response.status.message}`);
+        console.warn(`${response.status.code} - ${response.status.message}`);
       } else {
-        throw new Error(`${response.status} - ${response.status.message}`);
+        throw new Error(`${response.status.code} - ${response.status.message}`);
       }
     }
   }
