@@ -1,5 +1,5 @@
 import LRUCache from 'lru-cache';
-import fetch, { Headers, Request } from 'cross-fetch';
+import axios from 'axios';
 import { validateUrl } from './validators';
 import {
   DemetraOptions,
@@ -179,15 +179,17 @@ class Demetra {
 
     const requests = new Array();
     requests.push(params);
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    const request = new Request(this.options.endpoint, {
-      method: 'POST',
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    const response = await axios({
+      method: 'post',
       headers,
-      body: JSON.stringify({ requests }),
+      url: this.options.endpoint,
+      data: JSON.stringify({ requests }),
+      responseType: 'json',
     });
-    const response = await fetch(request);
-    const json : Array<WpData> = await response.json() as Array<WpData>;
+    const json = response.data as unknown as Array<WpData>;
     json.forEach((response) => {
       this.debugLog(response);
       this.handleError(response);
@@ -234,13 +236,17 @@ class Demetra {
     })
 
     // Inject endpoint and all configuration taken from demetra instance options
-    const request = new Request(this.endpoint, {
-      method: 'POST',
-      body: JSON.stringify({ requests: uncachedRequests }),
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    const response = await axios({
+      method: 'post',
+      headers,
+      url: this.options.endpoint,
+      data: JSON.stringify({ requests: uncachedRequests }),
+      responseType: 'json',
     });
-    const response = await fetch(request);
-    const responses : Array<WpData> = await response.json();
-
+    const responses = response.data as unknown as Array<WpData>;
     uncachedRequests.forEach((request, index) => {
       if (request.localCache) { this.cache.set(request.hash, responses[index]); }
     });
