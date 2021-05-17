@@ -27,6 +27,7 @@ Demetra accepts in the constructor an `option` object with the following possibl
 |debug|boolean|`false`|If You need extra log in browser console about what Demetra is doing|
 |version|number|`2`|The API version used (V2 is now available!)|
 |cacheMaxAge|number|`3600000`|Maximum cache age in ms. If the request will use the local cache (LRU Cache)|
+|proxy|AxiosProxyConfig|`false`|An http/https proxy to use for requests described as axios proxy config object|
 
 
 

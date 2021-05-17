@@ -1,3 +1,5 @@
+import { AxiosProxyConfig } from "axios";
+
 export interface Pagination {
   start: number;
   count: number;
@@ -50,6 +52,7 @@ export interface DemetraOptions {
   version : number;
   debug: boolean;
   cacheMaxAge: number;
+  proxy: AxiosProxyConfig | false;
 }
 
 export interface FetchPageOptions extends Cache, Lang {

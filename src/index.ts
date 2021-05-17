@@ -36,6 +36,7 @@ class Demetra {
       debug: false,
       version : 2,
       cacheMaxAge: 1000 * 60 * 60,
+      proxy: false,
     }
     this.options = { ...defaults, ...options };
     this.queue = new DemetraQueue;
@@ -188,6 +189,7 @@ class Demetra {
       url: this.options.endpoint,
       data: JSON.stringify({ requests }),
       responseType: 'json',
+      proxy: this.options.proxy,
     });
     const json = response.data as unknown as Array<WpData>;
     json.forEach((response) => {
@@ -245,6 +247,7 @@ class Demetra {
       url: this.options.endpoint,
       data: JSON.stringify({ requests: uncachedRequests }),
       responseType: 'json',
+      proxy: this.options.proxy,
     });
     const responses = response.data as unknown as Array<WpData>;
     uncachedRequests.forEach((request, index) => {
