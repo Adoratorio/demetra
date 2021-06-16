@@ -3,17 +3,21 @@ import axios from 'axios';
 import { validateUrl } from './validators';
 import {
   DemetraOptions,
+  DemetraRequestSitemapOptions,
   DemetraRequestArchiveOptions,
   DemetraRequestExtraOptions,
   DemetraRequestMenuOptions,
   DemetraRequestPageOptions,
+  DemetraRequestChildrenOptions,
   DemetraRequestTaxonomyOptions,
   SEND_MODES,
   WpData,
   WpFile,
 } from './declarations';
 import DemetraQueue from './Requests/DemetraQueue';
+import DemetraRequestSitemap from './Requests/DemetraRequestSitemap';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
+import DemetraRequestChildren from './Requests/DemetraRequestChildren';
 import DemetraRequestArchive from './Requests/DemetraRequestArchive';
 import DemetraRequestExtra from './Requests/DemetraRequestExtra';
 import DemetraRequestMenu from './Requests/DemetraRequestMenu';
@@ -73,8 +77,29 @@ class Demetra {
     return response || [];
   }
 
+  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSitemapOptions>) : Promise<WpData> {
+    const params = new DemetraRequestSitemap(
+      site,
+      options,
+      (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
+  }
+
   public async fetchPage(id: string | number, options?: Partial<DemetraRequestPageOptions>) : Promise<WpData> {
     const params = new DemetraRequestPage(
+      id,
+      options,
+      (options && options.lang) || this.options.lang,
+      (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
+  }
+
+  public async fetchChildren(id: string | number, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
+    const params = new DemetraRequestChildren(
       id,
       options,
       (options && options.lang) || this.options.lang,
@@ -163,7 +188,9 @@ class Demetra {
   }
 
   private async fetch(
-    params : DemetraRequestPage |
+    params : DemetraRequestSitemap |
+             DemetraRequestPage |
+             DemetraRequestChildren |
              DemetraRequestArchive |
              DemetraRequestExtra |
              DemetraRequestMenu |
@@ -223,7 +250,9 @@ class Demetra {
     const cachedDates : Array<{ index: number, data: object }> = [];
     // This will contain all un-cacheable and all the uncached requests
     const uncachedRequests : Array<
+      DemetraRequestSitemap |
       DemetraRequestPage |
+      DemetraRequestChildren |
       DemetraRequestArchive |
       DemetraRequestExtra |
       DemetraRequestTaxonomy
@@ -327,6 +356,7 @@ class Demetra {
 export default Demetra;
 export {
   DemetraRequestPage,
+  DemetraRequestChildren,
   DemetraRequestArchive,
   DemetraRequestMenu,
   DemetraRequestExtra,

@@ -29,7 +29,9 @@ export interface Lang {
 }
 
 export enum WP_MODES {
+  SITE_MAP = 'sitemap',
   PAGE = 'page',
+  CHILDREN = 'children',
   ARCHIVE = 'archive',
   EXTRA = 'extra',
   MENU = 'menu',
@@ -60,6 +62,8 @@ export interface FetchPageOptions extends Cache, Lang {
   siblings: Siblings;
 }
 
+export interface FetchChildrenOptions extends Cache, Lang {}
+
 export interface FetchArchiveOptions extends Cache, Lang {
   fields: Array<string>;
   pagination: Pagination;
@@ -72,6 +76,8 @@ export interface FetchExtraOptions extends Cache, Lang {}
 
 export interface FetchTaxonomyOptions extends Cache, Lang {}
 
+export interface FetchSitemapOptions extends Cache {}
+
 export interface DemetraRequestGlobalOptions {
   id : string | number | [string | number];
   mode : WP_MODES;
@@ -79,7 +85,9 @@ export interface DemetraRequestGlobalOptions {
   version : number;
 }
 
+export type DemetraRequestSitemapOptions = DemetraRequestGlobalOptions & FetchSitemapOptions;
 export type DemetraRequestPageOptions = DemetraRequestGlobalOptions & FetchPageOptions;
+export type DemetraRequestChildrenOptions = DemetraRequestGlobalOptions & FetchChildrenOptions;
 export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchArchiveOptions;
 export type DemetraRequestExtraOptions = DemetraRequestGlobalOptions & FetchExtraOptions;
 export type DemetraRequestMenuOptions = DemetraRequestGlobalOptions & FetchMenuOptions;
