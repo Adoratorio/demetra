@@ -361,4 +361,5 @@ export {
   DemetraRequestMenu,
   DemetraRequestExtra,
   DemetraRequestTaxonomy,
+  DemetraRequestSitemap,
 };
