@@ -3,6 +3,7 @@ import axios from 'axios';
 import { validateUrl } from './validators';
 import {
   DemetraOptions,
+  DemetraRequestLanguagesOptions,
   DemetraRequestSitemapOptions,
   DemetraRequestArchiveOptions,
   DemetraRequestExtraOptions,
@@ -15,6 +16,7 @@ import {
   WpFile,
 } from './declarations';
 import DemetraQueue from './Requests/DemetraQueue';
+import DemetraRequestLanguages from './Requests/DemetraRequestLanguages';
 import DemetraRequestSitemap from './Requests/DemetraRequestSitemap';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestChildren from './Requests/DemetraRequestChildren';
@@ -75,6 +77,16 @@ class Demetra {
 
     this.queue.clear();
     return response || [];
+  }
+
+  public async fetchLanguages(site: string, options?: Partial<DemetraRequestLanguagesOptions>) : Promise<WpData> {
+    const params = new DemetraRequestLanguages(
+      site,
+      options,
+      (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
   }
 
   public async fetchSitemap(site: string, options?: Partial<DemetraRequestSitemapOptions>) : Promise<WpData> {
@@ -188,7 +200,8 @@ class Demetra {
   }
 
   private async fetch(
-    params : DemetraRequestSitemap |
+    params : DemetraRequestLanguages |
+             DemetraRequestSitemap |
              DemetraRequestPage |
              DemetraRequestChildren |
              DemetraRequestArchive |
@@ -250,6 +263,7 @@ class Demetra {
     const cachedDates : Array<{ index: number, data: object }> = [];
     // This will contain all un-cacheable and all the uncached requests
     const uncachedRequests : Array<
+      DemetraRequestLanguages |
       DemetraRequestSitemap |
       DemetraRequestPage |
       DemetraRequestChildren |
@@ -362,4 +376,5 @@ export {
   DemetraRequestExtra,
   DemetraRequestTaxonomy,
   DemetraRequestSitemap,
+  DemetraRequestLanguages,
 };
