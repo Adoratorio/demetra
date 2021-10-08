@@ -80,7 +80,9 @@ export interface FetchTaxonomyOptions extends Cache, Lang {}
 
 export interface FetchLanguagesOptions extends Cache {}
 
-export interface FetchAlternatesOptions extends Cache {}
+export interface FetchAlternatesOptions extends Cache {
+  type: string;
+}
 
 export interface FetchSitemapOptions extends Cache {}
 

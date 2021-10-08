@@ -2,6 +2,7 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestAlternatesOptions, WP_MODES } from '../declarations';
 
 class DemetraRequestAlternates extends DemetraRequest {
+  public type : string;
   public wpCache : boolean;
   public localCache : boolean;
 
@@ -16,6 +17,7 @@ class DemetraRequestAlternates extends DemetraRequest {
 
     if (typeof options === 'undefined') options = {};
 
+    this.type = options.type              || 'page';
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }
