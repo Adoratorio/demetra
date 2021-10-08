@@ -91,16 +91,6 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchAlternates(site: string, options?: Partial<DemetraRequestAlternatesOptions>) : Promise<WpData> {
-    const params = new DemetraRequestAlternates(
-      site,
-      options,
-      (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
-    );
-    return this.fetch(params);
-  }
-
   public async fetchSitemap(site: string, options?: Partial<DemetraRequestSitemapOptions>) : Promise<WpData> {
     const params = new DemetraRequestSitemap(
       site,
@@ -150,6 +140,17 @@ class Demetra {
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
+  }
+
+  public async fetchAlternates(id: string, options?: Partial<DemetraRequestAlternatesOptions>) : Promise<WpData> {
+    const params = new DemetraRequestAlternates(
+      id,
+      options,
+      (options && options.site) || this.options.site,
+      this.options.lang,
       (options && options.version) || this.options.version
     );
     return this.fetch(params);

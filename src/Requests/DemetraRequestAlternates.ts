@@ -6,12 +6,13 @@ class DemetraRequestAlternates extends DemetraRequest {
   public localCache : boolean;
 
   constructor(
-    site : string,
+    id : string | number,
     options? : Partial<DemetraRequestAlternatesOptions>,
+    site? : string,
     lang? : string,
     version? : number,
     ) {
-    super(WP_MODES.ALTERNATES, 0, lang, site, version);
+    super(WP_MODES.ALTERNATES, id, lang, site, version);
 
     if (typeof options === 'undefined') options = {};
 
