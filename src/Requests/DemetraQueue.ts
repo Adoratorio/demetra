@@ -4,6 +4,7 @@ import DemetraRequestMenu from "./DemetraRequestMenu";
 import DemetraRequestPage from "./DemetraRequestPage";
 import DemetraRequestTaxonomy from "./DemetraRequestTaxonomy";
 import DemetraRequestLanguages from './DemetraRequestLanguages';
+import DemetraRequestAlternates from './DemetraRequestAlternates';
 import DemetraRequestSitemap from './DemetraRequestSiteMap';
 import DemetraRequestChildren from './DemetraRequestChildren';
 
@@ -14,6 +15,7 @@ class DemetraQueue {
     DemetraRequestExtra |
     DemetraRequestTaxonomy |
     DemetraRequestLanguages |
+    DemetraRequestAlternates |
     DemetraRequestSitemap |
     DemetraRequestChildren |
     DemetraRequestMenu
@@ -27,6 +29,7 @@ class DemetraQueue {
         DemetraRequestExtra |
         DemetraRequestTaxonomy |
         DemetraRequestLanguages |
+        DemetraRequestAlternates |
         DemetraRequestSitemap |
         DemetraRequestChildren |
         DemetraRequestMenu

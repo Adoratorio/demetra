@@ -30,6 +30,7 @@ export interface Lang {
 
 export enum WP_MODES {
   LANGUAGES = 'languages',
+  ALTERNATES = 'alternates',
   SITE_MAP = 'sitemap',
   PAGE = 'page',
   CHILDREN = 'children',
@@ -79,6 +80,8 @@ export interface FetchTaxonomyOptions extends Cache, Lang {}
 
 export interface FetchLanguagesOptions extends Cache {}
 
+export interface FetchAlternatesOptions extends Cache {}
+
 export interface FetchSitemapOptions extends Cache {}
 
 export interface DemetraRequestGlobalOptions {
@@ -89,6 +92,7 @@ export interface DemetraRequestGlobalOptions {
 }
 
 export type DemetraRequestLanguagesOptions = DemetraRequestGlobalOptions & FetchLanguagesOptions;
+export type DemetraRequestAlternatesOptions = DemetraRequestGlobalOptions & FetchAlternatesOptions;
 export type DemetraRequestSitemapOptions = DemetraRequestGlobalOptions & FetchSitemapOptions;
 export type DemetraRequestPageOptions = DemetraRequestGlobalOptions & FetchPageOptions;
 export type DemetraRequestChildrenOptions = DemetraRequestGlobalOptions & FetchChildrenOptions;

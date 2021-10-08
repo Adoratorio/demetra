@@ -4,6 +4,7 @@ import { validateUrl } from './validators';
 import {
   DemetraOptions,
   DemetraRequestLanguagesOptions,
+  DemetraRequestAlternatesOptions,
   DemetraRequestSitemapOptions,
   DemetraRequestArchiveOptions,
   DemetraRequestExtraOptions,
@@ -17,6 +18,7 @@ import {
 } from './declarations';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestLanguages from './Requests/DemetraRequestLanguages';
+import DemetraRequestAlternates from './Requests/DemetraRequestAlternates';
 import DemetraRequestSitemap from './Requests/DemetraRequestSitemap';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestChildren from './Requests/DemetraRequestChildren';
@@ -81,6 +83,16 @@ class Demetra {
 
   public async fetchLanguages(site: string, options?: Partial<DemetraRequestLanguagesOptions>) : Promise<WpData> {
     const params = new DemetraRequestLanguages(
+      site,
+      options,
+      (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
+  }
+
+  public async fetchAlternates(site: string, options?: Partial<DemetraRequestAlternatesOptions>) : Promise<WpData> {
+    const params = new DemetraRequestAlternates(
       site,
       options,
       (options && options.site) || this.options.site,
@@ -201,6 +213,7 @@ class Demetra {
 
   private async fetch(
     params : DemetraRequestLanguages |
+             DemetraRequestAlternates |
              DemetraRequestSitemap |
              DemetraRequestPage |
              DemetraRequestChildren |
@@ -264,6 +277,7 @@ class Demetra {
     // This will contain all un-cacheable and all the uncached requests
     const uncachedRequests : Array<
       DemetraRequestLanguages |
+      DemetraRequestAlternates |
       DemetraRequestSitemap |
       DemetraRequestPage |
       DemetraRequestChildren |
@@ -377,4 +391,5 @@ export {
   DemetraRequestTaxonomy,
   DemetraRequestSitemap,
   DemetraRequestLanguages,
+  DemetraRequestAlternates,
 };
