@@ -106,7 +106,7 @@ export type WpData = {
   data: object;
 };
 
-export type WpFile = {
+export type WpFile = Array<{
   status: {
     code: number;
     message: string;
@@ -115,4 +115,4 @@ export type WpFile = {
     uploadId : number,
     url : string,
   };
-};
+}>;
