@@ -180,9 +180,7 @@ class Demetra {
         if (typeof file !== 'object') {
           throw new Error('Invalid response. It mus be an object');
         }
-        if (!file.hasOwnProperty('file')) {
-          throw new Error('Invalid File Response');
-        }
+        // if (!file.hasOwnProperty('file')) { throw new Error('Invalid File Response'); }
         urls.push(file.data.url);
       });
     }
