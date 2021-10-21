@@ -176,14 +176,14 @@ class Demetra {
     if (files && files.length > 0) {
       const uploadResponses: Array<WpFile> = await this.upload(files);
 
-      uploadResponses.forEach((file) => {
-        if (typeof file !== 'object') {
-          throw new Error('Invalid response. It mus be an object');
-        }
-        if (!file.hasOwnProperty('file')) {
-          throw new Error('Invalid File Response');
-        }
-        urls.push(file.data.url);
+      uploadResponses.forEach((files) => {
+        files.forEach((file) => {
+          if (typeof file !== 'object') {
+            throw new Error('Invalid response. It mus be an object');
+          }
+          // if (!file.hasOwnProperty('file')) { throw new Error('Invalid File Response'); }
+          urls.push(file.data.url);
+        });
       });
     }
 
