@@ -7,13 +7,13 @@ class DemetraRequestChildren extends DemetraRequest {
   public localCache : boolean;
 
   constructor(
-    id : string | number,
+    id : number | Array<number>,
     options? : Partial<DemetraRequestChildrenOptions>,
     lang? : string,
     site? : string,
     version? : number,
   ) {
-    super(WP_MODES.CHILDREN, id, lang, site, version);
+    super(WP_MODES.CHILDREN, Array.isArray(id) ? id : [id], lang, site, version);
 
     if (typeof options === 'undefined') options = {};
 

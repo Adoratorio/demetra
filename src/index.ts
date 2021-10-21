@@ -110,7 +110,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchChildren(id: string | number, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
+  public async fetchChildren(id: number | Array<number>, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
     const params = new DemetraRequestChildren(
       id,
       options,

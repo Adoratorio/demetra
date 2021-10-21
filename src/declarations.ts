@@ -82,7 +82,7 @@ export interface FetchLanguagesOptions extends Cache {}
 export interface FetchSitemapOptions extends Cache {}
 
 export interface DemetraRequestGlobalOptions {
-  id : string | number | [string | number];
+  id : string | number | Array<string> | Array<number>;
   mode : WP_MODES;
   site : string;
   version : number;
