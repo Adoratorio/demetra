@@ -83,7 +83,7 @@ class Demetra {
     const params = new DemetraRequestLanguages(
       site,
       options,
-      (options && options.site) || this.options.site,
+      (options && options.lang) || this.options.lang,
       (options && options.version) || this.options.version
     );
     return this.fetch(params);
@@ -93,7 +93,6 @@ class Demetra {
     const params = new DemetraRequestSitemap(
       site,
       options,
-      (options && options.site) || this.options.site,
       (options && options.version) || this.options.version
     );
     return this.fetch(params);

@@ -12,7 +12,7 @@ class DemetraRequest {
 
   constructor(
     mode : WP_MODES,
-    id: string | number | Array<string> | Array<number>,
+    id: string | number | Array<string> | Array<number> | undefined,
     lang : string = 'en',
     site : string = 'default',
     version : number = 2,

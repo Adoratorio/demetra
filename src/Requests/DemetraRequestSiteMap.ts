@@ -8,10 +8,9 @@ class DemetraRequestSitemap extends DemetraRequest {
   constructor(
     site : string,
     options? : Partial<DemetraRequestSitemapOptions>,
-    lang? : string,
     version? : number,
     ) {
-    super(WP_MODES.SITE_MAP, 0, lang, site, version);
+    super(WP_MODES.SITE_MAP, undefined, undefined, site, version);
 
     if (typeof options === 'undefined') options = {};
 
