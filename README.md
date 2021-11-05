@@ -1,6 +1,6 @@
 # Demetra
 
-A utility library for Wordpress custom API interaction, using the **adora-theme** endpoint.
+A utility library for WordPress custom API interaction, using the **adora-theme** endpoint.
 
 ## Installation
 ```bash
@@ -10,9 +10,9 @@ npm install @adoratorio/demetra
 ## Usage
 
 Since this package has a [pkg.module](https://github.com/rollup/rollup/wiki/pkg.module) field, it’s highly recommended importing it as an ES6 module with some bundlers like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/):
-```javascript
+```typescript
 import Demetra from '@adoratorio/demetra';
-const demetra = new Demetra(options: object);
+const demetra = new Demetra(options: Object);
 ```
 ## Available options
 
@@ -58,7 +58,7 @@ Demetra.fetchPage(id : string | number, options : object);
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get the i18n object in the response containing all information about the other languages available for this page|
 
-**Siblings can take a object with the following keys**
+**Siblings can take an object with the following keys**
 
 | parameter |  type   | default | description                                                  |
 | :-------- | :-----: | :-----: | :----------------------------------------------------------- |
@@ -69,13 +69,13 @@ Demetra.fetchPage(id : string | number, options : object);
 
 The returned object will be in the following form
 
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "id": 1,
     "title": "Homepage",
@@ -86,7 +86,7 @@ The returned object will be in the following form
       {
         "frontId": "Component Name"
         // ... Other item data
-      },
+      }
         // ... Other item components
     ],
     "lang": "en",
@@ -117,7 +117,7 @@ The returned object will be in the following form
         "prev": null
     },
     "date": null // Filled only wen the requested type is a post
-  },
+  }
 }
 ```
 
@@ -146,7 +146,7 @@ Demetra.fetchArchive(id: string, options : object);
 |lang|string|`Demetra.lang`|The language in which data is retrieved|
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
-**Pagination can take a object with the following keys**
+**Pagination can take an object with the following keys**
 
 | parameter |  type  | default | description |
 | :-------- | :----: | :-----: | :---------- |
@@ -155,13 +155,13 @@ Demetra.fetchArchive(id: string, options : object);
 
 The returning object will be in the following form
 
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "items": [
       {
@@ -173,7 +173,7 @@ The returning object will be in the following form
           {
             "frontId": "Component Name",
             // ... Other item data
-          },
+          }
           // ... Other item components
         ],
         "lang": "en",
@@ -184,10 +184,10 @@ The returning object will be in the following form
       }
     ],
     "pagination": {
-      start: 0,
-      count: -1,
-      more: true,
-      total: 7
+      "start": 0,
+      "count": -1,
+      "more": true,
+      "total": 7
     }
   }
 }
@@ -217,19 +217,19 @@ Demetra.fetchExtra(id: string, options? : object);
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 The returning object will be in the following form
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "privacy": "",
     "cookies": "",
     "email": ""
     // ... Extra data with key : value here
-  },
+  }
 }
 ```
 
@@ -240,7 +240,7 @@ Fetch content for a menu
 Demetra.fetchMenu(id: string, options : object);
 ```
 
-**Required params**
+**Accepted params**
 
 |parameter|required|description|
 |:---|:---:|:---|
@@ -257,26 +257,26 @@ Demetra.fetchMenu(id: string, options : object);
 |i18n|boolean|`true`|If you need to get in response the i18n object containing all the information about the other available languages for this page|
 
 The returned object will be in the following form
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "items": [
       {
-        caption: 'Home',
-        link: {
-          title: 'Home',
-          url: 'https://xyz/about/',
-          target: ''
+        "caption": "Home",
+        "link": {
+          "title": "Home",
+          "url": "https://xyz/about/",
+          "target": ""
         }
-      },
+      }
       // ... Other menu item
     ]
-  },
+  }
 }
 ```
 
@@ -305,13 +305,13 @@ Demetra.fetchTaxonomy(id: string | [string], options? : object);
 
 The returning object will be in the following form
 
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "items": [
       {
@@ -325,10 +325,130 @@ The returning object will be in the following form
         "parent": 0,
         "count": 0,
         "filter": "raw"
-      },
+      }
       // ... Other terms following
-    ],
+    ]
   }  
+}
+```
+
+### fetchLanguages()
+
+Use this method to get locales details such as:
+- code
+- iso
+- default_locale
+- name
+- translated_name
+
+the method accept the following params
+
+```typescript
+Demetra.fetchLanguages(site : string, options : object);
+```
+
+**Accepted parameters**
+
+|parameter|required|description|
+|:---|:---:|:---|
+|site|`true`| the id of the reference site |
+|options|`false`|The configuration object|
+
+**Options can take an object with the following keys**
+
+|parameter|type|default|description|
+|:---|:---:|:---:|:---|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+|lang|string|`Demetra.lang`|The language in which data is retrieved|
+
+The returned object will be in the following form
+
+```json5
+{
+  "status": {
+    "code": 200,
+    "message": "Data loaded",
+    "cache": false
+  },
+  "data": {
+    "locales": [
+      {
+        "code": "en",
+        "iso": "en",
+        "default_locale": "en_US",
+        "name": "English",
+        "translated_name": "Inglese",
+        "hidden": false
+      },
+      {
+        "code": "it",
+        "iso": "it",
+        "default_locale": "it_IT",
+        "name": "Italiano",
+        "translated_name": "Italiano",
+        "hidden": false
+      }
+    ],
+    "defaultLocale": "en"
+  }
+}
+```
+
+### fetchSitemap()
+
+Use this method to get a list with all the project route.
+```typescript
+Demetra.fetchLanguages(site : string, options : object);
+```
+
+**Accepted parameters**
+
+|parameter|required|description|
+|:---|:---:|:---|
+|site|`true`| the id of the reference site |
+|options|`false`|The configuration object|
+
+**Options can take an object with the following keys**
+
+|parameter|type|default|description|
+|:---|:---:|:---:|:---|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+
+The returned object will be in the following form
+
+```json5
+{
+  "status": {
+    "code": 200,
+    "message": "Data loaded",
+    "cache": false
+  },
+  "data": [
+    "/explore/",
+    "/about/",
+    "/dining/bar-aperitifs/",
+    "/dining/breakfast/",
+    "/dining/restaurants/second-restaurant/",
+    "/dining/restaurants/first-restaurant/",
+    "/dining/",
+    "/suites/second-suite/",
+    "/suites/first-suite/",
+    "/suites/",
+    "/",
+    "/it/explore/",
+    "/it/about/",
+    "/it/pasti/bar-aperitifs/",
+    "/it/pasti/breakfast/",
+    "/it/pasti/restaurants/second-restaurant/",
+    "/it/pasti/restaurants/first-restaurant/",
+    "/it/pasti/",
+    "/camere/second-suite/",
+    "/camere/first-suite/",
+    "/camere/",
+    "/it/home"
+  ]
 }
 ```
 
@@ -337,6 +457,7 @@ The returning object will be in the following form
 Use configured MailChimp settings in order to subscribe an email to a list
 ```typescript
 Demetra.subscribe(email : string);
+
 ```
 
 **Accepted parameters**
@@ -346,13 +467,13 @@ Demetra.subscribe(email : string);
 |email|`true`|The e-mail to subscribe to the newsletter|
 
 The returning object will be in the following form
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Data loaded!",
     "cache": false
-  }
+  },
   "data": {
     "response": 1, // The request result 0 in case of error
     "message": "SUCCESS!", // The message associated with the result
@@ -378,7 +499,7 @@ Demetra.send(id : number, recipients : string, data : object, files : array);
 |files|`false`|should be a list of files handler to upload as attachments to the reques|
 
 The returning object will be in the following form
-```javascript
+```json5
 {
   "status": {
     "code": 200,
@@ -387,8 +508,8 @@ The returning object will be in the following form
   },
   "data": {
     "saved": 1, // How many requests have been saved in the db
-    "sended": true, // If the email has been sended to the recipients
-  },
+    "sended": true // If the email has been sended to the recipients
+  }
 }
 ```
 
@@ -399,18 +520,18 @@ Upload one or multiple files to the Wordpress media library
 Demetra.upload(files : file | array<file>);
 ```
 The returning object will be in the following form
-```javascript
+```json5
 {
   "status": {
     "code": 200,
     "message": "Upload successful",
-  }
+  },
   "data": [
     {
       "upload_id": 1, // The post id of the uploaded file
-      "url": "https://...", // The url of the uploaded file
+      "url": "https://..." // The url of the uploaded file
     }
-  ],  
+  ]  
 }
 ```
 
@@ -466,6 +587,8 @@ You can instantiate one or more of the following class:
 - `DemetraRequestMenu(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestPage(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestTaxonomy(id : string | number, options : object, lang : string, site : string, version : number)`
+- `DemetraRequestLanguages(site : string, options : object, lang : string, version : number)`
+- `DemetraRequestSitemap(site : string, options : object, version : number)`
 
 > NB: The request doesn't inherit the global parameters of Demetra. Tho you can pass the *lang*, *site* and *version* params directly in the options
 
