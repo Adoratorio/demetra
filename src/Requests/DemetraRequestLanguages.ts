@@ -11,7 +11,7 @@ class DemetraRequestLanguages extends DemetraRequest {
     lang? : string,
     version? : number,
     ) {
-    super(WP_MODES.LANGUAGES, undefined, lang, site, version);
+    super(WP_MODES.LANGUAGES, -1, lang, site, version);
 
     if (typeof options === 'undefined') options = {};
 

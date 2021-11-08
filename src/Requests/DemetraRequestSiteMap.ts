@@ -10,7 +10,7 @@ class DemetraRequestSitemap extends DemetraRequest {
     options? : Partial<DemetraRequestSitemapOptions>,
     version? : number,
     ) {
-    super(WP_MODES.SITE_MAP, undefined, undefined, site, version);
+    super(WP_MODES.SITE_MAP, -1, undefined, site, version);
 
     if (typeof options === 'undefined') options = {};
 
