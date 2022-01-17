@@ -164,11 +164,11 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async subscribe(email: string, site? : string, lang?: string ): Promise<WpData> {
+  public async subscribe(email: string, lang?: string, site? : string): Promise<WpData> {
     const params = new DemetraRequestSubscribe(
       email,
-      site || this.options.site,
       lang || this.options.lang,
+      site || this.options.site,
       this.options.version
     );
     return this.fetch(params);

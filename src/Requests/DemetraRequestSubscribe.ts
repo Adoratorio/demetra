@@ -6,11 +6,11 @@ class DemetraRequestSubscribe extends DemetraRequest {
 
   constructor(
     email : string,
-    site : string,
     lang : string,
+    site : string,
     version? : number
   ) {
-    super(WP_MODES.SUBSCRIBE, -1, site, lang, version);
+    super(WP_MODES.SUBSCRIBE, -1, lang, site, version);
     this.email = email;
   }
 }
