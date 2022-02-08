@@ -1,6 +1,6 @@
 {
   "name": "@adoratorio/demetra",
-  "version": "2.4.14",
+  "version": "2.4.15",
   "description": "Internal use library for wordpress API request",
   "main": "dist/index.js",
   "module": "dist/index.js",

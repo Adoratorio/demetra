@@ -69,6 +69,10 @@ export interface FetchArchiveOptions extends Cache, Lang {
   fields: Array<string>;
   pagination: Pagination;
   filters: Array<Filter>;
+  taxonomy: {
+    slug: string,
+    id: string,
+  };
 }
 
 export interface FetchMenuOptions extends Cache, Lang {}
@@ -79,7 +83,9 @@ export interface FetchTaxonomyOptions extends Cache, Lang {}
 
 export interface FetchLanguagesOptions extends Cache, Lang {}
 
-export interface FetchSitemapOptions extends Cache {}
+export interface FetchSitemapOptions extends Cache {
+  filter_lang: boolean,
+}
 
 export interface DemetraRequestGlobalOptions {
   id : string | number | Array<string> | Array<number>;
