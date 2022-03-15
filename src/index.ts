@@ -242,6 +242,10 @@ class Demetra {
     });
 
     if ((params as any).localCache) {
+      // Update response status before putting in cache so it will be ready when pulled
+      json[0].status.code = 304;
+      json[0].status.message = 'Data loaded from local cache';
+      json[0].status.cache = true;
       this.cache.set(params.hash, json[0]);
     }
     return json[0];
