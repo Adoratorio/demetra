@@ -217,9 +217,9 @@ class Demetra {
   ) : Promise<WpData> {
     // Check local cache
     if ((params as any).localCache && this.cache.has(params.hash)) {
-      const cached = this.cache.get(params.hash);
+      const cached = this.cache.get(params.hash) || {} as WpData;
       if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
-      return cached;
+      return this.parseFromLocalCache(cached);
     }
 
     const requests = new Array();
@@ -242,10 +242,6 @@ class Demetra {
     });
 
     if ((params as any).localCache) {
-      // Update response status before putting in cache so it will be ready when pulled
-      json[0].status.code = 304;
-      json[0].status.message = 'Data loaded from local cache';
-      json[0].status.cache = true;
       this.cache.set(params.hash, json[0]);
     }
     return json[0];
@@ -282,7 +278,8 @@ class Demetra {
 
     this.queue.requests.forEach((request, index) => {
       if (request.localCache && this.cache.has(request.hash)) {
-        cachedDates.push({ index, data: this.cache.get(request.hash) || {} });
+        const cached = this.cache.get(request.hash) || {} as WpData;
+        cachedDates.push({ index, data: this.parseFromLocalCache(cached) });
       } else {
         uncachedRequests.push(request);
       }
@@ -346,6 +343,13 @@ class Demetra {
         throw new Error(`${response.status.code} - ${response.status.message}`);
       }
     }
+  }
+
+  private parseFromLocalCache(cached: WpData) {
+    cached.status.code = 304;
+    cached.status.message = 'Data loaded from local cache';
+    cached.status.cache = true;
+    return cached;
   }
 
   // Getters and setters
