@@ -17,7 +17,7 @@ import {
 } from './declarations';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestLanguages from './Requests/DemetraRequestLanguages';
-import DemetraRequestSitemap from './Requests/DemetraRequestSitemap';
+import DemetraRequestSitemap from './Requests/DemetraRequestSiteMap';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestChildren from './Requests/DemetraRequestChildren';
 import DemetraRequestArchive from './Requests/DemetraRequestArchive';
@@ -109,7 +109,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchChildren(id: number | Array<number>, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
+  public async fetchChildren(id: number | Array<number> | string | Array<string>, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
     const params = new DemetraRequestChildren(
       id,
       options,
