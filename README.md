@@ -588,7 +588,7 @@ You can instantiate one or more of the following class:
 - `DemetraRequestPage(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestTaxonomy(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestLanguages(site : string, options : object, lang : string, version : number)`
-- `DemetraRequestSitemap(site : string, options : object, version : number)`
+- `DemetraRequestSiteMap(site : string, options : object, version : number)`
 
 > NB: The request doesn't inherit the global parameters of Demetra. Tho you can pass the *lang*, *site* and *version* params directly in the options
 

@@ -95,7 +95,7 @@ export interface DemetraRequestGlobalOptions {
 }
 
 export type DemetraRequestLanguagesOptions = DemetraRequestGlobalOptions & FetchLanguagesOptions;
-export type DemetraRequestSitemapOptions = DemetraRequestGlobalOptions & FetchSitemapOptions;
+export type DemetraRequestSiteMapOptions = DemetraRequestGlobalOptions & FetchSitemapOptions;
 export type DemetraRequestPageOptions = DemetraRequestGlobalOptions & FetchPageOptions;
 export type DemetraRequestChildrenOptions = DemetraRequestGlobalOptions & FetchChildrenOptions;
 export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchArchiveOptions;

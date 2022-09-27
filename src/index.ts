@@ -4,7 +4,7 @@ import { validateUrl } from './validators';
 import {
   DemetraOptions,
   DemetraRequestLanguagesOptions,
-  DemetraRequestSitemapOptions,
+  DemetraRequestSiteMapOptions,
   DemetraRequestArchiveOptions,
   DemetraRequestExtraOptions,
   DemetraRequestMenuOptions,
@@ -17,7 +17,7 @@ import {
 } from './declarations';
 import DemetraQueue from './Requests/DemetraQueue';
 import DemetraRequestLanguages from './Requests/DemetraRequestLanguages';
-import DemetraRequestSitemap from './Requests/DemetraRequestSiteMap';
+import DemetraRequestSiteMap from './Requests/DemetraRequestSiteMap';
 import DemetraRequestPage from './Requests/DemetraRequestPage';
 import DemetraRequestChildren from './Requests/DemetraRequestChildren';
 import DemetraRequestArchive from './Requests/DemetraRequestArchive';
@@ -89,8 +89,8 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSitemapOptions>) : Promise<WpData> {
-    const params = new DemetraRequestSitemap(
+  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSiteMapOptions>) : Promise<WpData> {
+    const params = new DemetraRequestSiteMap(
       site,
       options,
       (options && options.version) || this.options.version
@@ -205,7 +205,7 @@ class Demetra {
 
   private async fetch(
     params : DemetraRequestLanguages |
-             DemetraRequestSitemap |
+             DemetraRequestSiteMap |
              DemetraRequestPage |
              DemetraRequestChildren |
              DemetraRequestArchive |
@@ -268,7 +268,7 @@ class Demetra {
     // This will contain all un-cacheable and all the uncached requests
     const uncachedRequests : Array<
       DemetraRequestLanguages |
-      DemetraRequestSitemap |
+      DemetraRequestSiteMap |
       DemetraRequestPage |
       DemetraRequestChildren |
       DemetraRequestArchive |
@@ -387,6 +387,6 @@ export {
   DemetraRequestMenu,
   DemetraRequestExtra,
   DemetraRequestTaxonomy,
-  DemetraRequestSitemap,
+  DemetraRequestSiteMap,
   DemetraRequestLanguages,
 };
