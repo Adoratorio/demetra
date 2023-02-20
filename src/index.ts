@@ -11,6 +11,7 @@ import {
   DemetraRequestPageOptions,
   DemetraRequestChildrenOptions,
   DemetraRequestTaxonomyOptions,
+  DemetraRequestAttachmentsOptions,
   SEND_MODES,
   WpData,
   WpFile,
@@ -26,6 +27,7 @@ import DemetraRequestMenu from './Requests/DemetraRequestMenu';
 import DemetraRequestTaxonomy from './Requests/DemetraRequestTaxonomy';
 import DemetraRequestSend from './Requests/DemetraRequestSend';
 import DemetraRequestSubscribe from './Requests/DemetraRequestSubscribe';
+import DemetraRequestAttachments from './Requests/DemetraRequestAttachments';
 
 class Demetra {
   public static readonly SEND_MODES = SEND_MODES;
@@ -159,6 +161,15 @@ class Demetra {
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
+      (options && options.version) || this.options.version
+    );
+    return this.fetch(params);
+  }
+
+  public async fetchAttachments(site: string, options?: Partial<DemetraRequestAttachmentsOptions>): Promise<WpData> {
+    const params = new DemetraRequestAttachments(
+      site,
+      options,
       (options && options.version) || this.options.version
     );
     return this.fetch(params);

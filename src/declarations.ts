@@ -39,6 +39,7 @@ export enum WP_MODES {
   TAXONOMY = 'taxonomy',
   SEND = 'send',
   SUBSCRIBE = 'subscribe',
+  ATTACHMENTS = 'attachments',
 }
 
 export enum SEND_MODES {
@@ -87,6 +88,8 @@ export interface FetchSitemapOptions extends Cache {
   filter_lang: boolean,
 }
 
+export interface FetchAttachmentsOptions extends Cache, Lang {}
+
 export interface DemetraRequestGlobalOptions {
   id : string | number | Array<string> | Array<number>;
   mode : WP_MODES;
@@ -102,6 +105,7 @@ export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchAr
 export type DemetraRequestExtraOptions = DemetraRequestGlobalOptions & FetchExtraOptions;
 export type DemetraRequestMenuOptions = DemetraRequestGlobalOptions & FetchMenuOptions;
 export type DemetraRequestTaxonomyOptions = DemetraRequestGlobalOptions & FetchTaxonomyOptions;
+export type DemetraRequestAttachmentsOptions = DemetraRequestGlobalOptions & FetchAttachmentsOptions;
 
 export type WpData = {
   status: {
