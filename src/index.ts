@@ -400,4 +400,5 @@ export {
   DemetraRequestTaxonomy,
   DemetraRequestSiteMap,
   DemetraRequestLanguages,
+  DemetraRequestAttachments,
 };
