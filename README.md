@@ -399,7 +399,7 @@ The returned object will be in the following form
 
 Use this method to get a list with all the project route.
 ```typescript
-Demetra.fetchLanguages(site : string, options : object);
+Demetra.fetchSitemap(site : string, options : object);
 ```
 
 **Accepted parameters**
@@ -448,6 +448,42 @@ The returned object will be in the following form
     "/camere/first-suite/",
     "/camere/",
     "/it/home"
+  ]
+}
+```
+
+### fetchAttachments()
+
+Use this method to get a list with all the project route.
+```typescript
+Demetra.fetchAttachments(site : string, options : object);
+```
+
+**Accepted parameters**
+
+|parameter|required|description|
+|:---|:---:|:---|
+|site|`true`| the id of the reference site |
+|options|`false`|The configuration object|
+
+**Options can take an object with the following keys**
+
+|parameter|type|default|description|
+|:---|:---:|:---:|:---|
+|wpCache|boolean|`true`|If the endpoint will use the API cache|
+|localCache|boolean|`false`|If you want to save the data in a local cache *(LruCache)*|
+
+The returned object will be in the following form
+
+```json5
+{
+  "status": {
+    "code": 200,
+    "message": "Data loaded",
+    "cache": false
+  },
+  "data": [
+    "/.../",
   ]
 }
 ```
@@ -589,6 +625,7 @@ You can instantiate one or more of the following class:
 - `DemetraRequestTaxonomy(id : string | number, options : object, lang : string, site : string, version : number)`
 - `DemetraRequestLanguages(site : string, options : object, lang : string, version : number)`
 - `DemetraRequestSiteMap(site : string, options : object, version : number)`
+- `DemetraRequestAttachments(site : string, options : object, version : number)`
 
 > NB: The request doesn't inherit the global parameters of Demetra. Tho you can pass the *lang*, *site* and *version* params directly in the options
 
