@@ -38,7 +38,7 @@
   "dependencies": {
     "@types/lru-cache": "^5.1.0",
     "@types/md5": "^2.2.0",
-    "axios": "^0.26.1",
+    "axios": "^1.6.0",
     "lru-cache": "^6.0.0",
     "md5": "^2.3.0"
   },
