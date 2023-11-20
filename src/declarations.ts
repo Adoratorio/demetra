@@ -124,5 +124,6 @@ export type WpFile = Array<{
   data: {
     uploadId : number,
     url : string,
+    path : string,
   };
 }>;

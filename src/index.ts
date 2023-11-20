@@ -198,7 +198,7 @@ class Demetra {
   }
 
   public async send(id: number, recipients : string, data : object, files? : Array<File>): Promise<WpData> {
-    let urls: Array<string> = [];
+    let urls: Array<{ path: string, url : string }> = [];
 
     if (files && files.length > 0) {
       const uploadResponses: Array<WpFile> = await this.upload(files);
@@ -209,7 +209,7 @@ class Demetra {
             throw new Error('Invalid response. It mus be an object');
           }
           // if (!file.hasOwnProperty('file')) { throw new Error('Invalid File Response'); }
-          urls.push(file.data.url);
+          urls.push(file.data);
         });
       });
     }
