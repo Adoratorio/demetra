@@ -1,4 +1,4 @@
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import axios from 'axios';
 import { validateUrl } from './validators';
 import {
@@ -44,11 +44,12 @@ class Demetra {
       debug: false,
       version : 2,
       cacheMaxAge: 1000 * 60 * 60,
+      maxItems: 500,
       proxy: false,
     }
     this.options = { ...defaults, ...options };
     this.queue = new DemetraQueue;
-    this.cache = new LRUCache(this.options.cacheMaxAge);
+    this.cache = new LRUCache({ max: this.options.maxItems, ttl: this.options.cacheMaxAge });
 
     if (this.options.endpoint.length <= 0 || !validateUrl(this.options.endpoint)) {
       throw new Error('Invalid endpoint');

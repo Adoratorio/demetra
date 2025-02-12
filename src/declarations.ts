@@ -56,6 +56,7 @@ export interface DemetraOptions {
   version : number;
   debug: boolean;
   cacheMaxAge: number;
+  maxItems: number;
   proxy: AxiosProxyConfig | false;
 }
 
