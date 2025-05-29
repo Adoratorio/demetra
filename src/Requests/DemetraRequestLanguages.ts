@@ -2,15 +2,15 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestLanguagesOptions, WP_MODES } from '../declarations';
 
 class DemetraRequestLanguages extends DemetraRequest {
-  public wpCache : boolean;
-  public localCache : boolean;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    site : string,
-    options? : Partial<DemetraRequestLanguagesOptions>,
-    lang? : string,
-    version? : number,
-    ) {
+    site: string,
+    options?: Partial<DemetraRequestLanguagesOptions>,
+    lang?: string,
+    version?: number,
+  ) {
     super(WP_MODES.LANGUAGES, -1, lang, site, version);
 
     if (typeof options === 'undefined') options = {};

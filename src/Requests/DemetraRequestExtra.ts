@@ -2,15 +2,15 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestExtraOptions, WP_MODES } from "../declarations";
 
 class DemetraRequestExtra extends DemetraRequest {
-  public wpCache : boolean;
-  public localCache : boolean;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    id : string | number,
-    options? : Partial<DemetraRequestExtraOptions>,
-    lang? : string,
-    site? : string,
-    version? : number,
+    id: string | number,
+    options?: Partial<DemetraRequestExtraOptions>,
+    lang?: string,
+    site?: string,
+    version?: number,
   ) {
     super(WP_MODES.EXTRA, id, lang, site, version);
 

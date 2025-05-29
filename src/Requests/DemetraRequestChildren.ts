@@ -2,16 +2,16 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestChildrenOptions, WP_MODES } from "../declarations";
 
 class DemetraRequestChildren extends DemetraRequest {
-  public i18n : boolean;
-  public wpCache : boolean;
-  public localCache : boolean;
+  public i18n: boolean;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    id : number | Array<number> | string | Array<string>,
-    options? : Partial<DemetraRequestChildrenOptions>,
-    lang? : string,
-    site? : string,
-    version? : number,
+    id: number | Array<number> | string | Array<string>,
+    options?: Partial<DemetraRequestChildrenOptions>,
+    lang?: string,
+    site?: string,
+    version?: number,
   ) {
     super(WP_MODES.CHILDREN, id, lang, site, version);
 

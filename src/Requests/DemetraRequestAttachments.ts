@@ -2,13 +2,13 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestAttachmentsOptions, WP_MODES } from "../declarations";
 
 class DemetraRequestAttachments extends DemetraRequest {
-  public wpCache : boolean;
-  public localCache : boolean;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    site : string,
-    options? : Partial<DemetraRequestAttachmentsOptions>,
-    version? : number,
+    site: string,
+    options?: Partial<DemetraRequestAttachmentsOptions>,
+    version?: number,
   ) {
     super(WP_MODES.ATTACHMENTS, -1, undefined, site, version);
 

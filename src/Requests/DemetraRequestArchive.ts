@@ -7,19 +7,19 @@ import {
 } from "../declarations";
 
 class DemetraRequestArchive extends DemetraRequest {
-  public i18n : boolean;
-  public fields : Array<string>;
-  public pagination : Pagination;
-  public filters : Array<Filter>;
-  public wpCache : boolean;
-  public localCache : boolean;
+  public i18n: boolean;
+  public fields: Array<string>;
+  public pagination: Pagination;
+  public filters: Array<Filter>;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    id : string | number,
-    options? : Partial<DemetraRequestArchiveOptions>,
-    lang? : string,
-    site? : string,
-    version? : number
+    id: string | number,
+    options?: Partial<DemetraRequestArchiveOptions>,
+    lang?: string,
+    site?: string,
+    version?: number
   ) {
     super(WP_MODES.ARCHIVE, id, lang, site, version);
 

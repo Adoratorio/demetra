@@ -8,7 +8,7 @@ import DemetraRequestSiteMap from './DemetraRequestSiteMap';
 import DemetraRequestChildren from './DemetraRequestChildren';
 
 class DemetraQueue {
-  public readonly requests : Array<
+  public readonly requests: Array<
     DemetraRequestPage |
     DemetraRequestArchive |
     DemetraRequestExtra |

@@ -31,18 +31,18 @@ import DemetraRequestAttachments from './Requests/DemetraRequestAttachments';
 
 class Demetra {
   public static readonly SEND_MODES = SEND_MODES;
-  private readonly cache : LRUCache<string, WpData>;
-  private readonly queue : DemetraQueue;
-  private options : DemetraOptions;
+  private readonly cache: LRUCache<string, WpData>;
+  private readonly queue: DemetraQueue;
+  private options: DemetraOptions;
 
   constructor(options: Partial<DemetraOptions> = {}) {
-    const defaults : DemetraOptions = {
+    const defaults: DemetraOptions = {
       endpoint: '',
       uploadEndpoint: '',
       site: 'default',
       lang: 'en',
       debug: false,
-      version : 2,
+      version: 2,
       cacheMaxAge: 1000 * 60 * 60,
       maxItems: 500,
       proxy: false,
@@ -82,7 +82,7 @@ class Demetra {
     return response || [];
   }
 
-  public async fetchLanguages(site: string, options?: Partial<DemetraRequestLanguagesOptions>) : Promise<WpData> {
+  public async fetchLanguages(site: string, options?: Partial<DemetraRequestLanguagesOptions>): Promise<WpData> {
     const params = new DemetraRequestLanguages(
       site,
       options,
@@ -92,7 +92,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSiteMapOptions>) : Promise<WpData> {
+  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSiteMapOptions>): Promise<WpData> {
     const params = new DemetraRequestSiteMap(
       site,
       options,
@@ -101,7 +101,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchPage(id: string | number, options?: Partial<DemetraRequestPageOptions>) : Promise<WpData> {
+  public async fetchPage(id: string | number, options?: Partial<DemetraRequestPageOptions>): Promise<WpData> {
     const params = new DemetraRequestPage(
       id,
       options,
@@ -112,7 +112,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async fetchChildren(id: number | Array<number> | string | Array<string>, options?: Partial<DemetraRequestChildrenOptions>) : Promise<WpData> {
+  public async fetchChildren(id: number | Array<number> | string | Array<string>, options?: Partial<DemetraRequestChildrenOptions>): Promise<WpData> {
     const params = new DemetraRequestChildren(
       id,
       options,
@@ -176,7 +176,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async subscribe(email: string, lang?: string, site? : string): Promise<WpData> {
+  public async subscribe(email: string, lang?: string, site?: string): Promise<WpData> {
     const params = new DemetraRequestSubscribe(
       email,
       null,
@@ -187,7 +187,7 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async subscribeWithAdditionalData(email: string, data : Map<string, string>, lang?: string, site? : string): Promise<WpData> {
+  public async subscribeWithAdditionalData(email: string, data: Map<string, string>, lang?: string, site?: string): Promise<WpData> {
     const params = new DemetraRequestSubscribe(
       email,
       data,
@@ -198,8 +198,8 @@ class Demetra {
     return this.fetch(params);
   }
 
-  public async send(id: number, recipients : string, data : object, files? : Array<File>): Promise<WpData> {
-    let urls: Array<{ path: string, url : string }> = [];
+  public async send(id: number, recipients: string, data: object, files?: Array<File>): Promise<WpData> {
+    let urls: Array<{ path: string, url: string }> = [];
 
     if (files && files.length > 0) {
       const uploadResponses: Array<WpFile> = await this.upload(files);
@@ -228,17 +228,17 @@ class Demetra {
   }
 
   private async fetch(
-    params : DemetraRequestLanguages |
-             DemetraRequestSiteMap |
-             DemetraRequestPage |
-             DemetraRequestChildren |
-             DemetraRequestArchive |
-             DemetraRequestExtra |
-             DemetraRequestMenu |
-             DemetraRequestTaxonomy |
-             DemetraRequestSend |
-             DemetraRequestSubscribe
-  ) : Promise<WpData> {
+    params: DemetraRequestLanguages |
+            DemetraRequestSiteMap |
+            DemetraRequestPage |
+            DemetraRequestChildren |
+            DemetraRequestArchive |
+            DemetraRequestExtra |
+            DemetraRequestMenu |
+            DemetraRequestTaxonomy |
+            DemetraRequestSend |
+            DemetraRequestSubscribe
+  ): Promise<WpData> {
     // Check local cache
     if ((params as any).localCache && this.cache.has(params.hash)) {
       const cached = this.cache.get(params.hash) || {} as WpData;
@@ -268,29 +268,29 @@ class Demetra {
     if ((params as any).localCache) {
       this.cache.set(params.hash, json[0]);
     }
-    return json[0];
+    return json[0] || {} as WpData;
   }
 
-  public async upload(files : Array<File> | File) : Promise<Array<WpFile>> {
+  public async upload(files: Array<File> | File): Promise<Array<WpFile>> {
     if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
-    files = Array.isArray(files) ? files : [files];
+    files = Array.isArray(files) ? files: [files];
 
-    const responses : Array<Promise<Response>> = files.map((file) => {
+    const responses: Array<Promise<Response>> = files.map((file) => {
       const formData = new FormData();
       formData.append('file', file);
       const request = new Request(this.options.uploadEndpoint, { method: 'POST', body: formData });
       return fetch(request);
     });
     const promisesResponses = await Promise.all(responses);
-    const jsons : Array<Promise<WpFile>> = promisesResponses.map(response => response.json());
+    const jsons: Array<Promise<WpFile>> = promisesResponses.map(response => response.json());
     return Promise.all(jsons);
   }
 
   private async sendOnce(): Promise<Array<object>> {
     // This will contains the already fetched data extrapolated from the local cache and the original array index
-    const cachedDates : Array<{ index: number, data: object }> = [];
+    const cachedDates: Array<{ index: number, data: object }> = [];
     // This will contain all un-cacheable and all the uncached requests
-    const uncachedRequests : Array<
+    const uncachedRequests: Array<
       DemetraRequestLanguages |
       DemetraRequestSiteMap |
       DemetraRequestPage |
@@ -346,7 +346,7 @@ class Demetra {
   }
 
   private async sendConsequentially(): Promise<Array<WpData>> {
-    const responses : Array<WpData> = [];
+    const responses: Array<WpData> = [];
     for (const request of this.queue.requests) {
       responses.push(await this.fetch(request));
     }

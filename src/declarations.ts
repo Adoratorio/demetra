@@ -53,7 +53,7 @@ export interface DemetraOptions {
   uploadEndpoint: string;
   site: string;
   lang: string;
-  version : number;
+  version: number;
   debug: boolean;
   cacheMaxAge: number;
   maxItems: number;
@@ -92,10 +92,10 @@ export interface FetchSitemapOptions extends Cache {
 export interface FetchAttachmentsOptions extends Cache, Lang {}
 
 export interface DemetraRequestGlobalOptions {
-  id : string | number | Array<string> | Array<number>;
-  mode : WP_MODES;
-  site : string;
-  version : number;
+  id: string | number | Array<string> | Array<number>;
+  mode: WP_MODES;
+  site: string;
+  version: number;
 }
 
 export type DemetraRequestLanguagesOptions = DemetraRequestGlobalOptions & FetchLanguagesOptions;
@@ -123,8 +123,8 @@ export type WpFile = Array<{
     message: string;
   };
   data: {
-    uploadId : number,
-    url : string,
-    path : string,
+    uploadId: number,
+    url: string,
+    path: string,
   };
 }>;

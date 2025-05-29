@@ -2,13 +2,13 @@ import DemetraRequest from "./DemetraRequest";
 import { DemetraRequestSiteMapOptions, WP_MODES } from '../declarations';
 
 class DemetraRequestSiteMap extends DemetraRequest {
-  public wpCache : boolean;
-  public localCache : boolean;
+  public wpCache: boolean;
+  public localCache: boolean;
 
   constructor(
-    site : string,
-    options? : Partial<DemetraRequestSiteMapOptions>,
-    version? : number,
+    site: string,
+    options?: Partial<DemetraRequestSiteMapOptions>,
+    version?: number,
     ) {
     super(WP_MODES.SITE_MAP, -1, undefined, site, version);
 
