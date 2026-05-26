@@ -1,12 +1,12 @@
-import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestTaxonomyOptions, WP_MODES } from "../declarations";
+import DemetraRequest from './DemetraRequest.ts';
+import { WP_MODES, type DemetraRequestTaxonomyOptions } from '../declarations.ts';
 
 class DemetraRequestTaxonomy extends DemetraRequest {
   public wpCache: boolean;
   public localCache: boolean;
 
   constructor(
-    id: string | Array<string>,
+    id: string | string[],
     options?: Partial<DemetraRequestTaxonomyOptions>,
     lang?: string,
     site?: string,

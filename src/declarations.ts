@@ -1,4 +1,4 @@
-import { AxiosProxyConfig } from "axios";
+import { type AxiosProxyConfig } from 'axios';
 
 export interface Pagination {
   start: number;
@@ -12,7 +12,7 @@ export interface Filter {
 }
 
 export interface Siblings {
-  fields: Array<string>;
+  fields: string[];
   next?: boolean;
   prev?: boolean;
   loop?: boolean;
@@ -68,12 +68,12 @@ export interface FetchPageOptions extends Cache, Lang {
 export interface FetchChildrenOptions extends Cache, Lang {}
 
 export interface FetchArchiveOptions extends Cache, Lang {
-  fields: Array<string>;
+  fields: string[];
   pagination: Pagination;
-  filters: Array<Filter>;
+  filters: Filter[];
   taxonomy: {
-    slug: string,
-    id: string,
+    slug: string;
+    id: string;
   };
 }
 
@@ -86,13 +86,13 @@ export interface FetchTaxonomyOptions extends Cache, Lang {}
 export interface FetchLanguagesOptions extends Cache, Lang {}
 
 export interface FetchSitemapOptions extends Cache {
-  filter_lang: boolean,
+  filter_lang: boolean;
 }
 
 export interface FetchAttachmentsOptions extends Cache, Lang {}
 
 export interface DemetraRequestGlobalOptions {
-  id: string | number | Array<string> | Array<number>;
+  id: string | number | string[] | number[];
   mode: WP_MODES;
   site: string;
   version: number;
@@ -106,25 +106,26 @@ export type DemetraRequestArchiveOptions = DemetraRequestGlobalOptions & FetchAr
 export type DemetraRequestExtraOptions = DemetraRequestGlobalOptions & FetchExtraOptions;
 export type DemetraRequestMenuOptions = DemetraRequestGlobalOptions & FetchMenuOptions;
 export type DemetraRequestTaxonomyOptions = DemetraRequestGlobalOptions & FetchTaxonomyOptions;
-export type DemetraRequestAttachmentsOptions = DemetraRequestGlobalOptions & FetchAttachmentsOptions;
+export type DemetraRequestAttachmentsOptions = DemetraRequestGlobalOptions &
+  FetchAttachmentsOptions;
 
-export type WpData = {
+export interface WpData {
   status: {
     code: number;
     message: string;
     cache: boolean;
   };
   data: object;
-};
+}
 
-export type WpFile = Array<{
+export type WpFile = {
   status: {
     code: number;
     message: string;
   };
   data: {
-    uploadId: number,
-    url: string,
-    path: string,
+    uploadId: number;
+    url: string;
+    path: string;
   };
-}>;
+}[];

@@ -3,15 +3,13 @@
     // === Language & Environment ===
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
 
     // === Module System ===
-    "allowSyntheticDefaultImports": false,
-    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false,
-    "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
 
     // === Emit ===
@@ -22,57 +20,33 @@
     "rootDir": "./src",
     "removeComments": true,
     "importHelpers": true,
-    "inlineSourceMap": false,
-    "inlineSources": false,
+    "stripInternal": true,
 
-    // === JavaScript Support ===
-    "allowJs": false,
-    "checkJs": false,
-
-    // === Type Checking (Strict Mode) ===
+    // === Type Checking ===
     "strict": true,
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "useUnknownInCatchVariables": true,
 
     // === Modules ===
-    "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "@/types": ["src/declarations.ts"]
+      "@/*": ["./src/*"],
+      "@/types": ["./src/declarations.ts"]
     },
 
-    // === Emit Declarations ===
-    "stripInternal": true,
-
-    // === Advanced ===
+    // === Performance ===
     "skipLibCheck": true,
-
-    // === Bundler-specific ===
-    "allowArbitraryExtensions": false,
-
-    // === Projects ===
-    "composite": false,
-    "disableReferencedProjectLoad": true,
 
     // === Output Formatting ===
     "noErrorTruncation": true,
     "preserveWatchOutput": true,
-    "pretty": true,
-
-    // === Completeness ===
-    "skipDefaultLibCheck": true,
+    "pretty": true
   },
-  "include": [
-    "src/**/*",
-    "types/**/*"
-  ],
+  "include": ["src/**/*", "types/**/*"],
   "exclude": [
     "node_modules",
     "dist",
@@ -86,5 +60,5 @@
     "docs/**/*",
     "*.config.js",
     "*.config.ts"
-  ],
+  ]
 }

@@ -1,35 +1,34 @@
-import DemetraRequestArchive from "./DemetraRequestArchive";
-import DemetraRequestExtra from "./DemetraRequestExtra";
-import DemetraRequestMenu from "./DemetraRequestMenu";
-import DemetraRequestPage from "./DemetraRequestPage";
-import DemetraRequestTaxonomy from "./DemetraRequestTaxonomy";
-import DemetraRequestLanguages from './DemetraRequestLanguages';
-import DemetraRequestSiteMap from './DemetraRequestSiteMap';
-import DemetraRequestChildren from './DemetraRequestChildren';
+import type DemetraRequestArchive from './DemetraRequestArchive.ts';
+import type DemetraRequestExtra from './DemetraRequestExtra.ts';
+import type DemetraRequestMenu from './DemetraRequestMenu.ts';
+import type DemetraRequestPage from './DemetraRequestPage.ts';
+import type DemetraRequestTaxonomy from './DemetraRequestTaxonomy.ts';
+import type DemetraRequestLanguages from './DemetraRequestLanguages.ts';
+import type DemetraRequestSiteMap from './DemetraRequestSiteMap.ts';
+import type DemetraRequestChildren from './DemetraRequestChildren.ts';
 
 class DemetraQueue {
-  public readonly requests: Array<
-    DemetraRequestPage |
-    DemetraRequestArchive |
-    DemetraRequestExtra |
-    DemetraRequestTaxonomy |
-    DemetraRequestLanguages |
-    DemetraRequestSiteMap |
-    DemetraRequestChildren |
-    DemetraRequestMenu
-  > = [];
+  public readonly requests: (
+    | DemetraRequestPage
+    | DemetraRequestArchive
+    | DemetraRequestExtra
+    | DemetraRequestTaxonomy
+    | DemetraRequestLanguages
+    | DemetraRequestSiteMap
+    | DemetraRequestChildren
+    | DemetraRequestMenu
+  )[] = [];
 
-  constructor() {}
-
-  add(request :
-        DemetraRequestPage |
-        DemetraRequestArchive |
-        DemetraRequestExtra |
-        DemetraRequestTaxonomy |
-        DemetraRequestLanguages |
-        DemetraRequestSiteMap |
-        DemetraRequestChildren |
-        DemetraRequestMenu
+  add(
+    request:
+      | DemetraRequestPage
+      | DemetraRequestArchive
+      | DemetraRequestExtra
+      | DemetraRequestTaxonomy
+      | DemetraRequestLanguages
+      | DemetraRequestSiteMap
+      | DemetraRequestChildren
+      | DemetraRequestMenu,
   ) {
     this.requests.push(request);
   }

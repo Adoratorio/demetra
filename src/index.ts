@@ -1,39 +1,39 @@
 import { LRUCache } from 'lru-cache';
 import axios from 'axios';
-import { validateUrl } from './validators';
+import { validateUrl } from './validators.ts';
 import {
-  DemetraOptions,
-  DemetraRequestLanguagesOptions,
-  DemetraRequestSiteMapOptions,
-  DemetraRequestArchiveOptions,
-  DemetraRequestExtraOptions,
-  DemetraRequestMenuOptions,
-  DemetraRequestPageOptions,
-  DemetraRequestChildrenOptions,
-  DemetraRequestTaxonomyOptions,
-  DemetraRequestAttachmentsOptions,
   SEND_MODES,
-  WpData,
-  WpFile,
-} from './declarations';
-import DemetraQueue from './Requests/DemetraQueue';
-import DemetraRequestLanguages from './Requests/DemetraRequestLanguages';
-import DemetraRequestSiteMap from './Requests/DemetraRequestSiteMap';
-import DemetraRequestPage from './Requests/DemetraRequestPage';
-import DemetraRequestChildren from './Requests/DemetraRequestChildren';
-import DemetraRequestArchive from './Requests/DemetraRequestArchive';
-import DemetraRequestExtra from './Requests/DemetraRequestExtra';
-import DemetraRequestMenu from './Requests/DemetraRequestMenu';
-import DemetraRequestTaxonomy from './Requests/DemetraRequestTaxonomy';
-import DemetraRequestSend from './Requests/DemetraRequestSend';
-import DemetraRequestSubscribe from './Requests/DemetraRequestSubscribe';
-import DemetraRequestAttachments from './Requests/DemetraRequestAttachments';
+  type DemetraOptions,
+  type DemetraRequestLanguagesOptions,
+  type DemetraRequestSiteMapOptions,
+  type DemetraRequestArchiveOptions,
+  type DemetraRequestExtraOptions,
+  type DemetraRequestMenuOptions,
+  type DemetraRequestPageOptions,
+  type DemetraRequestChildrenOptions,
+  type DemetraRequestTaxonomyOptions,
+  type DemetraRequestAttachmentsOptions,
+  type WpData,
+  type WpFile,
+} from './declarations.ts';
+import DemetraQueue from './Requests/DemetraQueue.ts';
+import DemetraRequestLanguages from './Requests/DemetraRequestLanguages.ts';
+import DemetraRequestSiteMap from './Requests/DemetraRequestSiteMap.ts';
+import DemetraRequestPage from './Requests/DemetraRequestPage.ts';
+import DemetraRequestChildren from './Requests/DemetraRequestChildren.ts';
+import DemetraRequestArchive from './Requests/DemetraRequestArchive.ts';
+import DemetraRequestExtra from './Requests/DemetraRequestExtra.ts';
+import DemetraRequestMenu from './Requests/DemetraRequestMenu.ts';
+import DemetraRequestTaxonomy from './Requests/DemetraRequestTaxonomy.ts';
+import DemetraRequestSend from './Requests/DemetraRequestSend.ts';
+import DemetraRequestSubscribe from './Requests/DemetraRequestSubscribe.ts';
+import DemetraRequestAttachments from './Requests/DemetraRequestAttachments.ts';
 
 class Demetra {
   public static readonly SEND_MODES = SEND_MODES;
   private readonly cache: LRUCache<string, WpData>;
-  private readonly queue: DemetraQueue;
-  private options: DemetraOptions;
+  public readonly queue: DemetraQueue;
+  private readonly options: DemetraOptions;
 
   constructor(options: Partial<DemetraOptions> = {}) {
     const defaults: DemetraOptions = {
@@ -46,9 +46,9 @@ class Demetra {
       cacheMaxAge: 1000 * 60 * 60,
       maxItems: 500,
       proxy: false,
-    }
+    };
     this.options = { ...defaults, ...options };
-    this.queue = new DemetraQueue;
+    this.queue = new DemetraQueue();
     this.cache = new LRUCache({ max: this.options.maxItems, ttl: this.options.cacheMaxAge });
 
     if (this.options.endpoint.length <= 0 || !validateUrl(this.options.endpoint)) {
@@ -60,12 +60,17 @@ class Demetra {
     }
   }
 
-  public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<Array<object>> {
-    if (sendModes !== SEND_MODES.ONCE && sendModes !== SEND_MODES.SIMULTANEOUSLY && sendModes !== SEND_MODES.AWAIT) {
-      throw new Error('Invalid SEND_MODES')
+  public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<object[]> {
+    if (
+      sendModes !== SEND_MODES.ONCE &&
+      sendModes !== SEND_MODES.SIMULTANEOUSLY &&
+      sendModes !== SEND_MODES.AWAIT
+    ) {
+      throw new Error('Invalid SEND_MODES');
     }
 
-    let response;
+    let response = undefined;
+
     if (sendModes === SEND_MODES.ONCE) {
       response = this.sendOnce();
     }
@@ -82,96 +87,123 @@ class Demetra {
     return response || [];
   }
 
-  public async fetchLanguages(site: string, options?: Partial<DemetraRequestLanguagesOptions>): Promise<WpData> {
+  public async fetchLanguages(
+    site: string,
+    options?: Partial<DemetraRequestLanguagesOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestLanguages(
       site,
       options,
       (options && options.lang) || this.options.lang,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchSitemap(site: string, options?: Partial<DemetraRequestSiteMapOptions>): Promise<WpData> {
+  public async fetchSitemap(
+    site: string,
+    options?: Partial<DemetraRequestSiteMapOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestSiteMap(
       site,
       options,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchPage(id: string | number, options?: Partial<DemetraRequestPageOptions>): Promise<WpData> {
+  public async fetchPage(
+    id: string | number,
+    options?: Partial<DemetraRequestPageOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestPage(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchChildren(id: number | Array<number> | string | Array<string>, options?: Partial<DemetraRequestChildrenOptions>): Promise<WpData> {
+  public async fetchChildren(
+    id: number | number[] | string | string[],
+    options?: Partial<DemetraRequestChildrenOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestChildren(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchArchive(id: string, options?: Partial<DemetraRequestArchiveOptions>): Promise<WpData> {
+  public async fetchArchive(
+    id: string,
+    options?: Partial<DemetraRequestArchiveOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestArchive(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchExtra(id: string, options?: Partial<DemetraRequestExtraOptions>): Promise<WpData> {
+  public async fetchExtra(
+    id: string,
+    options?: Partial<DemetraRequestExtraOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestExtra(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchMenu(id: string, options?: Partial<DemetraRequestMenuOptions>): Promise<WpData> {
+  public async fetchMenu(
+    id: string,
+    options?: Partial<DemetraRequestMenuOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestMenu(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchTaxonomy(id: string | Array<string>, options?: Partial<DemetraRequestTaxonomyOptions>): Promise<WpData> {
+  public async fetchTaxonomy(
+    id: string | string[],
+    options?: Partial<DemetraRequestTaxonomyOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestTaxonomy(
       id,
       options,
       (options && options.lang) || this.options.lang,
       (options && options.site) || this.options.site,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async fetchAttachments(site: string, options?: Partial<DemetraRequestAttachmentsOptions>): Promise<WpData> {
+  public async fetchAttachments(
+    site: string,
+    options?: Partial<DemetraRequestAttachmentsOptions>,
+  ): Promise<WpData> {
     const params = new DemetraRequestAttachments(
       site,
       options,
-      (options && options.version) || this.options.version
+      (options && options.version) || this.options.version,
     );
     return this.fetch(params);
   }
@@ -182,30 +214,35 @@ class Demetra {
       null,
       lang || this.options.lang,
       site || this.options.site,
-      this.options.version
+      this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async subscribeWithAdditionalData(email: string, data: Map<string, string>, lang?: string, site?: string): Promise<WpData> {
+  public async subscribeWithAdditionalData(
+    email: string,
+    data: Map<string, string>,
+    lang?: string,
+    site?: string,
+  ): Promise<WpData> {
     const params = new DemetraRequestSubscribe(
       email,
       data,
       lang || this.options.lang,
       site || this.options.site,
-      this.options.version
+      this.options.version,
     );
     return this.fetch(params);
   }
 
-  public async send(id: number, recipients: string, data: object, files?: Array<File>): Promise<WpData> {
-    let urls: Array<{ path: string, url: string }> = [];
+  public async send(id: number, recipients: string, data: object, files?: File[]): Promise<WpData> {
+    const urls: { path: string; url: string }[] = [];
 
     if (files && files.length > 0) {
-      const uploadResponses: Array<WpFile> = await this.upload(files);
+      const uploadResponses: WpFile[] = await this.upload(files);
 
-      uploadResponses.forEach((files) => {
-        files.forEach((file) => {
+      uploadResponses.forEach((uploadedFiles) => {
+        uploadedFiles.forEach((file) => {
           if (typeof file !== 'object') {
             throw new Error('Invalid response. It mus be an object');
           }
@@ -222,26 +259,29 @@ class Demetra {
       urls,
       this.options.lang,
       this.options.site,
-      this.options.version
+      this.options.version,
     );
     return this.fetch(params);
   }
 
   private async fetch(
-    params: DemetraRequestLanguages |
-            DemetraRequestSiteMap |
-            DemetraRequestPage |
-            DemetraRequestChildren |
-            DemetraRequestArchive |
-            DemetraRequestExtra |
-            DemetraRequestMenu |
-            DemetraRequestTaxonomy |
-            DemetraRequestSend |
-            DemetraRequestSubscribe
+    params:
+      | DemetraRequestLanguages
+      | DemetraRequestSiteMap
+      | DemetraRequestPage
+      | DemetraRequestChildren
+      | DemetraRequestArchive
+      | DemetraRequestExtra
+      | DemetraRequestMenu
+      | DemetraRequestTaxonomy
+      | DemetraRequestSend
+      | DemetraRequestSubscribe,
   ): Promise<WpData> {
+    const hasLocalCache = 'localCache' in params && params.localCache;
+
     // Check local cache
-    if ((params as any).localCache && this.cache.has(params.hash)) {
-      const cached = this.cache.get(params.hash) || {} as WpData;
+    if (hasLocalCache && this.cache.has(params.hash)) {
+      const cached = this.cache.get(params.hash);
       if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
       return this.parseFromLocalCache(cached);
     }
@@ -251,7 +291,7 @@ class Demetra {
     const headers = {
       'Content-Type': 'application/json',
     };
-    const response = await axios({
+    const response = await axios<WpData[]>({
       method: 'post',
       headers,
       url: this.options.endpoint,
@@ -259,61 +299,66 @@ class Demetra {
       responseType: 'json',
       proxy: this.options.proxy,
     });
-    const json = response.data as unknown as Array<WpData>;
-    json.forEach((response) => {
-      this.debugLog(response);
-      this.handleError(response);
+    const json = response.data;
+    json.forEach((res) => {
+      this.debugLog(res);
+      this.handleError(res);
     });
 
-    if ((params as any).localCache) {
-      this.cache.set(params.hash, json[0]);
+    const [result] = json;
+    if (typeof result === 'undefined') throw new Error('Empty response from API');
+
+    if (hasLocalCache) {
+      this.cache.set(params.hash, result);
     }
-    return json[0] || {} as WpData;
+    return result;
   }
 
-  public async upload(files: Array<File> | File): Promise<Array<WpFile>> {
-    if (typeof this.options.uploadEndpoint === 'undefined') throw new Error('No upload endpoint defined');
-    files = Array.isArray(files) ? files: [files];
+  public async upload(files: File[] | File): Promise<WpFile[]> {
+    if (typeof this.options.uploadEndpoint === 'undefined')
+      throw new Error('No upload endpoint defined');
+    files = Array.isArray(files) ? files : [files];
 
-    const responses: Array<Promise<Response>> = files.map((file) => {
+    const responses: Promise<Response>[] = files.map((file) => {
       const formData = new FormData();
       formData.append('file', file);
       const request = new Request(this.options.uploadEndpoint, { method: 'POST', body: formData });
       return fetch(request);
     });
     const promisesResponses = await Promise.all(responses);
-    const jsons: Array<Promise<WpFile>> = promisesResponses.map(response => response.json());
+    const jsons: Promise<WpFile>[] = promisesResponses.map((response) => response.json());
     return Promise.all(jsons);
   }
 
-  private async sendOnce(): Promise<Array<object>> {
+  private async sendOnce(): Promise<object[]> {
     // This will contains the already fetched data extrapolated from the local cache and the original array index
-    const cachedDates: Array<{ index: number, data: object }> = [];
+    const cachedDates: { index: number; data: WpData }[] = [];
     // This will contain all un-cacheable and all the uncached requests
-    const uncachedRequests: Array<
-      DemetraRequestLanguages |
-      DemetraRequestSiteMap |
-      DemetraRequestPage |
-      DemetraRequestChildren |
-      DemetraRequestArchive |
-      DemetraRequestExtra |
-      DemetraRequestTaxonomy
-    > = [];
+    const uncachedRequests: (
+      | DemetraRequestLanguages
+      | DemetraRequestSiteMap
+      | DemetraRequestPage
+      | DemetraRequestChildren
+      | DemetraRequestArchive
+      | DemetraRequestExtra
+      | DemetraRequestTaxonomy
+    )[] = [];
 
     this.queue.requests.forEach((request, index) => {
       if (request.localCache && this.cache.has(request.hash)) {
-        const cached = this.cache.get(request.hash) || {} as WpData;
+        const cached = this.cache.get(request.hash);
+        if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
         cachedDates.push({ index, data: this.parseFromLocalCache(cached) });
       } else {
         uncachedRequests.push(request);
       }
-    })
+    });
 
     // Inject endpoint and all configuration taken from demetra instance options
     const headers = {
       'Content-Type': 'application/json',
     };
-    const response = await axios({
+    const response = await axios<WpData[]>({
       method: 'post',
       headers,
       url: this.options.endpoint,
@@ -321,36 +366,33 @@ class Demetra {
       responseType: 'json',
       proxy: this.options.proxy,
     });
-    const responses = response.data as unknown as Array<WpData>;
+    const responses = response.data;
     uncachedRequests.forEach((request, index) => {
-      if (request.localCache) { this.cache.set(request.hash, responses[index]); }
+      if (request.localCache) {
+        this.cache.set(request.hash, responses[index]);
+      }
     });
-
 
     // Merge cached data with fetch data in the original index
     cachedDates.forEach((cachedData) => {
-      responses.splice(cachedData.index, 0, cachedData.data as WpData);
+      responses.splice(cachedData.index, 0, cachedData.data);
     });
 
-    responses.forEach((response) => {
-      this.debugLog(response);
-      this.handleError(response);
+    responses.forEach((res) => {
+      this.debugLog(res);
+      this.handleError(res);
     });
 
     return responses;
   }
 
-  private async sendSimultaneously(): Promise<Array<WpData>> {
-    const promises: Array<Promise<WpData>> = this.queue.requests.map(request => this.fetch(request));
+  private async sendSimultaneously(): Promise<WpData[]> {
+    const promises: Promise<WpData>[] = this.queue.requests.map((request) => this.fetch(request));
     return Promise.all(promises);
   }
 
-  private async sendConsequentially(): Promise<Array<WpData>> {
-    const responses: Array<WpData> = [];
-    for (const request of this.queue.requests) {
-      responses.push(await this.fetch(request));
-    }
-    return responses;
+  private async sendConsequentially(): Promise<WpData[]> {
+    return Promise.all(this.queue.requests.map((request) => this.fetch(request)));
   }
 
   private debugLog(response: WpData) {

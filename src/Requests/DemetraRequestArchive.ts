@@ -1,16 +1,16 @@
-import DemetraRequest from "./DemetraRequest";
+import DemetraRequest from './DemetraRequest.ts';
 import {
-  DemetraRequestArchiveOptions,
-  Pagination,
-  Filter,
   WP_MODES,
-} from "../declarations";
+  type DemetraRequestArchiveOptions,
+  type Pagination,
+  type Filter,
+} from '../declarations.ts';
 
 class DemetraRequestArchive extends DemetraRequest {
   public i18n: boolean;
-  public fields: Array<string>;
+  public fields: string[];
   public pagination: Pagination;
-  public filters: Array<Filter>;
+  public filters: Filter[];
   public wpCache: boolean;
   public localCache: boolean;
 
@@ -19,16 +19,16 @@ class DemetraRequestArchive extends DemetraRequest {
     options?: Partial<DemetraRequestArchiveOptions>,
     lang?: string,
     site?: string,
-    version?: number
+    version?: number,
   ) {
     super(WP_MODES.ARCHIVE, id, lang, site, version);
 
     if (typeof options === 'undefined') options = {};
 
-    this.i18n = options.i18n              || true;
-    this.fields = options.fields          || [];
-    this.pagination = options.pagination  || { start: 0, count: -1 };
-    this.filters = options.filters        || [];
+    this.i18n = options.i18n || true;
+    this.fields = options.fields || [];
+    this.pagination = options.pagination || { start: 0, count: -1 };
+    this.filters = options.filters || [];
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }

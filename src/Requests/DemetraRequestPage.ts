@@ -1,5 +1,5 @@
-import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestPageOptions, Siblings, WP_MODES } from "../declarations";
+import DemetraRequest from './DemetraRequest.ts';
+import { WP_MODES, type DemetraRequestPageOptions, type Siblings } from '../declarations.ts';
 
 class DemetraRequestPage extends DemetraRequest {
   public type: string;
@@ -19,9 +19,9 @@ class DemetraRequestPage extends DemetraRequest {
 
     if (typeof options === 'undefined') options = {};
 
-    this.type = options.type              || 'page';
-    this.i18n = options.i18n              || true;
-    this.siblings = options.siblings      || { fields: [], prev: false, next: false, loop: false };
+    this.type = options.type || 'page';
+    this.i18n = options.i18n || true;
+    this.siblings = options.siblings || { fields: [], prev: false, next: false, loop: false };
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }

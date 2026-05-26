@@ -1,5 +1,5 @@
-import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestChildrenOptions, WP_MODES } from "../declarations";
+import DemetraRequest from './DemetraRequest.ts';
+import { WP_MODES, type DemetraRequestChildrenOptions } from '../declarations.ts';
 
 class DemetraRequestChildren extends DemetraRequest {
   public i18n: boolean;
@@ -7,7 +7,7 @@ class DemetraRequestChildren extends DemetraRequest {
   public localCache: boolean;
 
   constructor(
-    id: number | Array<number> | string | Array<string>,
+    id: number | number[] | string | string[],
     options?: Partial<DemetraRequestChildrenOptions>,
     lang?: string,
     site?: string,
@@ -17,7 +17,7 @@ class DemetraRequestChildren extends DemetraRequest {
 
     if (typeof options === 'undefined') options = {};
 
-    this.i18n = options.i18n              || true;
+    this.i18n = options.i18n || true;
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }

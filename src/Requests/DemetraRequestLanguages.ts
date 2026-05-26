@@ -1,5 +1,5 @@
-import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestLanguagesOptions, WP_MODES } from '../declarations';
+import DemetraRequest from './DemetraRequest.ts';
+import { WP_MODES, type DemetraRequestLanguagesOptions } from '../declarations.ts';
 
 class DemetraRequestLanguages extends DemetraRequest {
   public wpCache: boolean;

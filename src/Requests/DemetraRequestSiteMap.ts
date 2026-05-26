@@ -1,15 +1,11 @@
-import DemetraRequest from "./DemetraRequest";
-import { DemetraRequestSiteMapOptions, WP_MODES } from '../declarations';
+import DemetraRequest from './DemetraRequest.ts';
+import { WP_MODES, type DemetraRequestSiteMapOptions } from '../declarations.ts';
 
 class DemetraRequestSiteMap extends DemetraRequest {
   public wpCache: boolean;
   public localCache: boolean;
 
-  constructor(
-    site: string,
-    options?: Partial<DemetraRequestSiteMapOptions>,
-    version?: number,
-    ) {
+  constructor(site: string, options?: Partial<DemetraRequestSiteMapOptions>, version?: number) {
     super(WP_MODES.SITE_MAP, -1, undefined, site, version);
 
     if (typeof options === 'undefined') options = {};
