@@ -17,7 +17,7 @@ class DemetraRequestChildren extends DemetraRequest {
 
     if (typeof options === 'undefined') options = {};
 
-    this.i18n = options.i18n || true;
+    this.i18n = options.i18n ?? true;
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
   }

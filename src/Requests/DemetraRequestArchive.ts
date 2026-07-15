@@ -25,7 +25,7 @@ class DemetraRequestArchive extends DemetraRequest {
 
     if (typeof options === 'undefined') options = {};
 
-    this.i18n = options.i18n || true;
+    this.i18n = options.i18n ?? true;
     this.fields = options.fields || [];
     this.pagination = options.pagination || { start: 0, count: -1 };
     this.filters = options.filters || [];

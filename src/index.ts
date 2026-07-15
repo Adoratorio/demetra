@@ -83,8 +83,11 @@ class Demetra {
       response = this.sendConsequentially();
     }
 
-    this.queue.clear();
-    return response || [];
+    try {
+      return (await response) || [];
+    } finally {
+      this.queue.clear();
+    }
   }
 
   public async fetchLanguages(
@@ -244,7 +247,7 @@ class Demetra {
       uploadResponses.forEach((uploadedFiles) => {
         uploadedFiles.forEach((file) => {
           if (typeof file !== 'object') {
-            throw new Error('Invalid response. It mus be an object');
+            throw new Error('Invalid response. It must be an object');
           }
           // if (!file.hasOwnProperty('file')) { throw new Error('Invalid File Response'); }
           urls.push(file.data);
@@ -392,7 +395,12 @@ class Demetra {
   }
 
   private async sendConsequentially(): Promise<WpData[]> {
-    return Promise.all(this.queue.requests.map((request) => this.fetch(request)));
+    const requests = [...this.queue.requests];
+    const responses: WpData[] = [];
+    for (const request of requests) {
+      responses.push(await this.fetch(request));
+    }
+    return responses;
   }
 
   private debugLog(response: WpData) {

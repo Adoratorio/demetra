@@ -20,7 +20,7 @@ class DemetraRequestPage extends DemetraRequest {
     if (typeof options === 'undefined') options = {};
 
     this.type = options.type || 'page';
-    this.i18n = options.i18n || true;
+    this.i18n = options.i18n ?? true;
     this.siblings = options.siblings || { fields: [], prev: false, next: false, loop: false };
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
