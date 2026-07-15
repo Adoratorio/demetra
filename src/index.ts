@@ -30,7 +30,7 @@ import DemetraRequestSubscribe from './Requests/DemetraRequestSubscribe.ts';
 import DemetraRequestAttachments from './Requests/DemetraRequestAttachments.ts';
 
 class Demetra {
-  public static readonly SEND_MODES = SEND_MODES;
+  public static readonly SEND_MODES: typeof SEND_MODES = SEND_MODES;
   private readonly cache: LRUCache<string, WpData>;
   public readonly queue: DemetraQueue;
   private readonly options: DemetraOptions;
@@ -86,6 +86,8 @@ class Demetra {
     try {
       return (await response) || [];
     } finally {
+      // Clear only after the batch settles: the sequential mode reads the
+      // queue lazily, clearing upfront would drop pending requests
       this.queue.clear();
     }
   }
@@ -285,7 +287,9 @@ class Demetra {
     // Check local cache
     if (hasLocalCache && this.cache.has(params.hash)) {
       const cached = this.cache.get(params.hash);
-      if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
+      if (typeof cached === 'undefined') {
+        throw new Error('Unexpected empty cache entry');
+      }
       return this.parseFromLocalCache(cached);
     }
 
@@ -309,7 +313,9 @@ class Demetra {
     });
 
     const [result] = json;
-    if (typeof result === 'undefined') throw new Error('Empty response from API');
+    if (typeof result === 'undefined') {
+      throw new Error('Empty response from API');
+    }
 
     if (hasLocalCache) {
       this.cache.set(params.hash, result);
@@ -318,8 +324,9 @@ class Demetra {
   }
 
   public async upload(files: File[] | File): Promise<WpFile[]> {
-    if (typeof this.options.uploadEndpoint === 'undefined')
+    if (typeof this.options.uploadEndpoint === 'undefined') {
       throw new Error('No upload endpoint defined');
+    }
     files = Array.isArray(files) ? files : [files];
 
     const responses: Promise<Response>[] = files.map((file) => {
@@ -350,7 +357,9 @@ class Demetra {
     this.queue.requests.forEach((request, index) => {
       if (request.localCache && this.cache.has(request.hash)) {
         const cached = this.cache.get(request.hash);
-        if (typeof cached === 'undefined') throw new Error('Unexpected empty cache entry');
+        if (typeof cached === 'undefined') {
+          throw new Error('Unexpected empty cache entry');
+        }
         cachedDates.push({ index, data: this.parseFromLocalCache(cached) });
       } else {
         uncachedRequests.push(request);
@@ -395,6 +404,7 @@ class Demetra {
   }
 
   private async sendConsequentially(): Promise<WpData[]> {
+    // SEND_MODES.AWAIT: requests must resolve one after the other
     const requests = [...this.queue.requests];
     const responses: WpData[] = [];
     for (const request of requests) {

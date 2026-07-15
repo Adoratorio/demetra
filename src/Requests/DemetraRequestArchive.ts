@@ -23,7 +23,9 @@ class DemetraRequestArchive extends DemetraRequest {
   ) {
     super(WP_MODES.ARCHIVE, id, lang, site, version);
 
-    if (typeof options === 'undefined') options = {};
+    if (typeof options === 'undefined') {
+      options = {};
+    }
 
     this.i18n = options.i18n ?? true;
     this.fields = options.fields || [];

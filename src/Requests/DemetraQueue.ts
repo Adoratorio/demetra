@@ -29,11 +29,11 @@ class DemetraQueue {
       | DemetraRequestSiteMap
       | DemetraRequestChildren
       | DemetraRequestMenu,
-  ) {
+  ): void {
     this.requests.push(request);
   }
 
-  clear() {
+  clear(): void {
     this.requests.length = 0;
   }
 }

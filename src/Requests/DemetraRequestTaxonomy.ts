@@ -14,7 +14,9 @@ class DemetraRequestTaxonomy extends DemetraRequest {
   ) {
     super(WP_MODES.TAXONOMY, id, lang, site, version);
 
-    if (typeof options === 'undefined') options = {};
+    if (typeof options === 'undefined') {
+      options = {};
+    }
 
     this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
     this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;

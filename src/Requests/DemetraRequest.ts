@@ -23,11 +23,15 @@ class DemetraRequest {
     this.site = site;
     this.version = version;
 
-    if (typeof this.id === 'undefined') throw new Error('Request id cannot be undefined');
+    if (typeof this.id === 'undefined') {
+      throw new Error('Request id cannot be undefined');
+    }
   }
 
-  public get hash() {
-    if (this.md5.length > 0) return this.md5;
+  public get hash(): string {
+    if (this.md5.length > 0) {
+      return this.md5;
+    }
     this.md5 = md5.hex(JSON.stringify(this));
     return this.md5;
   }

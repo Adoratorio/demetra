@@ -17,7 +17,9 @@ class DemetraRequestPage extends DemetraRequest {
   ) {
     super(WP_MODES.PAGE, id, lang, site, version);
 
-    if (typeof options === 'undefined') options = {};
+    if (typeof options === 'undefined') {
+      options = {};
+    }
 
     this.type = options.type || 'page';
     this.i18n = options.i18n ?? true;

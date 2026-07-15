@@ -28,25 +28,29 @@ export interface Lang {
   i18n: boolean;
 }
 
-export enum WP_MODES {
-  LANGUAGES = 'languages',
-  SITE_MAP = 'sitemap',
-  PAGE = 'page',
-  CHILDREN = 'children',
-  ARCHIVE = 'archive',
-  EXTRA = 'extra',
-  MENU = 'menu',
-  TAXONOMY = 'taxonomy',
-  SEND = 'send',
-  SUBSCRIBE = 'subscribe',
-  ATTACHMENTS = 'attachments',
-}
+export const WP_MODES = {
+  LANGUAGES: 'languages',
+  SITE_MAP: 'sitemap',
+  PAGE: 'page',
+  CHILDREN: 'children',
+  ARCHIVE: 'archive',
+  EXTRA: 'extra',
+  MENU: 'menu',
+  TAXONOMY: 'taxonomy',
+  SEND: 'send',
+  SUBSCRIBE: 'subscribe',
+  ATTACHMENTS: 'attachments',
+} as const;
 
-export enum SEND_MODES {
-  'ONCE',
-  'SIMULTANEOUSLY',
-  'AWAIT',
-}
+export type WP_MODES = (typeof WP_MODES)[keyof typeof WP_MODES];
+
+export const SEND_MODES = {
+  ONCE: 0,
+  SIMULTANEOUSLY: 1,
+  AWAIT: 2,
+} as const;
+
+export type SEND_MODES = (typeof SEND_MODES)[keyof typeof SEND_MODES];
 
 export interface DemetraOptions {
   endpoint: string;

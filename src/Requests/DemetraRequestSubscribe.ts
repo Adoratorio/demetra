@@ -3,7 +3,7 @@ import { WP_MODES } from '../declarations.ts';
 
 class DemetraRequestSubscribe extends DemetraRequest {
   public email = '';
-  public data = new Map<string, string>();
+  public data: Map<string, string> = new Map<string, string>();
 
   constructor(
     email: string,
