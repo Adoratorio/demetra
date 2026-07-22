@@ -1,19 +1,9 @@
-import DemetraRequest from './DemetraRequest.ts';
+import CacheableDemetraRequest from './CacheableDemetraRequest.ts';
 import { WP_MODES, type DemetraRequestSiteMapOptions } from '../types.ts';
 
-class DemetraRequestSiteMap extends DemetraRequest {
-  public wpCache: boolean;
-  public localCache: boolean;
-
-  constructor(site: string, options?: Partial<DemetraRequestSiteMapOptions>, version?: number) {
-    super(WP_MODES.SITE_MAP, -1, undefined, site, version);
-
-    if (typeof options === 'undefined') {
-      options = {};
-    }
-
-    this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
-    this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
+class DemetraRequestSiteMap extends CacheableDemetraRequest {
+  constructor(site: string, options: Partial<DemetraRequestSiteMapOptions> = {}, version?: number) {
+    super(WP_MODES.SITE_MAP, -1, options, undefined, site, version);
   }
 }
 

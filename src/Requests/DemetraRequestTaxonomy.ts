@@ -1,25 +1,15 @@
-import DemetraRequest from './DemetraRequest.ts';
+import CacheableDemetraRequest from './CacheableDemetraRequest.ts';
 import { WP_MODES, type DemetraRequestTaxonomyOptions } from '../types.ts';
 
-class DemetraRequestTaxonomy extends DemetraRequest {
-  public wpCache: boolean;
-  public localCache: boolean;
-
+class DemetraRequestTaxonomy extends CacheableDemetraRequest {
   constructor(
     id: string | string[],
-    options?: Partial<DemetraRequestTaxonomyOptions>,
+    options: Partial<DemetraRequestTaxonomyOptions> = {},
     lang?: string,
     site?: string,
     version?: number,
   ) {
-    super(WP_MODES.TAXONOMY, id, lang, site, version);
-
-    if (typeof options === 'undefined') {
-      options = {};
-    }
-
-    this.wpCache = typeof options.wpCache === 'undefined' ? true : options.wpCache;
-    this.localCache = typeof options.localCache === 'undefined' ? false : options.localCache;
+    super(WP_MODES.TAXONOMY, id, options, lang, site, version);
   }
 }
 

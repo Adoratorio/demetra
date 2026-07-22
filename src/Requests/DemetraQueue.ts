@@ -1,39 +1,13 @@
-import type DemetraRequestArchive from './DemetraRequestArchive.ts';
-import type DemetraRequestExtra from './DemetraRequestExtra.ts';
-import type DemetraRequestMenu from './DemetraRequestMenu.ts';
-import type DemetraRequestPage from './DemetraRequestPage.ts';
-import type DemetraRequestTaxonomy from './DemetraRequestTaxonomy.ts';
-import type DemetraRequestLanguages from './DemetraRequestLanguages.ts';
-import type DemetraRequestSiteMap from './DemetraRequestSiteMap.ts';
-import type DemetraRequestChildren from './DemetraRequestChildren.ts';
+import { type AnyDemetraRequest } from './index.ts';
 
 class DemetraQueue {
-  public readonly requests: (
-    | DemetraRequestPage
-    | DemetraRequestArchive
-    | DemetraRequestExtra
-    | DemetraRequestTaxonomy
-    | DemetraRequestLanguages
-    | DemetraRequestSiteMap
-    | DemetraRequestChildren
-    | DemetraRequestMenu
-  )[] = [];
+  public readonly requests: AnyDemetraRequest[] = [];
 
-  add(
-    request:
-      | DemetraRequestPage
-      | DemetraRequestArchive
-      | DemetraRequestExtra
-      | DemetraRequestTaxonomy
-      | DemetraRequestLanguages
-      | DemetraRequestSiteMap
-      | DemetraRequestChildren
-      | DemetraRequestMenu,
-  ): void {
+  public add(request: AnyDemetraRequest): void {
     this.requests.push(request);
   }
 
-  clear(): void {
+  public clear(): void {
     this.requests.length = 0;
   }
 }

@@ -2,34 +2,10 @@
   "name": "@adoratorio/demetra",
   "version": "2.7.1",
   "description": "Internal use library for wordpress API request",
-  "keywords": [
-    "API",
-    "Firebase",
-    "Wordpress",
-    "adoratorio"
-  ],
-  "homepage": "https://github.com/Adoratorio/demetra#readme",
-  "bugs": {
-    "url": "https://github.com/Adoratorio/demetra/issues"
-  },
-  "license": "MIT",
-  "author": "Adoratorio <contact@adoratorio.com>",
-  "contributors": [
-    "Andrea Gottardi <andrea@adoratorio.com>",
-    "Daniele Borra <daniele@adoratorio.com>",
-    "Andrea Biason <biazo@adoratorio.com>"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Adoratorio/demetra.git"
-  },
-  "files": [
-    "dist/**/*"
-  ],
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -41,7 +17,9 @@
     }
   },
   "sideEffects": false,
-  "packageManager": "pnpm@11.12.0",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "typecheck": "tsc --noEmit",
@@ -52,15 +30,36 @@
     "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check",
     "prepublishOnly": "pnpm run check && pnpm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adoratorio/demetra.git"
+  },
+  "keywords": [
+    "API",
+    "Firebase",
+    "Wordpress",
+    "adoratorio"
+  ],
+  "author": "Adoratorio Studio <contact@adoratorio.com>",
+  "contributors": [
+    "Andrea Gottardi <andrea@adoratorio.com>",
+    "Daniele Borra <daniele@adoratorio.com>",
+    "Andrea Biason <biazo@adoratorio.com>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Adoratorio/demetra/issues"
+  },
+  "homepage": "https://github.com/Adoratorio/demetra#readme",
+  "packageManager": "pnpm@11.12.0",
   "dependencies": {
-    "axios": "^1.18.1",
-    "js-md5": "^0.8.3",
+    "js-md5": "^0.9.2",
     "lru-cache": "^11.5.2"
   },
   "devDependencies": {
-    "@types/node": "^22.19.19",
-    "oxfmt": "^0.58.0",
-    "oxlint": "^1.73.0",
+    "@types/node": "^26.1.1",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
     "typescript": "^7.0.2"
   }
 }

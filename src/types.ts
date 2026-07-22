@@ -1,5 +1,3 @@
-import { type AxiosProxyConfig } from 'axios';
-
 export interface Pagination {
   start: number;
   count: number;
@@ -61,7 +59,6 @@ export interface DemetraOptions {
   debug: boolean;
   cacheMaxAge: number;
   maxItems: number;
-  proxy: AxiosProxyConfig | false;
 }
 
 export interface FetchPageOptions extends Cache, Lang {
@@ -113,16 +110,16 @@ export type DemetraRequestTaxonomyOptions = DemetraRequestGlobalOptions & FetchT
 export type DemetraRequestAttachmentsOptions = DemetraRequestGlobalOptions &
   FetchAttachmentsOptions;
 
-export interface WpData {
+export interface WpData<T = unknown> {
   status: {
     code: number;
     message: string;
     cache: boolean;
   };
-  data: object;
+  data: T;
 }
 
-export type WpFile = {
+export interface WpFile {
   status: {
     code: number;
     message: string;
@@ -132,4 +129,4 @@ export type WpFile = {
     url: string;
     path: string;
   };
-}[];
+}
