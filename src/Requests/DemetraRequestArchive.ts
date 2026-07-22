@@ -4,7 +4,7 @@ import {
   type DemetraRequestArchiveOptions,
   type Pagination,
   type Filter,
-} from '../declarations.ts';
+} from '../types.ts';
 
 class DemetraRequestArchive extends DemetraRequest {
   public i18n: boolean;

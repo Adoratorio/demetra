@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestTaxonomyOptions } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestTaxonomyOptions } from '../types.ts';
 
 class DemetraRequestTaxonomy extends DemetraRequest {
   public wpCache: boolean;

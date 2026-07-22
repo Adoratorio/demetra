@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestMenuOptions } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestMenuOptions } from '../types.ts';
 
 class DemetraRequestMenu extends DemetraRequest {
   public wpCache: boolean;

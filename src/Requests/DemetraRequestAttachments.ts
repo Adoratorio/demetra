@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestAttachmentsOptions } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestAttachmentsOptions } from '../types.ts';
 
 class DemetraRequestAttachments extends DemetraRequest {
   public wpCache: boolean;

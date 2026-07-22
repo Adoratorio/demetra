@@ -1,9 +1,12 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES } from '../declarations.ts';
+import { WP_MODES } from '../types.ts';
 
 class DemetraRequestSubscribe extends DemetraRequest {
   public email = '';
-  public data: Map<string, string> = new Map<string, string>();
+  // Stored as a plain object (not a Map): the request is serialized with
+  // JSON.stringify, and a Map serializes to `{}` — which silently dropped all
+  // additional subscribe data. Object.fromEntries preserves it.
+  public data: Record<string, string> = {};
 
   constructor(
     email: string,
@@ -14,7 +17,7 @@ class DemetraRequestSubscribe extends DemetraRequest {
   ) {
     super(WP_MODES.SUBSCRIBE, -1, lang, site, version);
     this.email = email;
-    this.data = data || new Map();
+    this.data = data ? Object.fromEntries(data) : {};
   }
 }
 

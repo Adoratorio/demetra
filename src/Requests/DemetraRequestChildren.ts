@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestChildrenOptions } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestChildrenOptions } from '../types.ts';
 
 class DemetraRequestChildren extends DemetraRequest {
   public i18n: boolean;

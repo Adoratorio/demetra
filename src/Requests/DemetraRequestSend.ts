@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES } from '../declarations.ts';
+import { WP_MODES } from '../types.ts';
 
 class DemetraRequestSend extends DemetraRequest {
   public recipients: string;

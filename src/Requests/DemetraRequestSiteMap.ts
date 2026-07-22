@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestSiteMapOptions } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestSiteMapOptions } from '../types.ts';
 
 class DemetraRequestSiteMap extends DemetraRequest {
   public wpCache: boolean;

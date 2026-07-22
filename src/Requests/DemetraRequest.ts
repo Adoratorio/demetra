@@ -1,5 +1,5 @@
 import { md5 } from 'js-md5';
-import { type WP_MODES } from '../declarations.ts';
+import { type WP_MODES } from '../types.ts';
 
 class DemetraRequest {
   public id: string | number | string[] | number[] | undefined = undefined;
@@ -8,7 +8,7 @@ class DemetraRequest {
   public site: string;
   public version: number;
 
-  private md5 = '';
+  #md5 = '';
 
   constructor(
     mode: WP_MODES,
@@ -29,11 +29,11 @@ class DemetraRequest {
   }
 
   public get hash(): string {
-    if (this.md5.length > 0) {
-      return this.md5;
+    if (this.#md5.length > 0) {
+      return this.#md5;
     }
-    this.md5 = md5.hex(JSON.stringify(this));
-    return this.md5;
+    this.#md5 = md5.hex(JSON.stringify(this));
+    return this.#md5;
   }
 }
 

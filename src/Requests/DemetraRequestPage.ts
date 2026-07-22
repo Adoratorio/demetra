@@ -1,5 +1,5 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES, type DemetraRequestPageOptions, type Siblings } from '../declarations.ts';
+import { WP_MODES, type DemetraRequestPageOptions, type Siblings } from '../types.ts';
 
 class DemetraRequestPage extends DemetraRequest {
   public type: string;
