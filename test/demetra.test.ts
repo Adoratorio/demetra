@@ -221,3 +221,101 @@ describe('Demetra queue', () => {
     await expect(demetra.fetchQueue(9 as never)).rejects.toThrow('Invalid SEND_MODES');
   });
 });
+
+describe('Demetra endpoint switch', () => {
+  it('keeps the cache isolated per endpoint, including late responses', async () => {
+    let release: (() => void) | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        const body = JSON.parse(init.body as string) as { requests: Record<string, unknown>[] };
+        sent.push({ url, init, requests: body.requests });
+        if (url.includes('slow')) {
+          await new Promise<void>((resolve) => {
+            release = resolve;
+          });
+        }
+        return Response.json(body.requests.map((request) => ok({ from: url, id: request.id })));
+      }),
+    );
+    const demetra = new Demetra({ endpoint: 'https://slow.test/api.php' });
+
+    // A request to the first endpoint is still in flight when the endpoint changes
+    const late = demetra.fetchPage<{ from: string }>('home', { localCache: true });
+    demetra.endpoint = 'https://fast.test/api.php';
+    const fresh = await demetra.fetchPage<{ from: string }>('home', { localCache: true });
+    release?.();
+    await late;
+
+    expect(fresh.data.from).toBe('https://fast.test/api.php');
+    expect(fresh.status.code).toBe(200);
+    // The late response did not overwrite the new endpoint's entry
+    const again = await demetra.fetchPage<{ from: string }>('home', { localCache: true });
+    expect(again.status.code).toBe(304);
+    expect(again.data.from).toBe('https://fast.test/api.php');
+    expect(sent.map((entry) => entry.url)).toEqual([
+      'https://slow.test/api.php',
+      'https://fast.test/api.php',
+    ]);
+  });
+
+  it('follows a derived upload endpoint but keeps an explicit one', () => {
+    const derived = new Demetra({ endpoint: 'https://a.test/api.php' });
+    derived.endpoint = 'https://b.test/api.php';
+    expect(derived.uploadEndpoint).toBe('https://b.test/upload.php');
+
+    const explicit = new Demetra({
+      endpoint: 'https://a.test/api.php',
+      uploadEndpoint: 'https://files.test/upload.php',
+    });
+    explicit.endpoint = 'https://b.test/api.php';
+    expect(explicit.uploadEndpoint).toBe('https://files.test/upload.php');
+  });
+});
+
+describe('Demetra upload', () => {
+  it('drops a configured Content-Type so the multipart boundary is set by the runtime', async () => {
+    const uploads: RequestInit[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        uploads.push(init);
+        return Response.json([
+          { status: { code: 200, message: 'OK' }, data: { uploadId: 1, url: 'u', path: 'p' } },
+        ]);
+      }),
+    );
+    const demetra = new Demetra({
+      endpoint: 'https://x.test/api.php',
+      fetchOptions: { headers: { 'Content-Type': 'application/json', 'X-Token': 'abc' } },
+    });
+
+    const [files] = await demetra.upload(new File(['x'], 'x.txt'));
+
+    const headers = new Headers(uploads[0]?.headers);
+    expect(headers.get('content-type')).toBeNull();
+    expect(headers.get('x-token')).toBe('abc');
+    expect(uploads[0]?.body).toBeInstanceOf(FormData);
+    expect(files?.[0]?.data.url).toBe('u');
+  });
+});
+
+describe('Demetra response validation', () => {
+  it('rejects entries without a status envelope', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json([null])),
+    );
+    const demetra = new Demetra({ endpoint: 'https://x.test/api.php' });
+    await expect(demetra.fetchPage('home')).rejects.toThrow('status and data');
+  });
+
+  it('rejects malformed upload responses', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ nope: true })),
+    );
+    const demetra = new Demetra({ endpoint: 'https://x.test/api.php' });
+    await expect(demetra.upload(new File(['x'], 'x.txt'))).rejects.toThrow('list of files');
+  });
+});
