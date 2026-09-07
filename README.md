@@ -124,3 +124,10 @@ await demetra.fetchQueue(Demetra.SEND_MODES.ONCE);
 ## TypeScript Support
 
 Demetra is fully typed and uses generics for response handling, preventing silent errors and mutating cache bugs. All interfaces (`WpData`, `WpFile`, etc.) are exposed.
+## Maintenance and compatibility
+
+See [MAINTAINERS.md](MAINTAINERS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
+[CHANGELOG.md](CHANGELOG.md). Historical contributor credits are retained.
+The CI runtime is Node 24. Demetra runs in browsers and in Node with a global
+`fetch`; a relative endpoint needs a browser. `AbortSignal.timeout` and
+`AbortSignal.any` are used when `timeout` and a custom `signal` are combined.
