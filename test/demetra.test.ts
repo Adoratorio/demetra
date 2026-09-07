@@ -3,6 +3,7 @@ import Demetra, {
   DemetraError,
   DemetraRequestPage,
   DemetraRequestSubscribe,
+  SEND_MODES,
   type WpData,
 } from '../src/index.ts';
 import { validateUrl } from '../src/validators.ts';
@@ -26,7 +27,7 @@ function mockFetch(responder: (request: Record<string, unknown>) => WpData): voi
     vi.fn(async (url: string, init: RequestInit) => {
       const body = JSON.parse(init.body as string) as { requests: Record<string, unknown>[] };
       sent.push({ url, init, requests: body.requests });
-      return new Response(JSON.stringify(body.requests.map(responder)), { status: 200 });
+      return Response.json(body.requests.map(responder));
     }),
   );
 }
@@ -91,12 +92,16 @@ describe('Demetra requests', () => {
     expect(sent[1]?.requests[0]).toMatchObject({ taxonomy: { slug: 'cat', id: '3' } });
   });
 
-  it('serializes subscribe data given as a Map', () => {
-    const request = new DemetraRequestSubscribe('a@b.c', { data: new Map([['name', 'Ann']]) });
-    expect(JSON.parse(JSON.stringify(request))).toMatchObject({
+  it('sends subscribe data given as a Map as a plain object', async () => {
+    const demetra = new Demetra({ endpoint: 'https://x.test/api.php' });
+    await demetra.subscribeWithAdditionalData('a@b.c', new Map([['name', 'Ann']]));
+
+    expect(sent[0]?.requests[0]).toMatchObject({
+      mode: 'subscribe',
       email: 'a@b.c',
       data: { name: 'Ann' },
     });
+    expect(new DemetraRequestSubscribe('a@b.c').data).toEqual({});
   });
 
   it('derives a stable hash from the request fields', () => {
@@ -113,9 +118,9 @@ describe('Demetra errors', () => {
     mockFetch(() => ({ status: { code: 404, message: 'Not found', cache: false }, data: null }));
     const demetra = new Demetra({ endpoint: 'https://x.test/api.php' });
 
-    const error = await demetra.fetchPage('missing').catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(DemetraError);
-    expect((error as DemetraError).response.status.code).toBe(404);
+    const request = demetra.fetchPage('missing');
+    await expect(request).rejects.toBeInstanceOf(DemetraError);
+    await expect(request).rejects.toMatchObject({ response: { status: { code: 404 } } });
   });
 
   it('returns the error payload when throwOnError is off, without caching it', async () => {
@@ -173,7 +178,7 @@ describe('Demetra queue', () => {
     demetra.queue.add(new DemetraRequestPage('a'));
     demetra.queue.add(new DemetraRequestPage('b', { localCache: true }));
     demetra.queue.add(new DemetraRequestPage('c'));
-    const responses = await demetra.fetchQueue(Demetra.SEND_MODES.ONCE);
+    const responses = await demetra.fetchQueue(SEND_MODES.ONCE);
 
     expect(sent).toHaveLength(1);
     expect(sent[0]?.requests.map((request) => request.id)).toEqual(['a', 'c']);
@@ -200,13 +205,13 @@ describe('Demetra queue', () => {
     const demetra = new Demetra({ endpoint: 'https://x.test/api.php' });
     demetra.queue.add(new DemetraRequestPage('a'));
     demetra.queue.add(new DemetraRequestPage('b'));
-    const sequential = await demetra.fetchQueue(Demetra.SEND_MODES.AWAIT);
+    const sequential = await demetra.fetchQueue(SEND_MODES.AWAIT);
     expect(sent).toHaveLength(2);
     expect(sequential).toHaveLength(2);
 
     demetra.queue.add(new DemetraRequestPage('c'));
     demetra.queue.add(new DemetraRequestPage('d'));
-    const parallel = await demetra.fetchQueue(Demetra.SEND_MODES.SIMULTANEOUSLY);
+    const parallel = await demetra.fetchQueue(SEND_MODES.SIMULTANEOUSLY);
     expect(sent).toHaveLength(4);
     expect(parallel.map((response) => (response.data as { id: string }).id)).toEqual(['c', 'd']);
   });
