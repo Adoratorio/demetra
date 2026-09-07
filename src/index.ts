@@ -1,4 +1,5 @@
 import { LRUCache } from 'lru-cache';
+import { DemetraError } from './errors.ts';
 import { validateUrl } from './validators.ts';
 import {
   SEND_MODES,
@@ -12,6 +13,8 @@ import {
   type DemetraRequestChildrenOptions,
   type DemetraRequestTaxonomyOptions,
   type DemetraRequestAttachmentsOptions,
+  type DemetraRequestBaseOptions,
+  type RequestId,
   type WpData,
   type WpFile,
 } from './types.ts';
@@ -31,6 +34,9 @@ import {
   type AnyDemetraRequest,
 } from './Requests/index.ts';
 
+const HTTP_ERROR = 400;
+const HTTP_NOT_MODIFIED = 304;
+
 class Demetra {
   public static readonly SEND_MODES: typeof SEND_MODES = SEND_MODES;
 
@@ -45,6 +51,9 @@ class Demetra {
       site: 'default',
       lang: 'en',
       debug: false,
+      throwOnError: true,
+      timeout: 0,
+      fetchOptions: {},
       version: 2,
       cacheMaxAge: 1000 * 60 * 60,
       maxItems: 500,
@@ -55,7 +64,11 @@ class Demetra {
     this.#cache = new LRUCache({ max: this.#options.maxItems, ttl: this.#options.cacheMaxAge });
 
     if (this.#options.endpoint.length <= 0 || !validateUrl(this.#options.endpoint)) {
-      throw new Error('Invalid endpoint');
+      throw new Error('[Demetra] Invalid endpoint');
+    }
+
+    if (this.#options.endpoint.startsWith('/') && typeof window === 'undefined') {
+      this.#debugWarn('A relative endpoint cannot be fetched outside of a browser environment');
     }
 
     if (this.#options.uploadEndpoint.length <= 0) {
@@ -63,360 +76,269 @@ class Demetra {
     }
   }
 
-  public async fetchQueue(sendModes: SEND_MODES = SEND_MODES.ONCE): Promise<object[]> {
-    if (
-      sendModes !== SEND_MODES.ONCE &&
-      sendModes !== SEND_MODES.SIMULTANEOUSLY &&
-      sendModes !== SEND_MODES.AWAIT
-    ) {
-      throw new Error('Invalid SEND_MODES');
+  #debugWarn(message: string): void {
+    if (this.#options.debug) {
+      console.warn(`[Demetra] ${message}`);
     }
+  }
 
-    let response = undefined;
+  #debugLog(response: WpData): void {
+    if (this.#options.debug) {
+      console.log('[Demetra]', response);
+    }
+  }
 
-    if (sendModes === SEND_MODES.ONCE) {
-      response = this.#sendOnce();
-    }
-    if (sendModes === SEND_MODES.SIMULTANEOUSLY) {
-      response = this.#sendSimultaneously();
-    }
-    if (sendModes === SEND_MODES.AWAIT) {
-      response = this.#sendConsequentially();
-    }
+  public async fetchQueue(sendMode: SEND_MODES = SEND_MODES.ONCE): Promise<WpData[]> {
+    // Snapshot and clear right away: requests queued while this batch is in
+    // flight belong to the next one
+    const requests = this.queue.requests.map((request) => this.#prepare(request));
+    this.queue.clear();
 
-    try {
-      return (await response) || [];
-    } finally {
-      this.queue.clear();
+    switch (sendMode) {
+      case SEND_MODES.ONCE: {
+        return this.#sendOnce(requests);
+      }
+      case SEND_MODES.SIMULTANEOUSLY: {
+        return Promise.all(requests.map((request) => this.#fetch(request)));
+      }
+      case SEND_MODES.AWAIT: {
+        return this.#sendSequentially(requests);
+      }
+      default: {
+        throw new Error('[Demetra] Invalid SEND_MODES');
+      }
     }
   }
 
   public async fetchLanguages<T = unknown>(
     site: string,
-    options?: Partial<DemetraRequestLanguagesOptions>,
+    options: Partial<DemetraRequestLanguagesOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestLanguages(
-      site,
-      options,
-      options?.lang || this.#options.lang,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestLanguages(site, options));
   }
 
   public async fetchSitemap<T = unknown>(
     site: string,
-    options?: Partial<DemetraRequestSiteMapOptions>,
+    options: Partial<DemetraRequestSiteMapOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestSiteMap(
-      site,
-      options,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestSiteMap(site, options));
   }
 
   public async fetchPage<T = unknown>(
     id: string | number,
-    options?: Partial<DemetraRequestPageOptions>,
+    options: Partial<DemetraRequestPageOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestPage(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestPage(id, options));
   }
 
   public async fetchChildren<T = unknown>(
-    id: number | number[] | string | string[],
-    options?: Partial<DemetraRequestChildrenOptions>,
+    id: RequestId,
+    options: Partial<DemetraRequestChildrenOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestChildren(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestChildren(id, options));
   }
 
   public async fetchArchive<T = unknown>(
     id: string,
-    options?: Partial<DemetraRequestArchiveOptions>,
+    options: Partial<DemetraRequestArchiveOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestArchive(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestArchive(id, options));
   }
 
   public async fetchExtra<T = unknown>(
     id: string,
-    options?: Partial<DemetraRequestExtraOptions>,
+    options: Partial<DemetraRequestExtraOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestExtra(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestExtra(id, options));
   }
 
   public async fetchMenu<T = unknown>(
     id: string,
-    options?: Partial<DemetraRequestMenuOptions>,
+    options: Partial<DemetraRequestMenuOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestMenu(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestMenu(id, options));
   }
 
   public async fetchTaxonomy<T = unknown>(
     id: string | string[],
-    options?: Partial<DemetraRequestTaxonomyOptions>,
+    options: Partial<DemetraRequestTaxonomyOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestTaxonomy(
-      id,
-      options,
-      options?.lang || this.#options.lang,
-      options?.site || this.#options.site,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestTaxonomy(id, options));
   }
 
   public async fetchAttachments<T = unknown>(
     site: string,
-    options?: Partial<DemetraRequestAttachmentsOptions>,
+    options: Partial<DemetraRequestAttachmentsOptions> = {},
   ): Promise<WpData<T>> {
-    const params = new DemetraRequestAttachments(
-      site,
-      options,
-      options?.version || this.#options.version,
-    );
-
-    return this.#fetch<T>(params);
+    return this.#fetch<T>(new DemetraRequestAttachments(site, options));
   }
 
-  public async subscribe(email: string, lang?: string, site?: string): Promise<WpData> {
-    const params = new DemetraRequestSubscribe(
-      email,
-      null,
-      lang || this.#options.lang,
-      site || this.#options.site,
-      this.#options.version,
-    );
-
-    return this.#fetch(params);
+  public async subscribe(email: string, options: DemetraRequestBaseOptions = {}): Promise<WpData> {
+    return this.#fetch(new DemetraRequestSubscribe(email, options));
   }
 
   public async subscribeWithAdditionalData(
     email: string,
-    data: Map<string, string>,
-    lang?: string,
-    site?: string,
+    data: Map<string, string> | Record<string, string>,
+    options: DemetraRequestBaseOptions = {},
   ): Promise<WpData> {
-    const params = new DemetraRequestSubscribe(
-      email,
-      data,
-      lang || this.#options.lang,
-      site || this.#options.site,
-      this.#options.version,
-    );
-
-    return this.#fetch(params);
+    return this.#fetch(new DemetraRequestSubscribe(email, { ...options, data }));
   }
 
-  public async send(id: number, recipients: string, data: object, files?: File[]): Promise<WpData> {
+  public async send(
+    id: number,
+    recipients: string,
+    data: object,
+    files?: File[],
+    options: DemetraRequestBaseOptions = {},
+  ): Promise<WpData> {
     const urls: { path: string; url: string }[] = [];
 
     if (files && files.length > 0) {
-      const uploadResponses: WpFile[][] = await this.upload(files);
+      const uploadResponses = await this.upload(files);
       uploadResponses.forEach((requestResponses) => {
         requestResponses.forEach((file) => {
-          if (typeof file !== 'object') {
-            throw new Error('Invalid response. It must be an object');
+          if (typeof file !== 'object' || file === null) {
+            throw new Error('[Demetra] Invalid upload response. It must be an object');
           }
           urls.push(file.data);
         });
       });
     }
 
-    const params = new DemetraRequestSend(
-      id,
-      recipients,
-      data,
-      urls,
-      this.#options.lang,
-      this.#options.site,
-      this.#options.version,
-    );
-
-    return this.#fetch(params);
+    return this.#fetch(new DemetraRequestSend(id, { ...options, recipients, data, urls }));
   }
 
-  async #fetch<T = unknown>(params: AnyDemetraRequest): Promise<WpData<T>> {
-    const hasLocalCache = 'localCache' in params && params.localCache;
+  public async upload(files: File[] | File): Promise<WpFile[][]> {
+    const list = Array.isArray(files) ? files : [files];
+    const { fetchOptions, uploadEndpoint } = this.#options;
 
-    // Check local cache
-    if (hasLocalCache && this.#cache.has(params.hash)) {
-      const cached = this.#cache.get(params.hash);
-      if (typeof cached === 'undefined') {
-        throw new Error('Unexpected empty cache entry');
-      }
-      return this.#parseFromLocalCache(cached) as WpData<T>;
+    const responses = await Promise.all(
+      list.map((file) => {
+        const body = new FormData();
+        body.append('file', file);
+        return fetch(uploadEndpoint, { ...fetchOptions, ...this.#signal(), method: 'POST', body });
+      }),
+    );
+
+    return Promise.all(
+      responses.map((response) => {
+        if (!response.ok) {
+          throw new Error(`[Demetra] Upload failed: ${response.status} ${response.statusText}`);
+        }
+        return response.json() as Promise<WpFile[]>;
+      }),
+    );
+  }
+
+  // Fill in the instance defaults the request does not set itself
+  #prepare<R extends AnyDemetraRequest>(request: R): R {
+    const { lang, site, version } = this.#options;
+    request.applyDefaults({ lang, site, version });
+    return request;
+  }
+
+  #signal(): { signal?: AbortSignal } {
+    const { timeout, fetchOptions } = this.#options;
+    const signals: AbortSignal[] = [];
+    if (fetchOptions.signal) {
+      signals.push(fetchOptions.signal);
     }
+    if (timeout > 0) {
+      signals.push(AbortSignal.timeout(timeout));
+    }
+    const [first] = signals;
+    if (typeof first === 'undefined') {
+      return {};
+    }
+    return { signal: signals.length === 1 ? first : AbortSignal.any(signals) };
+  }
 
-    const requests = [params];
-    const headers = {
-      'Content-Type': 'application/json',
-    };
+  // One POST carrying any number of requests; the API answers with one entry per request
+  async #post(requests: AnyDemetraRequest[]): Promise<WpData[]> {
+    const { endpoint, fetchOptions } = this.#options;
+    const headers = new Headers(fetchOptions.headers);
+    headers.set('Content-Type', 'application/json');
 
-    const response = await fetch(this.#options.endpoint, {
+    const response = await fetch(endpoint, {
+      ...fetchOptions,
+      ...this.#signal(),
       method: 'POST',
       headers,
       body: JSON.stringify({ requests }),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+      throw new Error(`[Demetra] HTTP Error: ${response.status} ${response.statusText}`);
     }
 
-    const json = (await response.json()) as WpData<T>[];
+    const json = (await response.json()) as unknown;
+    if (!Array.isArray(json) || json.length !== requests.length) {
+      throw new Error('[Demetra] Unexpected response: expected one entry per request');
+    }
+    return json as WpData[];
+  }
 
-    json.forEach((res) => {
-      this.#debugLog(res);
-      this.#handleError(res);
-    });
+  async #fetch<T = unknown>(request: AnyDemetraRequest): Promise<WpData<T>> {
+    this.#prepare(request);
 
-    const [result] = json;
+    const cached = this.#fromCache(request);
+    if (cached) {
+      return cached as WpData<T>;
+    }
 
+    const [result] = await this.#post([request]);
     if (typeof result === 'undefined') {
-      throw new Error('Empty response from API');
+      throw new Error('[Demetra] Empty response from API');
     }
 
-    if (hasLocalCache) {
-      this.#cache.set(params.hash, structuredClone(result));
-    }
+    this.#store(request, result);
+    this.#debugLog(result);
+    this.#handleError(result);
 
-    return result;
+    return result as WpData<T>;
   }
 
-  public async upload(files: File[] | File): Promise<WpFile[][]> {
-    if (typeof this.#options.uploadEndpoint === 'undefined') {
-      throw new Error('No upload endpoint defined');
-    }
+  async #sendOnce(requests: AnyDemetraRequest[]): Promise<WpData[]> {
+    const results: (WpData | undefined)[] = Array.from({ length: requests.length });
+    const pending: { index: number; request: AnyDemetraRequest }[] = [];
 
-    files = Array.isArray(files) ? files : [files];
-
-    const responses: Promise<Response>[] = files.map((file) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const request = new Request(this.#options.uploadEndpoint, { method: 'POST', body: formData });
-      return fetch(request);
-    });
-
-    const promisesResponses = await Promise.all(responses);
-    const jsons: Promise<WpFile[]>[] = promisesResponses.map((response) => {
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
-      }
-      return response.json();
-    });
-
-    return Promise.all(jsons);
-  }
-
-  async #sendOnce(): Promise<object[]> {
-    const cachedDates: { index: number; data: WpData }[] = [];
-    const uncachedRequests: AnyDemetraRequest[] = [];
-
-    this.queue.requests.forEach((request, index) => {
-      if ('localCache' in request && request.localCache && this.#cache.has(request.hash)) {
-        const cached = this.#cache.get(request.hash);
-        if (typeof cached === 'undefined') {
-          throw new Error('Unexpected empty cache entry');
-        }
-        cachedDates.push({ index, data: this.#parseFromLocalCache(cached) });
+    requests.forEach((request, index) => {
+      const cached = this.#fromCache(request);
+      if (cached) {
+        results[index] = cached;
       } else {
-        uncachedRequests.push(request);
+        pending.push({ index, request });
       }
     });
-
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-
-    let responses: WpData[] = [];
 
     // Skip the network round-trip entirely when everything was served from cache
-    if (uncachedRequests.length > 0) {
-      const response = await fetch(this.#options.endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ requests: uncachedRequests }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-      }
-
-      responses = (await response.json()) as WpData[];
-
-      uncachedRequests.forEach((request, index) => {
-        if ('localCache' in request && request.localCache) {
-          this.#cache.set(request.hash, structuredClone(responses[index]));
+    if (pending.length > 0) {
+      const responses = await this.#post(pending.map((entry) => entry.request));
+      pending.forEach(({ index, request }, position) => {
+        const response = responses[position];
+        if (typeof response === 'undefined') {
+          throw new Error('[Demetra] Empty response from API');
         }
+        this.#store(request, response);
+        results[index] = response;
       });
     }
 
-    // Merge cached data with fetch data in the original index
-    cachedDates.forEach((cachedData) => {
-      responses.splice(cachedData.index, 0, cachedData.data);
-    });
-
-    responses.forEach((res) => {
-      this.#debugLog(res);
-      this.#handleError(res);
+    const responses = results.filter((result): result is WpData => typeof result !== 'undefined');
+    responses.forEach((response) => {
+      this.#debugLog(response);
+      this.#handleError(response);
     });
 
     return responses;
   }
 
-  async #sendSimultaneously(): Promise<WpData[]> {
-    const promises: Promise<WpData>[] = this.queue.requests.map((request) => this.#fetch(request));
-    return Promise.all(promises);
-  }
-
-  async #sendConsequentially(): Promise<WpData[]> {
-    const requests = [...this.queue.requests];
+  async #sendSequentially(requests: AnyDemetraRequest[]): Promise<WpData[]> {
     const responses: WpData[] = [];
 
     for (const request of requests) {
-      // AWAIT mode is sequential by design (see #sendSimultaneously for the parallel
+      // AWAIT mode is sequential by design (see SIMULTANEOUSLY for the parallel
       // variant): each request must resolve before the next starts, so awaiting in the
       // loop is intentional, not a missed Promise.all.
       // eslint-disable-next-line no-await-in-loop
@@ -426,28 +348,45 @@ class Demetra {
     return responses;
   }
 
-  #debugLog(response: WpData): void {
-    if (this.#options.debug) {
-      console.log(response);
+  #isLocallyCacheable(request: AnyDemetraRequest): boolean {
+    return 'localCache' in request && request.localCache;
+  }
+
+  #fromCache(request: AnyDemetraRequest): WpData | undefined {
+    if (!this.#isLocallyCacheable(request)) {
+      return undefined;
+    }
+    const cached = this.#cache.get(request.hash);
+    return cached ? this.#parseFromLocalCache(cached) : undefined;
+  }
+
+  // Error responses are never cached
+  #store(request: AnyDemetraRequest, response: WpData): void {
+    if (this.#isLocallyCacheable(request) && response.status.code < HTTP_ERROR) {
+      this.#cache.set(request.hash, structuredClone(response));
     }
   }
 
   #handleError(response: WpData): void {
-    if (response.status.code >= 400) {
-      if (!this.#options.debug) {
-        console.warn(`${response.status.code} - ${response.status.message}`);
-      } else {
-        throw new Error(`${response.status.code} - ${response.status.message}`);
-      }
+    if (response.status.code < HTTP_ERROR) {
+      return;
     }
+    if (this.#options.throwOnError) {
+      throw new DemetraError(response);
+    }
+    this.#debugWarn(`${response.status.code} - ${response.status.message}`);
   }
 
   #parseFromLocalCache(cached: WpData): WpData {
     const cloned = structuredClone(cached);
-    cloned.status.code = 304;
+    cloned.status.code = HTTP_NOT_MODIFIED;
     cloned.status.message = 'Data loaded from local cache';
     cloned.status.cache = true;
     return cloned;
+  }
+
+  public clearCache(): void {
+    this.#cache.clear();
   }
 
   // Getters and setters
@@ -456,6 +395,9 @@ class Demetra {
   }
 
   public set endpoint(url: string) {
+    if (!validateUrl(url)) {
+      throw new Error('[Demetra] Invalid endpoint');
+    }
     this.#options.endpoint = url;
   }
 
@@ -474,14 +416,25 @@ class Demetra {
   public set lang(lang: string) {
     this.#options.lang = lang;
   }
+
+  public get site(): string {
+    return this.#options.site;
+  }
+
+  public set site(site: string) {
+    this.#options.site = site;
+  }
 }
 
+export { DemetraError } from './errors.ts';
 export { SEND_MODES, WP_MODES } from './types.ts';
 export type {
   Cache,
+  DemetraFetchOptions,
   DemetraOptions,
   DemetraRequestArchiveOptions,
   DemetraRequestAttachmentsOptions,
+  DemetraRequestBaseOptions,
   DemetraRequestChildrenOptions,
   DemetraRequestExtraOptions,
   DemetraRequestGlobalOptions,
@@ -497,16 +450,22 @@ export type {
   FetchLanguagesOptions,
   FetchMenuOptions,
   FetchPageOptions,
+  FetchSendOptions,
   FetchSitemapOptions,
+  FetchSubscribeOptions,
   FetchTaxonomyOptions,
   Filter,
   Lang,
   Pagination,
+  RequestId,
   Siblings,
+  Taxonomy,
   WpData,
   WpFile,
 } from './types.ts';
 export {
+  DemetraQueue,
+  DemetraRequest,
   DemetraRequestPage,
   DemetraRequestChildren,
   DemetraRequestArchive,
@@ -516,6 +475,9 @@ export {
   DemetraRequestSiteMap,
   DemetraRequestLanguages,
   DemetraRequestAttachments,
+  DemetraRequestSend,
+  DemetraRequestSubscribe,
+  type AnyDemetraRequest,
 } from './Requests/index.ts';
 
 export default Demetra;

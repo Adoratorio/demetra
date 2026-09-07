@@ -1,25 +1,17 @@
 import DemetraRequest from './DemetraRequest.ts';
-import { WP_MODES } from '../types.ts';
+import { WP_MODES, type FetchSendOptions } from '../types.ts';
 
 class DemetraRequestSend extends DemetraRequest {
   public recipients: string;
   public data: object;
   public urls: { path: string; url: string }[];
 
-  constructor(
-    id: string | number,
-    recipients: string,
-    data: object,
-    urls: { path: string; url: string }[],
-    lang: string,
-    site: string,
-    version: number,
-  ) {
-    super(WP_MODES.SEND, id, lang, site, version);
+  constructor(id: string | number, options: Partial<FetchSendOptions> = {}) {
+    super(WP_MODES.SEND, id, options);
 
-    this.recipients = recipients || '';
-    this.data = data || {};
-    this.urls = urls || [];
+    this.recipients = options.recipients || '';
+    this.data = options.data || {};
+    this.urls = options.urls || [];
   }
 }
 

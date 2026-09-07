@@ -1,4 +1,4 @@
-import { type AnyDemetraRequest } from './index.ts';
+import { type AnyDemetraRequest } from './types.ts';
 
 class DemetraQueue {
   public readonly requests: AnyDemetraRequest[] = [];

@@ -6,14 +6,8 @@ class DemetraRequestPage extends CacheableDemetraRequest {
   public i18n: boolean;
   public siblings: Siblings;
 
-  constructor(
-    id: string | number,
-    options: Partial<DemetraRequestPageOptions> = {},
-    lang?: string,
-    site?: string,
-    version?: number,
-  ) {
-    super(WP_MODES.PAGE, id, options, lang, site, version);
+  constructor(id: string | number, options: Partial<DemetraRequestPageOptions> = {}) {
+    super(WP_MODES.PAGE, id, options);
 
     this.type = options.type || 'page';
     this.i18n = options.i18n ?? true;

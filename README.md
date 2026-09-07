@@ -30,9 +30,12 @@ const demetra = new Demetra({
 | `site` | `string` | `'default'` | Site ID for WordPress multi-site installations. |
 | `lang` | `string` | `'en'` | Default language for data retrieval. |
 | `version` | `number` | `2` | API version used. |
-| `cacheMaxAge` | `number` | `3600000` | Maximum cache age in ms for the LRU Cache. |
+| `throwOnError` | `boolean` | `true` | Reject with a `DemetraError` (carrying the response) when the API answers with a status code `>= 400`. When `false` the error payload is returned as-is. |
+| `timeout` | `number` | `0` | Abort requests after this many ms (`0` disables). |
+| `fetchOptions` | `RequestInit` | `{}` | Extra options forwarded to every `fetch` call (`credentials`, `headers`, `signal`, ...). |
+| `cacheMaxAge` | `number` | `3600000` | Maximum cache age in ms for the LRU Cache. Error responses are never cached. |
 | `maxItems` | `number` | `500` | Maximum number of entries kept in the local cache. |
-| `debug` | `boolean` | `false` | Enable console logging. |
+| `debug` | `boolean` | `false` | Log every response and warn about recoverable issues. |
 
 ## Methods
 
@@ -51,6 +54,10 @@ const children = await demetra.fetchChildren([1, 2, 3]);
 const archive = await demetra.fetchArchive('news', {
   pagination: { start: 0, count: 10 }
 });
+
+// Every method accepts `lang`, `site` and `version` in its options; the
+// instance defaults are used for the ones left out
+const page = await demetra.fetchPage('homepage', { lang: 'it' });
 ```
 
 Other available endpoints:
@@ -66,12 +73,30 @@ Other available endpoints:
 ```typescript
 // Subscribe to MailChimp/Newsletter
 await demetra.subscribe('email@example.com');
+await demetra.subscribeWithAdditionalData('email@example.com', { name: 'John' });
 
 // Send an email via preconfigured WP form
 await demetra.send(formId, 'recipient@example.com', { name: 'John' });
 
 // Upload files (returns WpFile[][])
 await demetra.upload(myFile);
+
+// Drop every locally cached response
+demetra.clearCache();
+```
+
+### Errors
+
+```typescript
+import Demetra, { DemetraError } from '@adoratorio/demetra';
+
+try {
+  await demetra.fetchPage('missing');
+} catch (error) {
+  if (error instanceof DemetraError) {
+    console.log(error.response.status.code); // e.g. 404
+  }
+}
 ```
 
 ### Queue System
@@ -81,15 +106,19 @@ Demetra includes a built-in request queue to batch API calls.
 ```typescript
 import { DemetraRequestPage } from '@adoratorio/demetra';
 
-// Add to queue
+// Add to queue. Request options mirror the fetch methods; `lang`, `site` and
+// `version` fall back to the instance defaults when the queue is sent
 demetra.queue.add(new DemetraRequestPage('about'));
-demetra.queue.add(new DemetraRequestPage('contact'));
+demetra.queue.add(new DemetraRequestPage('contact', { lang: 'it', localCache: true }));
 
 // Execute queue
 // 0 = ONCE (Batch in single HTTP call)
 // 1 = SIMULTANEOUSLY (Parallel fetch)
 // 2 = AWAIT (Sequential fetch)
 await demetra.fetchQueue(Demetra.SEND_MODES.ONCE);
+
+// The queue is emptied as soon as it is sent: requests added while a batch is
+// in flight belong to the next one
 ```
 
 ## TypeScript Support

@@ -1,3 +1,5 @@
+export type RequestId = string | number | string[] | number[];
+
 export interface Pagination {
   start: number;
   count: number;
@@ -14,6 +16,11 @@ export interface Siblings {
   next?: boolean;
   prev?: boolean;
   loop?: boolean;
+}
+
+export interface Taxonomy {
+  slug: string;
+  id: string;
 }
 
 export interface Cache {
@@ -50,6 +57,9 @@ export const SEND_MODES = {
 
 export type SEND_MODES = (typeof SEND_MODES)[keyof typeof SEND_MODES];
 
+// Everything `fetch` accepts except what Demetra sets itself
+export type DemetraFetchOptions = Omit<RequestInit, 'method' | 'body'>;
+
 export interface DemetraOptions {
   endpoint: string;
   uploadEndpoint: string;
@@ -57,8 +67,21 @@ export interface DemetraOptions {
   lang: string;
   version: number;
   debug: boolean;
+  // Reject with a `DemetraError` when the API answers with a status code >= 400
+  throwOnError: boolean;
+  // Abort requests after this many ms (0 disables)
+  timeout: number;
+  fetchOptions: DemetraFetchOptions;
   cacheMaxAge: number;
   maxItems: number;
+}
+
+// Fields every request can set; the ones left out are filled in by the
+// Demetra instance defaults when the request is sent
+export interface DemetraRequestBaseOptions {
+  lang?: string;
+  site?: string;
+  version?: number;
 }
 
 export interface FetchPageOptions extends Cache, Lang {
@@ -72,10 +95,7 @@ export interface FetchArchiveOptions extends Cache, Lang {
   fields: string[];
   pagination: Pagination;
   filters: Filter[];
-  taxonomy: {
-    slug: string;
-    id: string;
-  };
+  taxonomy: Taxonomy;
 }
 
 export interface FetchMenuOptions extends Cache, Lang {}
@@ -92,8 +112,18 @@ export interface FetchSitemapOptions extends Cache {
 
 export interface FetchAttachmentsOptions extends Cache, Lang {}
 
+export interface FetchSendOptions extends DemetraRequestBaseOptions {
+  recipients: string;
+  data: object;
+  urls: { path: string; url: string }[];
+}
+
+export interface FetchSubscribeOptions extends DemetraRequestBaseOptions {
+  data: Map<string, string> | Record<string, string> | null;
+}
+
 export interface DemetraRequestGlobalOptions {
-  id: string | number | string[] | number[];
+  id: RequestId;
   mode: WP_MODES;
   site: string;
   version: number;
