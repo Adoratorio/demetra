@@ -1,6 +1,6 @@
 import { LRUCache } from 'lru-cache';
 import { DemetraError } from './errors.ts';
-import { validateUrl } from './validators.ts';
+import { isWpData, isWpFile, validateUrl } from './validators.ts';
 import {
   SEND_MODES,
   type DemetraOptions,
@@ -43,6 +43,8 @@ class Demetra {
   readonly #cache: LRUCache<string, WpData>;
   public readonly queue: DemetraQueue;
   readonly #options: DemetraOptions;
+  // Whether the upload endpoint was derived from the endpoint (and follows it)
+  #derivedUploadEndpoint = false;
 
   constructor(options: Partial<DemetraOptions> = {}) {
     const defaults: DemetraOptions = {
@@ -72,8 +74,19 @@ class Demetra {
     }
 
     if (this.#options.uploadEndpoint.length <= 0) {
-      this.#options.uploadEndpoint = this.#options.endpoint.replace('/api.php', '/upload.php');
+      this.#deriveUploadEndpoint();
     }
+  }
+
+  #deriveUploadEndpoint(): void {
+    this.#options.uploadEndpoint = this.#options.endpoint.replace('/api.php', '/upload.php');
+    this.#derivedUploadEndpoint = true;
+  }
+
+  // Cache entries belong to the endpoint they were fetched from: a response
+  // arriving after an endpoint switch is stored under the old key
+  #cacheKey(request: AnyDemetraRequest, endpoint = this.#options.endpoint): string {
+    return `${endpoint}#${request.hash}`;
   }
 
   #debugWarn(message: string): void {
@@ -213,20 +226,35 @@ class Demetra {
     const list = Array.isArray(files) ? files : [files];
     const { fetchOptions, uploadEndpoint } = this.#options;
 
+    // Keep the configured headers (auth, ...) but let the runtime set the
+    // multipart Content-Type with its boundary
+    const headers = new Headers(fetchOptions.headers);
+    headers.delete('Content-Type');
+
     const responses = await Promise.all(
       list.map((file) => {
         const body = new FormData();
         body.append('file', file);
-        return fetch(uploadEndpoint, { ...fetchOptions, ...this.#signal(), method: 'POST', body });
+        return fetch(uploadEndpoint, {
+          ...fetchOptions,
+          ...this.#signal(),
+          method: 'POST',
+          headers,
+          body,
+        });
       }),
     );
 
     return Promise.all(
-      responses.map((response) => {
+      responses.map(async (response) => {
         if (!response.ok) {
           throw new Error(`[Demetra] Upload failed: ${response.status} ${response.statusText}`);
         }
-        return response.json() as Promise<WpFile[]>;
+        const json = (await response.json()) as unknown;
+        if (!Array.isArray(json) || !json.every(isWpFile)) {
+          throw new Error('[Demetra] Unexpected upload response: expected a list of files');
+        }
+        return json;
       }),
     );
   }
@@ -276,7 +304,10 @@ class Demetra {
     if (!Array.isArray(json) || json.length !== requests.length) {
       throw new Error('[Demetra] Unexpected response: expected one entry per request');
     }
-    return json as WpData[];
+    if (!json.every(isWpData)) {
+      throw new Error('[Demetra] Unexpected response: every entry must carry a status and data');
+    }
+    return json;
   }
 
   async #fetch<T = unknown>(request: AnyDemetraRequest): Promise<WpData<T>> {
@@ -287,12 +318,13 @@ class Demetra {
       return cached as WpData<T>;
     }
 
+    const { endpoint } = this.#options;
     const [result] = await this.#post([request]);
     if (typeof result === 'undefined') {
       throw new Error('[Demetra] Empty response from API');
     }
 
-    this.#store(request, result);
+    this.#store(request, result, endpoint);
     this.#debugLog(result);
     this.#handleError(result);
 
@@ -314,13 +346,14 @@ class Demetra {
 
     // Skip the network round-trip entirely when everything was served from cache
     if (pending.length > 0) {
+      const { endpoint } = this.#options;
       const responses = await this.#post(pending.map((entry) => entry.request));
       pending.forEach(({ index, request }, position) => {
         const response = responses[position];
         if (typeof response === 'undefined') {
           throw new Error('[Demetra] Empty response from API');
         }
-        this.#store(request, response);
+        this.#store(request, response, endpoint);
         results[index] = response;
       });
     }
@@ -356,14 +389,14 @@ class Demetra {
     if (!this.#isLocallyCacheable(request)) {
       return undefined;
     }
-    const cached = this.#cache.get(request.hash);
+    const cached = this.#cache.get(this.#cacheKey(request));
     return cached ? this.#parseFromLocalCache(cached) : undefined;
   }
 
   // Error responses are never cached
-  #store(request: AnyDemetraRequest, response: WpData): void {
+  #store(request: AnyDemetraRequest, response: WpData, endpoint: string): void {
     if (this.#isLocallyCacheable(request) && response.status.code < HTTP_ERROR) {
-      this.#cache.set(request.hash, structuredClone(response));
+      this.#cache.set(this.#cacheKey(request, endpoint), structuredClone(response));
     }
   }
 
@@ -394,11 +427,16 @@ class Demetra {
     return this.#options.endpoint;
   }
 
+  // Switching endpoint keeps the cache isolated per endpoint (see #cacheKey)
+  // and follows with the upload endpoint only when it was derived
   public set endpoint(url: string) {
     if (!validateUrl(url)) {
       throw new Error('[Demetra] Invalid endpoint');
     }
     this.#options.endpoint = url;
+    if (this.#derivedUploadEndpoint) {
+      this.#deriveUploadEndpoint();
+    }
   }
 
   public get uploadEndpoint(): string {
@@ -407,6 +445,7 @@ class Demetra {
 
   public set uploadEndpoint(url: string) {
     this.#options.uploadEndpoint = url;
+    this.#derivedUploadEndpoint = false;
   }
 
   public get lang(): string {
