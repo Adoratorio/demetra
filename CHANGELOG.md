@@ -6,6 +6,8 @@ The changes below describe the planned 3.0.0 update. The published npm version i
 
 ### Documentation
 
+- Document request defaults, optional form arguments, queue classes, runtime setters and development-version compatibility.
+
 - Refine contributor guidance and consolidate maintainer contacts in the README.
 
 ### Planned for 3.0.0
