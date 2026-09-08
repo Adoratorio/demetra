@@ -1,8 +1,21 @@
 # Changelog
 
-## 3.0.0
+The changes below describe the planned 3.0.0 update. The published npm version is 2.7.1; no GitHub release has been published.
+
+## Unreleased
+
+### Documentation
+
+- Refine contributor guidance and consolidate maintainer contacts in the README.
+
+### Planned for 3.0.0
+
+#### Breaking changes
 
 - Native `fetch` with LRU response caching replaces axios.
+
+#### Changes
+
 - Error responses are never cached; API errors reject with `DemetraError` (`throwOnError`).
 - Request classes read `lang`, `site` and `version` from their options; the instance fills in its defaults when sending.
 - The queue is snapshotted and cleared when sent; requests queued meanwhile belong to the next batch.
@@ -12,5 +25,8 @@
 - Archive `taxonomy` and sitemap `filter_lang` are sent when provided; endpoint validation accepts any http(s) URL.
 - `timeout` and `fetchOptions` are forwarded to fetch; `clearCache()`.
 - `js-md5` replaced by an inline string hash.
+
+#### Maintenance
+
 - Include source files and inline source maps for consumer debugging.
-- Typecheck tests, verify packed exports, and document active maintainers separately from contributors.
+- Typecheck tests and verify packed exports.

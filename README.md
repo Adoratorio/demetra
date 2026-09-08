@@ -1,6 +1,6 @@
 # Demetra
 
-A utility library for WordPress/API custom interaction, built with native `fetch` and robust queueing.
+A client for Adoratorio’s WordPress API, with request batching and response caching.
 
 ## Installation
 
@@ -123,11 +123,27 @@ await demetra.fetchQueue(Demetra.SEND_MODES.ONCE);
 
 ## TypeScript Support
 
-Demetra is fully typed and uses generics for response handling, preventing silent errors and mutating cache bugs. All interfaces (`WpData`, `WpFile`, etc.) are exposed.
-## Maintenance and compatibility
+Demetra includes generic response types and exports interfaces such as `WpData` and `WpFile`.
 
-See [MAINTAINERS.md](MAINTAINERS.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
-[CHANGELOG.md](CHANGELOG.md). Historical contributor credits are retained.
-The CI runtime is Node 24. Demetra runs in browsers and in Node with a global
-`fetch`; a relative endpoint needs a browser. `AbortSignal.timeout` and
-`AbortSignal.any` are used when `timeout` and a custom `signal` are combined.
+## Compatibility
+
+Demetra runs in browsers and in Node.js environments with a global `fetch`. Relative endpoints require a browser. Combining a timeout with a custom signal requires `AbortSignal.timeout` and `AbortSignal.any`.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, checks and pull requests.
+Version history is documented in the [changelog](CHANGELOG.md) and [GitHub releases](https://github.com/Adoratorio/demetra/releases).
+
+## Maintainers
+
+Maintained by [Adoratorio](https://github.com/Adoratorio).
+
+- [Andrea Gottardi](https://github.com/AndreaGottardi)
+- [Daniele Borra](https://github.com/borradaniele)
+- [Andrea Biason](https://github.com/biazo5)
+
+Contributor credits are preserved in [package.json](package.json) and the Git history.
+
+## License
+
+[MIT](LICENSE).
